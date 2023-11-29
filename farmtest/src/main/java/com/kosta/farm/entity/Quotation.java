@@ -2,11 +2,13 @@ package com.kosta.farm.entity;
 
 import java.sql.Timestamp;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
@@ -17,27 +19,32 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @DynamicInsert
 @DynamicUpdate
-@Builder
-public class User {
+public class Quotation {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	private Integer id;
-	private String name;
-	private String email;
-	private String nickname;
-	private String password;
-	private String address1;
-	private String address2;
-	private String address3;
-	private String provider;
-	private String provider_id;
-	private String user_roles;
-	private String access_token;
+	private Integer quotationId;
+	@Column
+	private Integer requestId;
+	@Column
+	private Integer farmerId;
+	@Column
+	private String quotationProduct;
+	@Column
+	private String quotationQuantity;
+	@Column
+	private String quotationPrice;
+	@Column
+	private String quotationComment;
+	@Column
+	private String quotationPicture;
+	@CreationTimestamp
+	@Column
+	private Timestamp createDate; //자동
+	@Column
 	private Boolean state;
-
-	
 }

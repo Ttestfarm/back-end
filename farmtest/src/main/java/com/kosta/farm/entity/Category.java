@@ -1,7 +1,6 @@
 package com.kosta.farm.entity;
 
-import java.sql.Timestamp;
-
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -17,27 +16,15 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @DynamicInsert
 @DynamicUpdate
-@Builder
-public class User {
+public class Category {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	private Integer id;
-	private String name;
-	private String email;
-	private String nickname;
-	private String password;
-	private String address1;
-	private String address2;
-	private String address3;
-	private String provider;
-	private String provider_id;
-	private String user_roles;
-	private String access_token;
-	private Boolean state;
-
-	
+	private Integer categoryId;
+	@Column
+	private String categoryName;
 }

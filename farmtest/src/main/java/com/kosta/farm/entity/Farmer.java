@@ -23,25 +23,24 @@ import lombok.NoArgsConstructor;
 @DynamicInsert
 @DynamicUpdate
 @Builder
-public class User {
+public class Farmer {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	private Integer userId;
+	private Integer farmerId;
 	
-	private String userName;
+	private String farmName;
 	private String userEmail;
-	private String userPassword;
-	private String userNickname;
-	private String userTel;
-	private String address1;
-	private String address2;
-	private String address3;
-	
-	private String provider;
-	private String providerId;
-	private String userRoles;
+	private String farmPixurl;
+	private String farmTel;
+	private String farmAddress;
+	private String registrationNum;
+	private String accountNo;
+	private String interest1;
+	private String interest2;
+	private String interest3;
+	private String interest4;
+	private String interest5;
 	private boolean state;
-	private String accessToken;
 	@CreationTimestamp
 	private Timestamp createDate;
 }

@@ -28,23 +28,25 @@ public class Quotation {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Integer quotationId;
+  // FK
 	@Column
 	private Integer requestId;
 	@Column
 	private Integer farmerId;
+	
 	@Column
-	private String quotationProduct;
+	private String quotationProduct; // 품목명
 	@Column
-	private String quotationQuantity;
+	private String quotationQuantity; // 수량
 	@Column
-	private String quotationPrice;
+	private String quotationPrice; // 가격
 	@Column
-	private String quotationComment;
+	private String quotationComment; // 추가 설명
 	@Column
-	private String quotationPicture;
+	private String quotationPicture; // 농산물 사진 5장
+	@Column
 	@CreationTimestamp
+	private Timestamp createDate; // 견적서 보낸 날짜
 	@Column
-	private Timestamp createDate; //자동
-	@Column
-	private Boolean state;
+	private String state; // 대기중, 견적서 실패, 결제완료
 }

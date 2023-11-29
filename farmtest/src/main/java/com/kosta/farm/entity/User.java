@@ -27,10 +27,12 @@ public class User {
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Integer id;
 	
+	private String email;
 	private String password;
 	private String address1;
 	private String address2;
 	private String address3;
+	
 
 	
 }

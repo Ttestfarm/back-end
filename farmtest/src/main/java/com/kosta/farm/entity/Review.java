@@ -24,29 +24,20 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @DynamicInsert
 @DynamicUpdate
-public class Quotation {
+public class Review {
 	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	private Integer quotationId;
-  // FK
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Integer ReviewId;
 	@Column
-	private Integer requestId;
+	private Long rating; //별점
 	@Column
-	private Integer farmerId;
-	
+	private String content;
 	@Column
-	private String quotationProduct; // 품목명
+	private String reviewpixUrl;
 	@Column
-	private String quotationQuantity; // 수량
-	@Column
-	private String quotationPrice; // 가격
-	@Column
-	private String quotationComment; // 추가 설명
-	@Column
-	private String quotationPicture; // 농산물 사진 5장
-	@Column
+	private Boolean state; 
 	@CreationTimestamp
-	private Timestamp createDate; // 견적서 보낸 날짜
 	@Column
-	private String state; // 대기중, 견적서 실패, 결제완료
+	private Timestamp createDate;
+	
 }

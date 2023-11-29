@@ -24,29 +24,33 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @DynamicInsert
 @DynamicUpdate
-public class Quotation {
+public class Request {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	private Integer quotationId;
-  // FK
-	@Column
 	private Integer requestId;
 	@Column
-	private Integer farmerId;
-	
+	private Integer userId;
 	@Column
-	private String quotationProduct; // 품목명
+	private String requestProduct; //요청 품목
 	@Column
-	private String quotationQuantity; // 수량
+	private String requestQuantity; //요청 물량
 	@Column
-	private String quotationPrice; // 가격
+	private String requestDate; // 요청 날짜
 	@Column
-	private String quotationComment; // 추가 설명
+	private String requestMessage; //요청메세지
 	@Column
-	private String quotationPicture; // 농산물 사진 5장
+	private String address;
 	@Column
+	private Boolean requestState; //요청 상태 (성사(결제까지완료) or not)
 	@CreationTimestamp
-	private Timestamp createDate; // 견적서 보낸 날짜
 	@Column
-	private String state; // 대기중, 견적서 실패, 결제완료
+	private Timestamp createDate; //자동
+	
+	
+	
+	
+	
+	
+		
+	
 }

@@ -1,12 +1,14 @@
 package com.kosta.farm.entity;
 
-import java.sql.Date;
+import java.sql.Timestamp;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+
+import org.hibernate.annotations.CreationTimestamp;
 
 import lombok.Data;
 
@@ -24,7 +26,8 @@ public class Delivery {
 	@Column
 	private String tInvocie; // 송장번호
 	@Column
-	private Date createDate;
+	@CreationTimestamp
+	private Timestamp createDate;
 	@Column
 	private String state;
 	

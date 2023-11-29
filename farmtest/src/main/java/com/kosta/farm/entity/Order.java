@@ -1,12 +1,15 @@
 package com.kosta.farm.entity;
 
-import java.sql.Date;
+import java.sql.Timestamp;
+import java.sql.Timestamp;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
-import javax.persistence.Id;
+
+
+import org.hibernate.annotations.CreationTimestamp;import javax.persistence.Id;
 
 import lombok.Data;
 
@@ -30,9 +33,9 @@ public class Order {
 	private Integer paymentId;
 //	@Column
 //	private String quotationName; productId로 대체
-	
 	@Column
-	private Date createDate;
+	@CreationTimestamp
+	private Timestamp createDate;
 	@Column
 	private String state; // 결제완료, 판매취소, 배송완료
 	

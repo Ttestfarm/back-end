@@ -1,12 +1,14 @@
 package com.kosta.farm.entity;
 
-import java.sql.Date;
+import java.sql.Timestamp;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+
+import org.hibernate.annotations.CreationTimestamp;
 
 import lombok.Data;
 
@@ -32,8 +34,8 @@ public class Quotation {
 	@Column
 	private String quotationPicture; // 농산물 사진 5장
 	@Column
-	private Date createDate; // 견적서 보낸 날짜
+	@CreationTimestamp
+	private Timestamp createDate; // 견적서 보낸 날짜
 	@Column
 	private String state; // 대기중, 견적서 실패, 결제완료
-
 }

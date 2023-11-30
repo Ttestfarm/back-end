@@ -27,11 +27,11 @@ import lombok.NoArgsConstructor;
 public class User {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	private Integer userId;
+	private Integer userId; // 서버에서 사용하는 userId
 	@Column
-	private String userName;
+	private String userName; // 이름 (실명)
 	@Column
-	private String userEmail;
+	private String userEmail; // ID
 	@Column
 	private String userPassword;
 	@Column
@@ -49,11 +49,10 @@ public class User {
 	@Column
 	private String providerId;
 	@Column
-	private String userRoles;
-	@Column
-	private String accessToken;
+	private String userRoles; // user, farmer, admin
 	@CreationTimestamp
 	@Column
 	private Timestamp createDate;
-  @Column
-	private boolean state;
+	@Column
+	private boolean state; // 
+}

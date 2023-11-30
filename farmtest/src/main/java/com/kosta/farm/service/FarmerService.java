@@ -1,6 +1,5 @@
 package com.kosta.farm.service;
 
-
-public interface FarmService {
+public interface FarmerService {
 
 }

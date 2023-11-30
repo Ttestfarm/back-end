@@ -35,11 +35,14 @@
 //
 //				.addFilter(corsFilter) // CORS필터 추가 다른 도메인 접근 허용
 //				.csrf().disable() // DISABLE CSRF 공격 비활성화
+
 //				.sessionManagement() // 세션 관리 설정: 세션 비활성화 및 STATELESS로 세션 생성 정책 설정
 //				.sessionCreationPolicy(SessionCreationPolicy.STATELESS)// session비활성화
+
 //				.and() // 그리고
 //				.formLogin().disable() // 로그인 폼 사용 비활성화 HTTP Basic 인증 비활성화 HTTP 기본 인증 사용하지 않음
 //				.httpBasic().disable() // httpbasic은 header에 username, password를 암호화 하지 않은 상태로 주고 받는다. 이를 사용하지 않겠다
+
 //				// 요청에 대한 인가 규칙 설정
 //				.addFilter(new JwtAuthenticationFilter(authenticationManager()))
 //				// verifying who it is confirms users are who they say they are

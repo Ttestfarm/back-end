@@ -19,41 +19,25 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @DynamicInsert
 @DynamicUpdate
-@Builder
-public class User {
+public class Review {
 	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	private Integer userId;
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Integer ReviewId;
 	@Column
-	private String userName;
+	private Long rating; //별점
 	@Column
-	private String userEmail;
+	private String content;
 	@Column
-	private String userPassword;
+	private String reviewpixUrl;
 	@Column
-	private String userNickname;
-	@Column
-	private String userTel;
-	@Column
-	private String address1;
-	@Column
-	private String address2;
-	@Column
-	private String address3;
-	@Column
-	private String provider;
-	@Column
-	private String providerId;
-	@Column
-	private String userRoles;
-	@Column
-	private String accessToken;
+	private Boolean state; 
 	@CreationTimestamp
 	@Column
 	private Timestamp createDate;
-  @Column
-	private boolean state;
+	
+}

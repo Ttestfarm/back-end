@@ -19,41 +19,38 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @DynamicInsert
 @DynamicUpdate
-@Builder
-public class User {
+public class Request {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	private Integer requestId;
+	@Column
 	private Integer userId;
 	@Column
-	private String userName;
+	private String requestProduct; //요청 품목
 	@Column
-	private String userEmail;
+	private String requestQuantity; //요청 물량
 	@Column
-	private String userPassword;
+	private String requestDate; // 요청 날짜
 	@Column
-	private String userNickname;
+	private String requestMessage; //요청메세지
 	@Column
-	private String userTel;
+	private String address;
 	@Column
-	private String address1;
-	@Column
-	private String address2;
-	@Column
-	private String address3;
-	@Column
-	private String provider;
-	@Column
-	private String providerId;
-	@Column
-	private String userRoles;
-	@Column
-	private String accessToken;
+	private Boolean requestState; //요청 상태 (성사(결제까지완료) or not)
 	@CreationTimestamp
 	@Column
-	private Timestamp createDate;
-  @Column
-	private boolean state;
+	private Timestamp createDate; //자동
+	
+	
+	
+	
+	
+	
+		
+	
+}

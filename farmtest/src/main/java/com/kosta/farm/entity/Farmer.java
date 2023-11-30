@@ -28,33 +28,36 @@ public class Farmer {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Integer farmerId;
+  // FK
+  // @Column
+  // private Integer userId;
 	@Column
-	private String farmName;
+	private String farmName; // 팜 이름
 	@Column
-	private String userEmail;
+	private String userEmail; // 팜 이메일
 	@Column
-	private String farmPixurl;
+	private String farmPixurl; // 팜 사진
 	@Column
-	private String farmTel;
+	private String farmTel; // 팜 전호
 	@Column
-	private String farmAddress;
+	private String farmAddress; // 팜 주소
 	@Column
-	private String registrationNum;
+	private String registrationNum; // 사업자등록호
 	@Column
-	private String farmAccountNum;
+	private String farmAccountNum; // 팜 계호
 	@Column
-	private String interest1;
+	private String farmInterest1; // 
 	@Column
-	private String interest2;
+	private String farmInterest2;
 	@Column
-	private String interest3;
+	private String farmInterest3;
 	@Column
-	private String interest4;
+	private String farmInterest4;
 	@Column
-	private String interest5;
-	@Column
-	private boolean state;
-	@CreationTimestamp
+	private String farmInterest5;
+  @CreationTimestamp
 	@Column
 	private Timestamp createDate;
+	@Column
+	private boolean state;
 }

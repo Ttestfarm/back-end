@@ -19,41 +19,34 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @DynamicInsert
 @DynamicUpdate
-@Builder
-public class User {
+public class Quotation {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	private Integer userId;
+	private Integer quotationId;
+  // FK
 	@Column
-	private String userName;
+	private Integer requestId;
 	@Column
-	private String userEmail;
+	private Integer farmerId;
+	
 	@Column
-	private String userPassword;
+	private String quotationProduct; // 품목명
 	@Column
-	private String userNickname;
+	private String quotationQuantity; // 수량
 	@Column
-	private String userTel;
+	private String quotationPrice; // 가격
 	@Column
-	private String address1;
+	private String quotationComment; // 추가 설명
 	@Column
-	private String address2;
+	private String quotationPicture; // 농산물 사진 5장
 	@Column
-	private String address3;
-	@Column
-	private String provider;
-	@Column
-	private String providerId;
-	@Column
-	private String userRoles;
-	@Column
-	private String accessToken;
 	@CreationTimestamp
+	private Timestamp createDate; // 견적서 보낸 날짜
 	@Column
-	private Timestamp createDate;
-  @Column
-	private boolean state;
+	private String state; // 대기중, 견적서 실패, 결제완료
+}

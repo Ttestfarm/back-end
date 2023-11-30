@@ -57,3 +57,4 @@ public class User {
 	private Timestamp createDate;
   @Column
 	private boolean state;
+}

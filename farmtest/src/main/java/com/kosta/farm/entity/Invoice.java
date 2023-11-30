@@ -11,10 +11,12 @@ import javax.persistence.Id;
 
 import org.hibernate.annotations.CreationTimestamp;
 
+import lombok.Builder;
 import lombok.Data;
 
 @Entity
 @Data
+@Builder
 public class Invoice {
 	@Id @GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Integer invoiceId;
@@ -23,7 +25,6 @@ public class Invoice {
 	private Integer farmerId;
 	@Column
 	private Integer orderId;
-
 	@Column
 	private Date invocieDate1; // 정산예정일
 	@Column

@@ -10,10 +10,12 @@ import javax.persistence.Id;
 
 import org.hibernate.annotations.CreationTimestamp;
 
+import lombok.Builder;
 import lombok.Data;
 
 @Entity
 @Data
+@Builder
 public class Farmer {
 	@Id @GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Integer farmerId;

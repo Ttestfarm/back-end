@@ -29,7 +29,7 @@ public class Review {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer ReviewId;
 	@Column
-	private Long rating; //별점
+	private Integer rating; //별점
 	@Column
 	private String content;
 	@Column

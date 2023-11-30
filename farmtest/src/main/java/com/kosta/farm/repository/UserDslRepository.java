@@ -9,9 +9,7 @@ import lombok.RequiredArgsConstructor;
 
 @Repository
 @RequiredArgsConstructor
-public class FarmDslRepository {
+public class UserDslRepository {
 	@Autowired
 	private JPAQueryFactory jpaQueryFactory;
-	
-	
 }

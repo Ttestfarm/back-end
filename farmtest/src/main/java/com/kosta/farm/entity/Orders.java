@@ -1,21 +1,20 @@
 package com.kosta.farm.entity;
 
-import java.sql.Timestamp;
+
 import java.sql.Timestamp;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
-
-
-import org.hibernate.annotations.CreationTimestamp;import javax.persistence.Id;
+import javax.persistence.Id;
+import org.hibernate.annotations.CreationTimestamp;
 
 import lombok.Data;
 
 @Entity
 @Data
-public class Order {
+public class Orders { //order> orders로 대체 entity 생성 오류 때문에
 	@Id @GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Integer orderId;
 	// FK

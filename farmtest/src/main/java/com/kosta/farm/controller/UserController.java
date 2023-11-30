@@ -24,10 +24,10 @@ public class UserController {
 	@GetMapping("user")
 	public String user(Authentication authentication) {
 		PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
-		System.out.println(principalDetails.getUser().getId());
-		System.out.println(principalDetails.getUser().getUsername());
-		System.out.println(principalDetails.getUser().getPassword());
-		System.out.println(principalDetails.getUser().getRoles());
+//		System.out.println(principalDetails.getUser().getId());
+//		System.out.println(principalDetails.getUser().getUsername());
+//		System.out.println(principalDetails.getUser().getPassword());
+//		System.out.println(principalDetails.getUser().getRoles());
 		return "user";
 	}
 	

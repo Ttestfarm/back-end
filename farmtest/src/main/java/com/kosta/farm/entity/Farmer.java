@@ -53,8 +53,8 @@ public class Farmer {
 	private String farmInterest4;
 	@Column
 	private String farmInterest5;
-  @CreationTimestamp
 	@Column
+	@CreationTimestamp
 	private Timestamp createDate;
 	@Column
 	private boolean state;

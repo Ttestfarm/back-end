@@ -14,6 +14,14 @@ public class PrincipalDetails implements UserDetails {
 	public PrincipalDetails(User user) {
 		this.user = user;
 	}
+	
+	public User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
+	}
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -56,4 +64,5 @@ public class PrincipalDetails implements UserDetails {
   public boolean isEnabled() { // 계정 활성화 여부
      return true;
   }
+
 }

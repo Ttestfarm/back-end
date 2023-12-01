@@ -25,7 +25,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	private UserRepository userRepository;
 
 	@Bean // 패스워드 암호화
-	public BCryptPasswordEncoder paswordEncoder() {
+	public BCryptPasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
 
@@ -36,10 +36,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		.csrf().disable() // csrf 공격 비활성화
 		.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)	// session 비활성화
 		.and()
-		.formLogin().disable() // 로그인 폼 사용 비활성화
-		.httpBasic().disable() // httpBasic은 header에 userName, password를 암호화하지 않은 상태로 주고받음. 이를 사용하지 않겠다는 뜻
-//		.addFilter(new JwtAuthenticationFilter(authenticationManager()))
-//		.addFilter(new JwtAuthorizationFilter(authenticationManager(), userRepository))
+		.formLogin().disable() // 폼 로그인 비활성화
+		.httpBasic().disable() // httpBasic은 header에 userName, password를 암호화하지 않은 상태로 주고받음. 이를 사용하지 않겠다는 뜻.
+		.addFilter(new JwtAuthenticationFilter(authenticationManager()))
+		.addFilter(new JwtAuthorizationFilter(authenticationManager(), userRepository))
 	
 		// 인가(권한) 필요한 URL 지정
 		.authorizeRequests()

@@ -14,19 +14,25 @@ import lombok.Data;
 
 @Entity
 @Data
-public class Payment {
+public class ProductFile {
 	@Id @GeneratedValue(strategy=GenerationType.IDENTITY)
-	private Long paymentId;
+	private Long productFileId;
 	@Column
-	private String paymentBank; // 결제 은행
+	private Long productId;
 	@Column
-	private Integer paymentDelivery; // 배송비
+	private String directory;
 	@Column
-	private Integer paymentPrice; // 상품금액
+	private Long size;
+	
+	// image 저장 방법 정하기
+	@Column
+	private String uploadDate; // 
+	@Column
+	private String data;
 	@Column
 	@CreationTimestamp
 	private Timestamp createDate;
 	@Column
-	private String state; // 결제완료, 결제취소
+	private String productState;
 	
 }

@@ -28,7 +28,7 @@ import lombok.NoArgsConstructor;
 public class Farmer {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	private Integer farmerId;
+	private Long farmerId;
   // FK
   // @Column
   // private Integer userId;
@@ -37,7 +37,7 @@ public class Farmer {
 	@Column
 	private String farmPixurl; // 팜 사진
 	@Column
-	private String farmTel; // 팜 전호
+	private String farmTel; // 팜 전화번호
 	@Column
 	private String farmAddress; // 팜 주소
 	@Column
@@ -45,7 +45,7 @@ public class Farmer {
 	@Column
 	private String farmAccountNum; // 팜 계좌번호
 	@Column
-	private String farmInterest1; // 
+	private String farmInterest1; // 관심 농산물
 	@Column
 	private String farmInterest2;
 	@Column

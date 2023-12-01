@@ -17,12 +17,13 @@ import lombok.Data;
 @Data
 public class Product {
 	@Id @GeneratedValue(strategy=GenerationType.IDENTITY)
-	private Integer productId;
+	private Long productId;
 	// FK
 	@Column
-	private Integer farmerId;
+	private Long farmerId;
 	@Column
-	private Integer categoryId;
+	private Long categoryId;
+	
 	@Column
 	private String productName; // 농산물명
 	@Column

@@ -18,10 +18,10 @@ import lombok.Data;
 @Builder
 public class Delivery {
 	@Id @GeneratedValue(strategy=GenerationType.IDENTITY)
-	private Integer deliveryId;
+	private Long deliveryId;
 	// FK
 	@Column
-	private Integer orderId;
+	private Long orderId;
 	@Column 
 	private String tCode; // 택배사 코드
 	@Column

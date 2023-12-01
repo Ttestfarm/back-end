@@ -14,21 +14,17 @@ import lombok.Data;
 
 @Entity
 @Data
-public class ProductImageFile {
+public class ProductFile {
 	@Id @GeneratedValue(strategy=GenerationType.IDENTITY)
-	private Integer fileId;
+	private Long productFileId;
 	@Column
-	private Integer productId;
-	@Column
-	private String thumbnail; // 대표 사진
+	private Long productId;
 	@Column
 	private String directory;
 	@Column
-	private String size;
+	private Long size;
 	
 	// image 저장 방법 정하기
-	@Column
-	private String contentType; // 
 	@Column
 	private String uploadDate; // 
 	@Column
@@ -37,6 +33,6 @@ public class ProductImageFile {
 	@CreationTimestamp
 	private Timestamp createDate;
 	@Column
-	private String state;
+	private String productState;
 	
 }

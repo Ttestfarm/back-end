@@ -27,17 +27,17 @@ import lombok.NoArgsConstructor;
 public class Review {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Integer ReviewId;
+	private Long ReviewId;
 	@Column
 	private Integer rating; //별점
 	@Column
 	private String content;
 	@Column
 	private String reviewpixUrl;
-	@Column
-	private Boolean state; 
 	@CreationTimestamp
 	@Column
 	private Timestamp createDate;
+	@Column
+	private Boolean reviewState; 
 	
 }

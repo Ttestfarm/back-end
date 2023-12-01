@@ -6,4 +6,5 @@ import com.kosta.farm.entity.Quotation;
 
 public interface QuotationRepositrory extends JpaRepository<Quotation, Integer> {
 
+	
 }

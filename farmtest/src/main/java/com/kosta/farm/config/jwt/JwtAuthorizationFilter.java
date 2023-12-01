@@ -1,5 +1,59 @@
 package com.kosta.farm.config.jwt;
 
-public class JwtAuthorizationFilter {
+import java.io.IOException;
 
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.kosta.farm.config.auth.PrincipalDetails;
+import com.kosta.farm.entity.User;
+import com.kosta.farm.repository.UserRepository;
+
+//인가 : 로그인 처리가 되야만 하는 요청이 들어왔을때 실행된다
+public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
+
+	private UserRepository userRepository;
+
+	public JwtAuthorizationFilter(AuthenticationManager authenticationManager, UserRepository userRepository) {
+		super(authenticationManager);
+		this.userRepository = userRepository;
+	}
+
+	@Override
+	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+			throws IOException, ServletException {
+		String header = request.getHeader(JwtProperties.HEADER_STRING);
+		System.out.println("header Authorization: " + header);
+
+		if (header == null || !header.startsWith(JwtProperties.TOKEN_PREFIX)) {
+			chain.doFilter(request, response);
+			return;
+		}
+		String token = request.getHeader(JwtProperties.HEADER_STRING).replace(JwtProperties.TOKEN_PREFIX, "");
+
+		// 토큰 검증
+		String username = JWT.require(Algorithm.HMAC512(JwtProperties.SECRET_KEY)).build().verify(token).getClaim("username")
+				.asString();
+		if (username != null) {
+			User user = userRepository.findByUserEmail(username);
+
+			PrincipalDetails principalDetails = new PrincipalDetails(user);
+			Authentication authentication = new UsernamePasswordAuthenticationToken(principalDetails, null,
+					principalDetails.getAuthorities()); // null은 password자리인데 이미 로그인 된 애를 타당성 체크하는거
+
+			SecurityContextHolder.getContext().setAuthentication(authentication);
+
+		}
+		chain.doFilter(request, response);
+	}
 }

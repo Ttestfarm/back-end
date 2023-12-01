@@ -36,7 +36,7 @@ public class Farmer {
 	@Column
 	private String farmPixurl; // 팜 사진
 	@Column
-	private String farmTel; // 팜 전호
+	private String farmTel; // 팜 전화번호
 	@Column
 	private String farmAddress; // 팜 주소
 	@Column

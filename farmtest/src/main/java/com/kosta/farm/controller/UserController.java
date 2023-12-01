@@ -46,7 +46,7 @@ public class UserController {
 		user.setUserPassword(bCryptPasswordEncoder.encode(user.getUserPassword()));
 		user.setUserName(user.getUserName());
 		user.setUserRoles("ROLE_USER");
-		user.setState(true);
+		user.setUserState(true);
 		userRepository.save(user);
 		return "회원가입완료";
 	}

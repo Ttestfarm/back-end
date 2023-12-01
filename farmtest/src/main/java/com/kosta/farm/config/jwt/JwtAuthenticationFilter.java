@@ -62,7 +62,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 		System.out.println(principalDetails.getUser().getAddress2());
 		System.out.println(principalDetails.getUser().getAddress3());
 		System.out.println(principalDetails.getUser().getUserRoles());
-		System.out.println(principalDetails.getUser().isState());
+		System.out.println(principalDetails.getUser().isUserState());
 		
 		return authentication;
 	}

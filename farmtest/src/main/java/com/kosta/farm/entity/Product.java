@@ -16,12 +16,12 @@ import lombok.Data;
 @Data
 public class Product {
 	@Id @GeneratedValue(strategy=GenerationType.IDENTITY)
-	private Integer productId;
+	private Long productId;
 	// FK
 	@Column
-	private Integer farmerId;
+	private Long farmerId;
 	@Column
-	private Integer categoryId;
+	private Long categoryId;
 	
 	@Column
 	private String productName; // 농산물명
@@ -34,12 +34,12 @@ public class Product {
 	@Column
 	private String productDescription; // 상품 설명
 	@Column
-	private String ShippingCost; // 배송비
+	private Integer ShippingCost; // 배송비
 	@Column
-	private String addShippingCost;
+	private Integer addShippingCost;
 	@Column
 	@CreationTimestamp
 	private Timestamp createDate;
 	@Column
-	private String state; // 판매중, 매진, (판매취소)
+	private String productState; // 판매중, 매진, (판매취소)
 }

@@ -27,9 +27,9 @@ import lombok.NoArgsConstructor;
 public class Request {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	private Integer requestId;
+	private Long requestId;
 	@Column
-	private Integer userId;
+	private Long userId;
 	@Column
 	private String requestProduct; //요청 품목
 	@Column
@@ -39,12 +39,18 @@ public class Request {
 	@Column
 	private String requestMessage; //요청메세지
 	@Column
-	private String address;
+	private Boolean choiceState; // 0 본인(기본 배송지), 1 선물
 	@Column
-	private Boolean requestState; //요청 상태 (성사(결제까지완료) or not)
+	private String name;
+	@Column
+	private String tel;
+	@Column
+	private String address;
 	@CreationTimestamp
 	@Column
 	private Timestamp createDate; //자동
+	@Column
+	private String requestState; // 요청 0, 기간 만료 1 , 성사 2 
 	
 	
 	

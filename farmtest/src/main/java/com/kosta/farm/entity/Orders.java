@@ -16,27 +16,27 @@ import lombok.Data;
 @Data
 public class Orders { //order> orders로 대체 entity 생성 오류 때문에
 	@Id @GeneratedValue(strategy=GenerationType.IDENTITY)
-	private Integer orderId;
+	private Long ordersId;
 	// FK
 	@Column
-	private Integer userId;
+	private Long userId;
 	@Column
-	private Integer farmerId;
+	private Long farmerId;
 	@Column
-	private Integer requestId;
+	private Long requestId;
 	@Column
-	private Integer productId;
+	private Long productId;
 	@Column
-	private Integer quotationId;
+	private Long quotationId;
 	@Column
-	private Integer paymentId;
+	private Long paymentId;
 //	@Column
 //	private String quotationName; productId로 대체
 	@Column
 	@CreationTimestamp
 	private Timestamp createDate;
 	@Column
-	private String state; // 결제완료, 판매취소, 배송완료
+	private String ordersState; // 결제완료 0, 판매취소 1, 배송완료 2
 	
 	
 }

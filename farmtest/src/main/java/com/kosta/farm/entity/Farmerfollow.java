@@ -22,9 +22,9 @@ import lombok.NoArgsConstructor;
 public class Farmerfollow {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Integer farmerFollowId; // entity를 쓰려면 id가 꼭 필요함
+	private Long farmerFollowId; // entity를 쓰려면 id가 꼭 필요함
 	@Column
-	private Integer userId;
+	private Long userId;
 	@Column
-	private Integer farmerId;
+	private Long farmerId;
 }

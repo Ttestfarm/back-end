@@ -16,13 +16,13 @@ import lombok.Data;
 @Data
 public class Payment {
 	@Id @GeneratedValue(strategy=GenerationType.IDENTITY)
-	private Integer paymentId;
+	private Long paymentId;
 	@Column
 	private String paymentBank; // 결제 은행
 	@Column
-	private String paymentDelivery; // 배송비
+	private Integer paymentDelivery; // 배송비
 	@Column
-	private String paymentPrice; // 상품금액
+	private Integer paymentPrice; // 상품금액
 	@Column
 	@CreationTimestamp
 	private Timestamp createDate;

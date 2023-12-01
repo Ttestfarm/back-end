@@ -27,7 +27,9 @@ import lombok.NoArgsConstructor;
 public class User {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	private Integer userId; // 서버에서 사용하는 userId
+	private Long userId; // 서버에서 사용하는 userId
+	@Column
+	private Long farmerId;	
 	@Column
 	private String userName; // 이름 (실명)
 	@Column
@@ -54,5 +56,5 @@ public class User {
 	@Column
 	private Timestamp createDate;
 	@Column
-	private boolean state; // 
+	private boolean userState; // 
 }

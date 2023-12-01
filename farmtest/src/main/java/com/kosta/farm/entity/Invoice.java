@@ -19,23 +19,23 @@ import lombok.Data;
 @Builder
 public class Invoice {
 	@Id @GeneratedValue(strategy=GenerationType.IDENTITY)
-	private Integer invoiceId;
+	private Long invoiceId;
 	// FK
 	@Column
-	private Integer farmerId;
+	private Long farmerId;
 	@Column
-	private Integer orderId;
+	private Long orderId;
 	@Column
 	private Date invocieDate1; // 정산예정일
 	@Column
 	private Date invocieDate2; // 정산완료일
 	@Column
-	private Integer invocieCommission; // 수수료
+	private Long invocieCommission; // 수수료
 	@Column
-	private Integer invociePrice; // 가격
+	private Long invociePrice; // 가격
 	@Column
 	@CreationTimestamp
 	private Timestamp createDate;
 	@Column
-	private String status; // 정산진행중, 정산완료, 정산오류
+	private String invoiceState; // 정산진행중, 정산완료, 정산오류
 }

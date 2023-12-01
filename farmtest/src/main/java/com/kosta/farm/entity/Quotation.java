@@ -27,19 +27,19 @@ import lombok.NoArgsConstructor;
 public class Quotation {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	private Integer quotationId;
+	private Long quotationId;
   // FK
 	@Column
-	private Integer requestId;
+	private Long requestId;
 	@Column
-	private Integer farmerId;
+	private Long farmerId;
 	
 	@Column
 	private String quotationProduct; // 품목명
 	@Column
 	private String quotationQuantity; // 수량
 	@Column
-	private String quotationPrice; // 가격
+	private Integer quotationPrice; // 가격
 	@Column
 	private String quotationComment; // 추가 설명
 	@Column
@@ -48,5 +48,5 @@ public class Quotation {
 	@CreationTimestamp
 	private Timestamp createDate; // 견적서 보낸 날짜
 	@Column
-	private String state; // 대기중, 견적서 실패, 결제완료
+	private String quotationState; // 대기중, 견적서 실패, 결제완료
 }

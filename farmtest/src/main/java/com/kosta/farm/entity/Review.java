@@ -35,9 +35,13 @@ public class Review {
 	@Column
 	private String reviewpixUrl;
 	@Column
-	private Boolean state; 
+	private Boolean reviewState; 
 	@CreationTimestamp
 	@Column
 	private Timestamp createDate;
+	@Column
+	private Integer farmerId;
+	@Column
+	private Integer userId;
 	
 }

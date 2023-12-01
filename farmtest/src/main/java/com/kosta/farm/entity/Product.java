@@ -1,6 +1,7 @@
 package com.kosta.farm.entity;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -22,7 +23,6 @@ public class Product {
 	private Integer farmerId;
 	@Column
 	private Integer categoryId;
-	
 	@Column
 	private String productName; // 농산물명
 	@Column
@@ -34,12 +34,20 @@ public class Product {
 	@Column
 	private String productDescription; // 상품 설명
 	@Column
-	private String ShippingCost; // 배송비
+	private Integer ShippingCost; // 배송비
 	@Column
-	private String addShippingCost;
+	private Integer addShippingCost;
 	@Column
 	@CreationTimestamp
 	private Timestamp createDate;
 	@Column
-	private String state; // 판매중, 매진, (판매취소)
+	private String productState; // 판매중, 매진, (판매취소)
+	@Column
+	private String fileUrl; //나머지 파일
+	@Column
+	private Integer thumbNail; // 대표이미지 id
+	
+//    private LocalDateTime regTime; //등록 시간
+//    private LocalDateTime updateTime; //수정 시간
+
 }

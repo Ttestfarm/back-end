@@ -36,7 +36,7 @@ public class Orders { //order> orders로 대체 entity 생성 오류 때문에
 	@CreationTimestamp
 	private Timestamp createDate;
 	@Column
-	private String state; // 결제완료, 판매취소, 배송완료
+	private String Orderstate; // 결제완료, 판매취소, 배송완료
 	
 	
 }

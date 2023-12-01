@@ -8,6 +8,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
@@ -58,4 +59,10 @@ public class Farmer {
 	private Timestamp createDate;
 	@Column
 	private boolean state;
+	@Column
+	@ColumnDefault("0")
+	private Integer followCount;
+	@Column
+	@ColumnDefault("0")
+	private Integer reviewCount;
 }

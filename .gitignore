@@ -14,8 +14,8 @@ local.properties
 .loadpath
 .recommenders
 
-# applcatio
 application.properties
+Servers
 
 # External tool builders
 .externalToolBuilders/

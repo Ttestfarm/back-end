@@ -25,7 +25,7 @@ public class Payment {
 	private Integer paymentPrice; // 상품금액
 	@Column
 	@CreationTimestamp
-	private Timestamp createDate;
+	private Timestamp createDate; // 결제 완료 날짜
 	@Column
 	private String state; // 결제완료, 결제취소
 	

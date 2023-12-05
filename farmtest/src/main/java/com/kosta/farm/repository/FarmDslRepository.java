@@ -33,19 +33,19 @@ public class FarmDslRepository {
 	
 
 	// farmerfollow에서 데이터 조회하기 
-	public Farmerfollow findFarmerfollow(Integer id, Integer fid) throws Exception {
-		QFarmerfollow farmerfollow = QFarmerfollow.farmerfollow;
-		return jpaQueryFactory.select(farmerfollow).from(farmerfollow)
-				.where(farmerfollow.userId.eq(id).and(farmerfollow.farmerId.eq(fid))).fetchOne();
-
-	}
+//	public Farmerfollow findFarmerfollow(Integer id, Integer fid) throws Exception {
+//		QFarmerfollow farmerfollow = QFarmerfollow.farmerfollow;
+//		return jpaQueryFactory.select(farmerfollow).from(farmerfollow)
+//				.where(farmerfollow.userId.eq(id).and(farmerfollow.farmerId.eq(fid))).fetchOne();
+//
+//	}
 
 	// farmerfollow에서 데이터 조회하기(개수) 좋아요 여부
-	public Long findIsFarmerfollow(Integer id, Integer fid) throws Exception {
-		QFarmerfollow farmerfollow = QFarmerfollow.farmerfollow;
-		return jpaQueryFactory.select(farmerfollow.count()).from(farmerfollow)
-				.where(farmerfollow.userId.eq(id).and(farmerfollow.farmerId.eq(fid))).fetchOne();
-	}
+//	public Long findIsFarmerfollow(Integer id, Integer fid) throws Exception {
+//		QFarmerfollow farmerfollow = QFarmerfollow.farmerfollow;
+//		return jpaQueryFactory.select(farmerfollow.count()).from(farmerfollow)
+//				.where(farmerfollow.userId.eq(id).and(farmerfollow.farmerId.eq(fid))).fetchOne();
+//	}
 	
 	public List<Farmer> findFarmerfollowListByUser(Integer userId) throws Exception{
 		QFarmer farmer= QFarmer.farmer;
@@ -55,16 +55,16 @@ public class FarmDslRepository {
 
 	
 	//farmerId로 리뷰 리스트 가져오기
-	public List<Review> findByFarmerId(Integer farmerId) throws Exception{
-		QReview review= QReview.review;
-		return jpaQueryFactory.selectFrom(review).where(review.farmerId.eq(farmerId)).fetch();
-	}
+//	public List<Review> findByFarmerId(Integer farmerId) throws Exception{
+//		QReview review= QReview.review;
+//		return jpaQueryFactory.selectFrom(review).where(review.farmerId.eq(farmerId)).fetch();
+//	}
 	
 	//userId로 리뷰 리스트 가져오기
-	public List<Review> findByUserId(Integer userId) throws Exception{
-		QReview review= QReview.review;
-		return jpaQueryFactory.selectFrom(review).where(review.userId.eq(userId)).fetch();
-	}
+//	public List<Review> findByUserId(Integer userId) throws Exception{
+//		QReview review= QReview.review;
+//		return jpaQueryFactory.selectFrom(review).where(review.userId.eq(userId)).fetch();
+//	}
 	
 	
 

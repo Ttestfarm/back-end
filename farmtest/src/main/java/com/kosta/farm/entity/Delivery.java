@@ -30,6 +30,6 @@ public class Delivery {
 	@CreationTimestamp
 	private Timestamp createDate;
 	@Column
-	private String state;
+	private String state; // 배송중, 배송 완료
 	
 }

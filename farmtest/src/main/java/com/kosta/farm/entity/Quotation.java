@@ -48,5 +48,5 @@ public class Quotation {
 	@CreationTimestamp
 	private Timestamp createDate; // 견적서 보낸 날짜
 	@Column
-	private String quotationState; // 대기중, 견적서 실패, 결제완료
+	private String quotationState; // 0 : 견적서 취소, 1 : 대기중, 2 : 기간 만료, 3 : 결제완료 
 }

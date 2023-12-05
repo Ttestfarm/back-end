@@ -1,39 +1,121 @@
-//package com.kosta.farm.service;
-//
-//import java.io.File;
-//import java.io.FileInputStream;
-//import java.nio.file.Files;
-//import java.util.List;
-//import java.util.Map;
-//
-//import javax.servlet.ServletOutputStream;
-//
-//import org.springframework.data.domain.PageRequest;
-//import org.springframework.data.domain.Sort;
-//import org.springframework.stereotype.Service;
-//import org.springframework.util.FileCopyUtils;
-//import org.springframework.web.multipart.MultipartFile;
-//
-//import com.fasterxml.jackson.databind.ObjectMapper;
-//import com.kosta.farm.entity.Farmer;
-//import com.kosta.farm.entity.Farmerfollow;
-//import com.kosta.farm.entity.Product;
-//import com.kosta.farm.entity.Productfile;
-//import com.kosta.farm.entity.Review;
-//import com.kosta.farm.repository.FarmDslRepository;
-//import com.kosta.farm.repository.FarmerDslRepository;
-//import com.kosta.farm.repository.FarmerRepository;
-//import com.kosta.farm.repository.FarmerfollowRepository;
-//import com.kosta.farm.repository.ProductFileRepository;
-//import com.kosta.farm.repository.ProductRepository;
-//import com.kosta.farm.repository.ReviewRepository;
-//import com.kosta.farm.util.PageInfo;
-//
-//import lombok.RequiredArgsConstructor;
-//
-//@Service
-//@RequiredArgsConstructor
-//public class FarmServiceImpl implements FarmService {
+package com.kosta.farm.service;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.nio.file.Files;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.ServletOutputStream;
+
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
+import org.springframework.util.FileCopyUtils;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kosta.farm.entity.Farmer;
+import com.kosta.farm.entity.Farmerfollow;
+import com.kosta.farm.entity.Product;
+import com.kosta.farm.entity.ProductFile;
+import com.kosta.farm.entity.Review;
+import com.kosta.farm.repository.FarmDslRepository;
+import com.kosta.farm.repository.FarmerDslRepository;
+import com.kosta.farm.repository.FarmerRepository;
+import com.kosta.farm.repository.FarmerfollowRepository;
+import com.kosta.farm.repository.ProductFileRepository;
+import com.kosta.farm.repository.ProductRepository;
+import com.kosta.farm.repository.ReviewRepository;
+import com.kosta.farm.util.PageInfo;
+
+import lombok.RequiredArgsConstructor;
+
+@Service
+@RequiredArgsConstructor
+public class FarmServiceImpl implements FarmService {@Override
+	public Integer productEnter(Product product, MultipartFile thmbnail, List<MultipartFile> file) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Farmer> searchListByPage(String category, PageInfo pageInfo) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void regFarmer(Farmer farmer) throws Exception {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public List<Farmer> getFarmerByReviewCount(Integer reviewCount) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Review> getReviewListByFarmer(Integer farmerId) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Review> getReviewListByUser(Integer userId) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void insertReview(Review review) throws Exception {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public List<Farmer> farmerListByPage(PageInfo pageInfo) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Long farmerCount() throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Boolean selectFarmerfollow(Integer userId, Integer farmerId) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Boolean selectedFarmerfollow(Integer userId, Integer farmerId) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Farmer farmerInfo(Integer farmerId) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Farmerfollow> getFollowingFarmersByUserId(Integer userId) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void readImage(Integer num, ServletOutputStream outputStream) throws Exception {
+		// TODO Auto-generated method stub
+		
+	}
 //	private final FarmDslRepository farmDslRepository;
 //	private final FarmerDslRepository farmerDslRepository;
 //	private final FarmerRepository farmerRepository;
@@ -164,6 +246,6 @@
 //	public List<Review> getReviewListByUser(Integer userId) throws Exception {
 //		return farmDslRepository.findByUserId(userId);
 //	}
-//
-//
-//}
+
+
+}

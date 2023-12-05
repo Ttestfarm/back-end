@@ -2,22 +2,35 @@ package com.kosta.farm.service;
 
 import java.util.List;
 
+import com.kosta.farm.dto.OrdersDto;
 import com.kosta.farm.dto.QuotationDto;
 import com.kosta.farm.entity.Quotation;
 import com.kosta.farm.entity.Request;
 import com.kosta.farm.unti.PageInfo;
+import com.querydsl.core.Tuple;
 
 public interface FarmerService {
-	// 파머페이지 : 요청서 보기
-	public List<Request> findRequestsByFarmInterest(String farmInterest) throws Exception;
+	// 매칭 주문 요청서 보기
+	// 관심 농산물인 요청서 리스트 보기
+	public List<Request> findRequestsByFarmInterest(Long farmerId, String farmInterest) throws Exception;
 	
 	// 견적서 양식 (보내기 이벤트)-> 견적서 저장
 	void saveQuotation(Quotation quotation) throws Exception;
 	
-	// 파머페이지 견적현황 state : 0 (대기중), 1(기간만료), 2(결제완료)  
+	// 파머페이지 견적현황
 	public List<QuotationDto> findQuotationByFarmerIdAndStateAndPage(Long farmerId, String state, PageInfo pageinfo) throws Exception;
 	
 	// 견적현황 (견적서 취소 이벤트) -> 견적서 삭제
+	public void updateQuotationByFarmerIdAndRequestIds(Long farmerId, List<Long> ids) throws Exception;
 	
 	// 견적서 상세보기
+	public Quotation findQuotationByQuotationId(Long quotationId) throws Exception;
+	
+	// 결제 완료 현황
+	public List<OrdersDto> findOrdersByFarmerIdAndPage(Long farmerId, String type, PageInfo pageinfo) throws Exception;
+
+	// 결제 완료(매칭) 상세보기
+	public OrdersDto OrdersDetailQuotationId(Long farmerId, Long ordersId) throws Exception;
+	// 결제 완료(주문) 상세보기
+	public OrdersDto OrdersDetailNotQuotationId(Long farmerId, Long ordersId) throws Exception;
 }

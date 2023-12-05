@@ -30,8 +30,6 @@ public class Orders { //order> orders로 대체 entity 생성 오류 때문에
 	private Long quotationId;
 	@Column
 	private Long paymentId;
-//	@Column
-//	private String quotationName; productId로 대체
 	@Column
 	@CreationTimestamp
 	private Timestamp createDate;

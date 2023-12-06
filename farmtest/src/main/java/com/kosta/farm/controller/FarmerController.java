@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.kosta.farm.dto.DeliveryDto;
@@ -34,11 +35,14 @@ public class FarmerController {
 	
 	// 매칭 주문 요청서 보기
 	// 관심 농산물인 요청서 리스트 보기
-	@GetMapping("/requestlist/{farmerId}/{farmInterest}")
-	public ResponseEntity<List<Request>> requestList(@PathVariable Long farmerId,
-			@PathVariable String farmInterest) {
+	@GetMapping("/requestlist")
+	public ResponseEntity<List<Request>> requestList(@RequestParam Long farmerId,
+			@RequestParam String farmInterest) {
 		try {
-			List<Request> reqList = farmerService.findRequestsByFarmInterest(farmerId ,farmInterest);
+			System.out.println(farmerId);
+			System.out.println(farmInterest);
+			List<Request> reqList = farmerService.findRequestsByFarmInterest(farmerId ,farmInterest);			
+			System.out.println(reqList);
 			return new ResponseEntity<List<Request>>(reqList, HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();

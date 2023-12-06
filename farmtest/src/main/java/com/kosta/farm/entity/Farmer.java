@@ -58,7 +58,7 @@ public class Farmer {
 	@CreationTimestamp
 	private Timestamp createDate;
 	@Column
-	private boolean state;
+	private boolean state; // 0 탈퇴 , 1 계정유지
 	@Column
 	@ColumnDefault("0")
 	private Integer followCount;

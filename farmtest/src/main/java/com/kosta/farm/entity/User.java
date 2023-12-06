@@ -56,5 +56,5 @@ public class User {
 	@Column
 	private Timestamp createDate;
 	@Column
-	private boolean userState; // 
+	private boolean userState; // 탈퇴 : 0 , ? : 1
 }

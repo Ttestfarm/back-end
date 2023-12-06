@@ -28,14 +28,15 @@ public class FarmerDslRepository {
 	@Autowired
 	private JPAQueryFactory jpaQueryFactory;
 	
+	// 매칭 주문 요청서 리스트
 	public List<Request> findRequestByInterestAndFarmerId(Long farmerId, String farmInterest) {
 		QRequest req = QRequest.request;
 		QQuotation quot = QQuotation.quotation;
 		return jpaQueryFactory.selectFrom(req)
-				.leftJoin(quot)
-				.on(req.requestId.eq(quot.requestId))
-				.where(req.requestProduct.eq(farmInterest)
-						.and(quot.quotationId.isNull()))
+//				.leftJoin(quot)
+//				.on(req.requestId.eq(quot.requestId))
+				.where(req.requestProduct.eq(farmInterest))
+//						.and(quot.quotationId.isNull())
 				.fetch();
 	}
 	

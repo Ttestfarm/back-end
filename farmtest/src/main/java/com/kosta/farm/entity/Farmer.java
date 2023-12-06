@@ -65,4 +65,5 @@ public class Farmer {
 	@Column
 	@ColumnDefault("0")
 	private Integer reviewCount;
+	// private Integer orderCancelCount;
 }

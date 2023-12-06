@@ -9,9 +9,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kosta.farm.dto.DeliveryDto;
 import com.kosta.farm.dto.OrdersDto;
 import com.kosta.farm.dto.QuotationDto;
-import com.kosta.farm.entity.Orders;
 import com.kosta.farm.entity.Quotation;
 import com.kosta.farm.entity.Request;
 import com.kosta.farm.repository.FarmerDslRepository;
@@ -179,6 +179,7 @@ public class FarmerServiceImpl implements FarmerService {
 		
 		return dto;
 	}
+	
 	// 결제 완료(주문) 상세 보기
 	public OrdersDto OrdersDetailNotQuotationId(Long farmerId, Long ordersId) throws Exception{
 		Tuple tuple = farmerDslRepository.findOrderByFarmerIdAndOrderIdAndQuotaionIdIsNull(farmerId, ordersId);
@@ -196,6 +197,54 @@ public class FarmerServiceImpl implements FarmerService {
 		dto.setDelivery(tuple.get(9, Integer.class));
 		
 		return dto;
+	}
+	
+	// 발송 완료 처리
+	public void updateDelivery(Long ordersId, String tCode, String tInvoice) throws Exception {
+		farmerDslRepository.updateDelivery(ordersId, tCode, tInvoice);
+	}
+	
+	// 판매 취소
+	public void updateOrderState(Long farmerId, Long ordersId) throws Exception {
+		farmerDslRepository.updateOrderState(ordersId, farmerId);
+	}
+
+	// 배송 현황 리스트
+	@Override
+	public List<DeliveryDto> findDeliberyByFarmerIdAndDeliveryState(Long farmerId, String deliveryState,
+			PageInfo pageInfo) throws Exception {
+		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 10); // 첫번째 값 : 페이지 번호, 두 번째 값 : 페이지 크기
+		List<Tuple> tuples = null;
+		List<DeliveryDto> deliveryList = new ArrayList<>();
+		Long allCount = null;
+			tuples = farmerDslRepository.findOrdersIdAndDeliveryAndProductAndByDeliveryState(farmerId, deliveryState, pageRequest);
+			for(Tuple t : tuples) {
+				DeliveryDto dto = new DeliveryDto();
+				Long ordersId = t.get(0, Long.class);
+				String tCode = t.get(1, String.class);
+				String tInvocie = t.get(2, String.class);
+				String product = t.get(3, String.class);
+				String state = t.get(4, String.class);
+				
+				dto.setOrdersId(ordersId);
+				dto.setTCode(tCode);
+				dto.setTInvocie(tInvocie);
+				dto.setProduct(product);
+				dto.setDeliveryState(deliveryState);
+				deliveryList.add(dto);
+			}	
+		
+		allCount = farmerDslRepository.findDeliveryCountByFarmerIdAndDeliveryState(farmerId, deliveryState);
+		
+		Integer allPage = (int)(Math.ceil(allCount.doubleValue()/pageRequest.getPageSize()));
+		Integer startPage = (pageInfo.getCurPage()-1)/10*10+1;
+		Integer endPage = Math.min(startPage+10-1, allPage);
+		
+		pageInfo.setAllPage(allPage);
+		pageInfo.setStartPage(startPage);
+		pageInfo.setEndPage(endPage);
+		
+		return deliveryList;
 	}
 	
 }

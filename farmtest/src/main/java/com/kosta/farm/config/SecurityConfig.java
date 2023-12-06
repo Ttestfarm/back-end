@@ -38,14 +38,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		.and()
 		.formLogin().disable() // 폼 로그인 비활성화
 		.httpBasic().disable() // httpBasic은 header에 userName, password를 암호화하지 않은 상태로 주고받음. 이를 사용하지 않겠다는 뜻.
-		.addFilter(new JwtAuthenticationFilter(authenticationManager()))
-		.addFilter(new JwtAuthorizationFilter(authenticationManager(), userRepository))
+//		.addFilter(new JwtAuthenticationFilter(authenticationManager()))
+//		.addFilter(new JwtAuthorizationFilter(authenticationManager(), userRepository))
 	
 		// 인가(권한) 필요한 URL 지정
 		.authorizeRequests()
-		.antMatchers("/user/**").access("hasRole('ROLE_USER') or hasRole('ROLE_FARMER') or hasRole('ROLE_ADMIN')")
-    .antMatchers("/farmer/**").access("hasRole('ROLE_FARMER') or hasRole('ROLE_ADMIN')")
-    .antMatchers("/admin/**").access("hasRole('ROLE_ADMIN')")
+//		.antMatchers("/user/**").access("hasRole('ROLE_USER') or hasRole('ROLE_FARMER') or hasRole('ROLE_ADMIN')")
+//    .antMatchers("/farmer/**").access("hasRole('ROLE_FARMER') or hasRole('ROLE_ADMIN')")
+//    .antMatchers("/admin/**").access("hasRole('ROLE_ADMIN')")
     .anyRequest().permitAll(); // 나머지는 허용
 	}
 

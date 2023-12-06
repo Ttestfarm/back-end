@@ -9,11 +9,15 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 
 import lombok.Data;
 
 @Entity
 @Data
+@DynamicInsert
+@DynamicUpdate
 public class Orders { //order> orders로 대체 entity 생성 오류 때문에
 	@Id @GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Long ordersId;
@@ -34,7 +38,8 @@ public class Orders { //order> orders로 대체 entity 생성 오류 때문에
 	@CreationTimestamp
 	private Timestamp createDate;
 	@Column
-	private String ordersState; // 결제완료 0, 판매취소 1, 배송완료 2
+//	@ColumnDefault("0")
+	private String ordersState; // 결제완료 0, 판매취소 1
 	
 	
 }

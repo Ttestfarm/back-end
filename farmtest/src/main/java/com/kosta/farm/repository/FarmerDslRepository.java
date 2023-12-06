@@ -2,10 +2,12 @@ package com.kosta.farm.repository;
 
 import java.util.List;
 
+import org.hibernate.annotations.Where;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
+import com.kosta.farm.entity.QDelivery;
 import com.kosta.farm.entity.QOrders;
 import com.kosta.farm.entity.QPayment;
 import com.kosta.farm.entity.QProduct;
@@ -15,6 +17,7 @@ import com.kosta.farm.entity.QUser;
 import com.kosta.farm.entity.Quotation;
 import com.kosta.farm.entity.Request;
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
@@ -187,4 +190,59 @@ public class FarmerDslRepository {
 						.and(ord.ordersId.eq(ordersId)))
 				.fetchOne();
 	}
+	
+	// 발송 완료 (ordersId, delivery update)
+	public void updateDelivery(Long ordersId, String tCode, String tInvoice) {
+		QDelivery d = QDelivery.delivery;
+		jpaQueryFactory.update(d)
+			.set(d.orderId, ordersId)
+			.set(d.tCode, tCode)
+			.set(d.tInvocie, tInvoice)
+		    .execute();
+	}
+	
+	// 판매 취소
+	public void updateOrderState(Long ordersId, Long farmerId) {
+		QOrders ord = QOrders.orders;
+		jpaQueryFactory.update(ord)
+			.set(ord.ordersState, "1")
+			.where(ord.ordersId.eq(ordersId)
+					.and(ord.farmerId.eq(farmerId)))
+			.execute();
+	}
+	
+	// 배송 현황 리스트
+	public List<Tuple> findOrdersIdAndDeliveryAndProductAndByDeliveryState(Long farmerId, String deliveryState, PageRequest pageRequest) {
+		QOrders ord = QOrders.orders;
+		QDelivery deli = QDelivery.delivery;
+		QQuotation quot = QQuotation.quotation;
+		QProduct prod = QProduct.product;
+		
+		return jpaQueryFactory.select(ord.ordersId, deli.tCode, deli.tInvocie, 
+				new CaseBuilder()
+					.when(ord.quotationId.isNotNull()).then(quot.quotationProduct)
+					.otherwise(prod.productName)
+				,deli.deliveryState)
+				.from(ord)
+				.join(deli).on(ord.ordersId.eq(deli.orderId))
+				.where(ord.farmerId.eq(farmerId)
+						.and(deli.deliveryState.eq(deliveryState)))
+				.orderBy(ord.ordersId.desc())
+				.offset(pageRequest.getOffset())
+				.limit(pageRequest.getPageSize())
+				.fetch();
+				
+	}
+	
+	// 배송 현황 테이블 수
+	public Long findDeliveryCountByFarmerIdAndDeliveryState(Long farmerId, String deliveryState) {
+		QOrders ord = QOrders.orders;
+		QDelivery deli = QDelivery.delivery;
+		return jpaQueryFactory.select(deli.count()).distinct()
+				.join(deli).on(ord.ordersId.eq(deli.orderId))
+				.where(ord.farmerId.eq(farmerId)
+						.and(deli.deliveryState.eq(deliveryState)))
+				.fetchOne();
+	}
+	
 }

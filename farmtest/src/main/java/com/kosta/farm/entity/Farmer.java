@@ -65,4 +65,6 @@ public class Farmer {
 	@Column
 	@ColumnDefault("0")
 	private Integer reviewCount;
+	@Column
+	private Long rating;
 }

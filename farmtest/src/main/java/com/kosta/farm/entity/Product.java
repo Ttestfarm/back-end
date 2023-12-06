@@ -16,14 +16,15 @@ import lombok.Data;
 @Entity
 @Data
 public class Product {
-	@Id @GeneratedValue(strategy=GenerationType.IDENTITY)
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long productId;
 	// FK
 	@Column
 	private Long farmerId;
 	@Column
 	private Long categoryId;
-	
+
 	@Column
 	private String productName; // 농산물명
 	@Column
@@ -31,7 +32,7 @@ public class Product {
 	@Column
 	private String productQuantity; // 판매 수량
 	@Column
-	private String productStock; // 재고
+	private Integer productStock; // 재고
 	@Column
 	private String productDescription; // 상품 설명
 	@Column
@@ -44,11 +45,18 @@ public class Product {
 	@Column
 	private String productState; // 판매중, 매진, (판매취소)
 	@Column
-	private String fileUrl; //나머지 파일
+	private String fileUrl; // 나머지 파일
 	@Column
-	private Integer thumbNail; // 대표이미지 id
-	
+	private Long thumbNail; // 대표이미지 id
+
 //    private LocalDateTime regTime; //등록 시간
 //    private LocalDateTime updateTime; //수정 시간
+
+	public void removeStock(Integer orderQuantity) throws Exception {
+		if (productStock < orderQuantity)
+			throw new Exception("상품의 재고가 부족합니다");
+		productStock -= orderQuantity; //상품 주문하면 재고 줄어드는 로직
+
+	}
 
 }

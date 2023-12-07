@@ -8,6 +8,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
@@ -29,15 +30,13 @@ public class User {
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Long userId; // 서버에서 사용하는 userId
 	@Column
-	private Long farmerId;	
+	private Long farmerId;
 	@Column
-	private String userName; // 이름 (실명)
+	private String userName; // 서비스에서 사용할 이름 (소셜로그인의 경우 닉네임 전달받음)
 	@Column
-	private String userEmail; // ID
+	private String userEmail; // 로그인 ID
 	@Column
 	private String userPassword;
-	@Column
-	private String userNickname;
 	@Column
 	private String userTel;
 	@Column
@@ -51,10 +50,11 @@ public class User {
 	@Column
 	private String providerId;
 	@Column
-	private String userRoles; // user, farmer, admin
+	private String userRoles; // USER, FARMER, ADMIN
 	@CreationTimestamp
 	@Column
 	private Timestamp createDate;
 	@Column
-	private boolean userState; // 
+	private boolean userState; // 탈퇴 : 0 , 유효한 유저 : 1
+
 }

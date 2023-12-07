@@ -39,9 +39,13 @@ public class Farmer {
 	@Column
 	private String farmTel; // 팜 전화번호
 	@Column
-	private String farmAddress; // 팜 주소
+	private String farmAddress; // 팜 주소1
+	@Column
+	private String farmAddressDetail; // 팜 주소2
 	@Column
 	private String registrationNum; // 사업자등록번호
+	@Column
+	private String farmBank; // 팜 계좌 은행
 	@Column
 	private String farmAccountNum; // 팜 계좌번호
 	@Column
@@ -58,11 +62,13 @@ public class Farmer {
 	@CreationTimestamp
 	private Timestamp createDate;
 	@Column
-	private boolean state;
+	private boolean state; // 0 탈퇴 , 1 계정유지
 	@Column
 	@ColumnDefault("0")
 	private Integer followCount;
 	@Column
 	@ColumnDefault("0")
 	private Integer reviewCount;
+	@Column
+	private Long rating;
 }

@@ -13,8 +13,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.kosta.farm.dto.DeliveryDto;
 import com.kosta.farm.dto.OrdersDto;
 import com.kosta.farm.dto.QuotDelDto;
 import com.kosta.farm.dto.QuotationDto;
@@ -32,12 +34,28 @@ public class FarmerController {
 	// 팜 정보 관리
 	
 	// 매칭 주문 요청서 보기
-	// 관심 농산물인 요청서 리스트 보기
-	@GetMapping("/requestlist/{farmerId}/{farmInterest}")
-	public ResponseEntity<List<Request>> requestList(@PathVariable Long farmerId,
-			@PathVariable String farmInterest) {
+	
+	// farmerId를 받고 farmInterest return
+	@GetMapping("/farmInterest")
+	public ResponseEntity<List<String>> farmInterest (@RequestParam Long farmerId) {
 		try {
-			List<Request> reqList = farmerService.findRequestsByFarmInterest(farmerId ,farmInterest);
+			List<String> interestList = farmerService.findFarmInterestByFarmerId(farmerId);
+			return new ResponseEntity<List<String>>(interestList, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<List<String>>(HttpStatus.BAD_REQUEST);
+		}
+	}
+	
+	// 관심 농산물인 요청서 리스트 보기
+	@GetMapping("/requestlist")
+	public ResponseEntity<List<Request>> requestList(@RequestParam Long farmerId,
+			@RequestParam String farmInterest) {
+		try {
+			System.out.println(farmerId);
+			System.out.println(farmInterest);
+			List<Request> reqList = farmerService.findRequestsByFarmInterest(farmerId ,farmInterest);			
+			System.out.println(reqList);
 			return new ResponseEntity<List<Request>>(reqList, HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -58,7 +76,7 @@ public class FarmerController {
 	
 	// 견적 현황 페이지
 	// 견적서 상태로(0 : 견적서 취소, 1 : 대기중, 2 : 기간 만료, 3 : 결제완료) 견적서 리스트 보여주기
-	@GetMapping("/quotstate/{page}/{farmerId}/{state}")
+	@GetMapping("/quotlist/{page}/{farmerId}/{state}")
 	public ResponseEntity<Map<String, Object>> quotList(@PathVariable Integer page, 
 			@PathVariable Long farmerId, @PathVariable String state) {
 		try {
@@ -133,11 +151,46 @@ public class FarmerController {
 		}
 	}
 
-	// 발송 완료
+	// 발송 완료 order 상태 변화, delivery 생성, 택배사 코드, 운송장번호
+	@GetMapping("/orderdelivery/{ordersId}/{tCode}/{tInvoice}")
+	public ResponseEntity<String> delivery(@PathVariable Long ordersId, @PathVariable String tCode, @PathVariable String tInvioce) {
+		try {
+			farmerService.updateDelivery(ordersId, tCode, tInvioce);
+			return new ResponseEntity<String>("성공", HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<String>("실패", HttpStatus.BAD_REQUEST);
+		}
+	}
 	
 	// 판매 취소
+	@GetMapping("/ordercancel/{farmerId}/{ordersId}")
+	public ResponseEntity<String> delivery(@PathVariable Long farmerId, @PathVariable Long ordersId) {
+		try {
+			farmerService.updateOrderState(farmerId, ordersId);
+			return new ResponseEntity<String>("성공", HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<String>("실패", HttpStatus.BAD_REQUEST);
+		}
+	}
 	
-	// 배송 현황(배송중, 배송완료)
+	// 배송 현황(배송중, 배송완료) deliveryState
+	@GetMapping("/deliverylist/{page}/{deliveryState}/{farmerId}")
+	public ResponseEntity<Map<String, Object>> deliveryList(@PathVariable Integer page,
+			@PathVariable String deliveryState, @PathVariable Long farmerId) {
+		try {
+			PageInfo pageInfo = new PageInfo(page);
+			List<OrdersDto> deliveryList = farmerService.findOrdersByFarmerIdAndPage(farmerId, deliveryState, pageInfo);
+			Map<String, Object> res = new HashMap<>();
+			res.put("pageInfo", pageInfo);
+			res.put("orderList", deliveryList);
+			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
+		}
+	}
 	
 	// 정산 내역
 	

@@ -14,6 +14,9 @@ import com.kosta.farm.entity.Farmer;
 import com.kosta.farm.util.PageInfo;
 
 public interface FarmerRepository extends JpaRepository<Farmer, Long> {
+	// farmerId로 관심 품목 조회
+	Farmer findByFarmerId(Long farmerId);
+	
 	// 리뷰카운트순으로 파머리스트 가져오기
 	List<Farmer> findByreviewCount(Integer reviewCount);
 

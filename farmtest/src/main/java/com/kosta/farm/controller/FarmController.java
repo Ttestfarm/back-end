@@ -44,7 +44,7 @@ public class FarmController {
 	private FarmerRepository farmerRepository;
 
 	// 상품 등록
-	@PostMapping("farmer/regprod")
+	@PostMapping("/farmer/regprod")
 	public ResponseEntity<Integer> regProduct(@ModelAttribute Product product, MultipartFile mainFile,
 			List<MultipartFile> additionalFiles) {
 		try {
@@ -188,8 +188,7 @@ public class FarmController {
 		}
 	}
 
-	
-	//아직 다 안함
+	// 아직 다 안함
 	@GetMapping("/matching") // 매칭 메인 페이지
 	public ResponseEntity<Map<String, Object>> Matching(@RequestParam(required = false) Integer page) {
 		try {
@@ -209,109 +208,64 @@ public class FarmController {
 		return null;
 
 	}
+	
+	@PostMapping("/orders")
+	public ResponseEntity<Long>createOrders() {
+		return null;
+		
+	}
+	// controller,에는 front에서 productid를 가져온다
+	// order 하는방법 1,2,3 서비스에서
+	
+	//1 productid로 product 조회
+	//2 product일부내용을 builder를 이용하여 orders객체생성
+	//3. repository 이용해서 save;
+
 
 	// 오더 끝내기
-	
+
+	// 리뷰 작성하기
+	@PostMapping("/review")
+	public ResponseEntity<Integer> insertReview(Review review) {
+		
+		return null;
+
+	}
 	
 
-//	
-//	@GetMapping("/findfarmer/{page}") // 파머찾기 메인페이지 정렬을 추가한
-//	public ResponseEntity<Map<String, Object>> findFarmer(@PathVariable(required = false) Integer page,
-//			@RequestParam(required = false, defaultValue = "farmerId") String sortType) {
-//		try {
-//			if (page == null) {
-//				page = 0;
-//			}
-//			PageInfo pageInfo = PageInfo.builder().curPage(page).build();
-//			List<Farmer> farmerList = farmService.findFarmersWithSorting(sortType, pageInfo);
-//			Map<String, Object> res = new HashMap<>();
-//			res.put("farmerList", farmerList);
-//			res.put("pageInfo", pageInfo);
-//			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
+	
+
+//	//리뷰 작성
+//		@PostMapping("/api/review") 
+//		public ResponseEntity<String> reviewWrite(ReviewDto reviewDto, @AuthenticationPrincipal CustomUserDetails principal){
+//			
+//			reviewDto.setUserId(principal.getId());
+//			if(storeService.reviewWrite(reviewDto))
+//				return ResponseEntity.ok().body("리뷰 작성 완료");
+//			
+//			
+//			return ResponseEntity.badRequest().body("파일 저장 실패");
+//			
 //		}
-//
-//	}
+//		
+//		//리뷰 수정
+//		@PutMapping("/api/review") 
+//		public ResponseEntity<String> reviewModify(ReviewDto reviewDto, @AuthenticationPrincipal CustomUserDetails principal){
+//			System.out.println(reviewDto.toString());
+//			reviewDto.setUserId(principal.getId());
+//			if(storeService.reviewModify(reviewDto))
+//				return ResponseEntity.ok().body("리뷰 수정 완료");
+//			
+//			
+//			return ResponseEntity.badRequest().body("파일 저장 실패");
+//			
+//		}
+
+
 
 //	@PostMapping("/matching") //요청서 작성하기
 
-//	@PostMapping("/matching") //요청서 작성하기
-//	@GetMapping("test/{id}")
-//	@GetMapping("/findfarmer/{page}") // 파머찾기 메인페이지 이거 되는거
-//	public ResponseEntity<Map<String, Object>> findFarmer(@PathVariable(required = false) Integer page) {
-//		try {
-//			if (page == null) {
-//				page = 0;
-//			}
-//			PageInfo pageInfo = PageInfo.builder().curPage(page).build();
-//			List<Farmer> farmerList = farmService.farmerListByPage(pageInfo);
-//			Map<String, Object> res = new HashMap<>();
-//			res.put("farmerList", farmerList);
-//			res.put("pageInfo", pageInfo);
-//			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
-//		}
-//
-//	}
-//	@GetMapping("/findfarmer/{page}/{reviewcount}")
-//	public ResponseEntity<Map<String, Object>> findFarmerbyReview(@PathVariable(required = false) Integer page) {
-//		try {
-//			PageInfo pageInfo= PageInfo.builder().curPage(page).build();
-//			List<Farmer>farmerorderbyreview= farmService.farmerListByReview(pageInfo);
-//			Map<String, Object> res = new HashMap<>();
-//			res.put("farmerorderbyreview", farmerorderbyreview);
-//			res.put("pageInfo", pageInfo);
-//			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
-//		}catch(Exception e) {
-//			e.printStackTrace();
-//			return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
-//		}
-//	}
-//	@GetMapping("/findfarmer/{page}") // 파머찾기 메인페이지 정렬 reviewcount랑 rating
-//	public ResponseEntity<Map<String, Object>> findFarmer(@PathVariable(required = false) Integer page,
-//			@RequestParam(required = false, defaultValue = "id") String sortBy) {
-//		try {
-//			if (page == null) {
-//				page = 0;
-//			}
-//			PageInfo pageInfo = PageInfo.builder().curPage(page).build();
-//	        PageRequest pageRequest;
-//	        if ("reviewcount".equals(sortBy)) {
-//	            pageRequest = PageRequest.of(page, 10, Sort.by("reviewCount").descending());
-//	        } else if ("rating".equals(sortBy)) {
-//	            pageRequest = PageRequest.of(page, 10, Sort.by("rating").descending());
-//	        } else {
-//	            // 기본적으로 id 순으로 정렬
-//	            pageRequest = PageRequest.of(page, 10, Sort.by("id").descending());
-//	        }
-//			
-//			
-//			List<Farmer> farmerList = farmService.farmerListByPage(pageInfo);
-//			Map<String, Object> res = new HashMap<>();
-//			res.put("farmerList", farmerList);
-//			res.put("pageInfo", pageInfo);
-//			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
-//		}
-//
-//	}
 
-//	@GetMapping("/findfarmer") // 파머찾기 requestparam 가능ㅇㅇ
-//	public ResponseEntity<List<Farmer>> findfarmermain(@RequestParam("page") Integer page, @RequestParam("size") Integer size) {
-//		try {
-//			Pageable pageable = PageRequest.of(page, size, Sort.by("farmerId").descending());
-//			Page<Farmer> farmersList = farmerRepository.findAll(pageable);
-//
-//			return new ResponseEntity<List<Farmer>>(farmersList.getContent(), HttpStatus.OK);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			return new ResponseEntity<List<Farmer>>(HttpStatus.BAD_REQUEST);
-//		}
-//	}
+
+
 }

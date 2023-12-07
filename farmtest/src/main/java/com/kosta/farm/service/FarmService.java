@@ -12,8 +12,10 @@ import org.springframework.web.multipart.MultipartFile;
 import com.kosta.farm.entity.Farmer;
 import com.kosta.farm.entity.Farmerfollow;
 import com.kosta.farm.entity.Orders;
+import com.kosta.farm.entity.Payment;
 import com.kosta.farm.entity.Product;
 import com.kosta.farm.entity.Review;
+import com.kosta.farm.entity.User;
 import com.kosta.farm.util.PageInfo;
 import com.querydsl.core.Tuple;
 
@@ -36,7 +38,8 @@ public interface FarmService {
 	List<Product> getProductListByFarmer(Long farmerId, PageInfo pageInfo) throws Exception;
 
 	List<Review> getReviewListByUser(Long userId) throws Exception;
-
+	
+	//리뷰 등록
 	void insertReview(Review review) throws Exception;
 
 	// 파머리스트 페이지
@@ -63,20 +66,14 @@ public interface FarmService {
 	List<Farmerfollow> getFollowingFarmersByUserId(Long userId) throws Exception;
 
 	void readImage(Integer num, ServletOutputStream outputStream) throws Exception;
-	
+
 	// 키워드로 농부 검색하기
 	List<Farmer> FarmerSearchList(String keyword, PageInfo pageInfo) throws Exception;
 
-	//주문 구현
-	Orders createOrder(Orders order) throws Exception;
-	
-	void completePay(Long orderId) throws Exception;
-	
-	
-//	List<Farmer> farmerListByReview(PageInfo pageInfo) throws Exception;
+	// 주문 구현
+	void makeOrder(Orders orders) throws Exception;
 
-	// 필드별로 정렬
-//	List<Farmer> farmerListByRating(PageInfo pageInfo) throws Exception;
-//
-//	List<Farmer> farmerListByfollower(PageInfo pageInfo) throws Exception;
+	
+
+
 }

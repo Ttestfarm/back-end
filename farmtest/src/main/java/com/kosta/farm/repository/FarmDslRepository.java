@@ -3,6 +3,7 @@ package com.kosta.farm.repository;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,9 +18,12 @@ import com.kosta.farm.entity.Product;
 import com.kosta.farm.entity.QCategory;
 import com.kosta.farm.entity.QFarmer;
 import com.kosta.farm.entity.QFarmerfollow;
+import com.kosta.farm.entity.QOrders;
 import com.kosta.farm.entity.QProduct;
 import com.kosta.farm.entity.QReview;
+import com.kosta.farm.entity.QUser;
 import com.kosta.farm.entity.Review;
+import com.kosta.farm.entity.User;
 import com.kosta.farm.util.PageInfo;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
@@ -33,6 +37,7 @@ import lombok.RequiredArgsConstructor;
 public class FarmDslRepository {
 	@Autowired
 	private JPAQueryFactory jpaQueryFactory;
+	private final EntityManager em;
 
 	// 파머 수 가져오기
 	public Long findFarmerCount() throws Exception {
@@ -67,43 +72,39 @@ public class FarmDslRepository {
 		QReview review = QReview.review;
 		return jpaQueryFactory.selectFrom(review).where(review.farmerId.eq(farmerId)).fetch();
 	}
-	//farmerId별로 상품 리스트 가져오기
-	public List<Product> findProductByFarmerId(Long farmerId) throws Exception{
-		QProduct product= QProduct.product;
+
+	// farmerId별로 상품 리스트 가져오기
+	public List<Product> findProductByFarmerId(Long farmerId) throws Exception {
+		QProduct product = QProduct.product;
 		return jpaQueryFactory.selectFrom(product).where(product.farmerId.eq(farmerId)).fetch();
 	}
-	
+
 	// userId로 리뷰 리스트 가져오기
 	public List<Review> findByUserId(Long userId) throws Exception {
 		QReview review = QReview.review;
 		return jpaQueryFactory.selectFrom(review).where(review.userId.eq(userId)).fetch();
 	}
 	
-	@Transactional
-	public void updateStock(Long productId, Integer stock) {
+	
+	// 이미 존재하는 주문 조회
+//	public Orders getExistingOrder(Long userId, Long productId) {
+//		QOrders orders = QOrders.orders;
+//		QUser user = QUser.user;
+//		QProduct product = QProduct.product;
+//
+//		return jpaQueryFactory.selectFrom(orders).where(orders.userId.eq(userId).and(orders.productId.eq(productId)))
+//				.fetchOne();
+//	}
 
-	}
 	
-	
-//	public Payment findByPaymentId(Long paymentId);
-
-	
-	
-	
-	
-	//파머의 카테고리 이름 가져오기? ㄴㄴ farminterest 검색하기
+	// 파머의 카테고리 이름 가져오기? ㄴㄴ farminterest 검색하기
 	public List<Tuple> getFarmersByCategory(String categoryName) {
 		QFarmer farmer = QFarmer.farmer;
-		QCategory category= QCategory.category;
-		QProduct product= QProduct.product;
-	    return jpaQueryFactory
-	            .select(farmer,category.categoryName)
-	            .from(product)
-	            .join(farmer).on(product.farmerId.eq(farmer.farmerId))
-	            .join(category).on(product.categoryId.eq(category.categoryId))
-	            .where(category.categoryName.eq(categoryName)).fetch();
+		QCategory category = QCategory.category;
+		QProduct product = QProduct.product;
+		return jpaQueryFactory.select(farmer, category.categoryName).from(product).join(farmer)
+				.on(product.farmerId.eq(farmer.farmerId)).join(category).on(product.categoryId.eq(category.categoryId))
+				.where(category.categoryName.eq(categoryName)).fetch();
 	}
 
-	}
-
-
+}

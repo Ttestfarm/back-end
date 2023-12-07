@@ -27,6 +27,6 @@ public class Payment {
 	@CreationTimestamp
 	private Timestamp createDate; // 결제 완료 날짜
 	@Column
-	private String state; // 결제완료, 결제취소
+	private String state; // 결제취소 0, 결제완료 1
 	
 }

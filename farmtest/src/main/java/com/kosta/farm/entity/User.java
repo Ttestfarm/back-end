@@ -50,9 +50,10 @@ public class User {
 	private String providerId;
 	@Column
 	private String userRoles; // user, farmer, admin
-	@Column
-	private boolean userState;
 	@CreationTimestamp
 	@Column
 	private Timestamp createDate;
+	@Column
+	private boolean userState; // 탈퇴 : 0 , ? : 1
+
 }

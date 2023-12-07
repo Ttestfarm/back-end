@@ -20,8 +20,6 @@ import com.kosta.farm.entity.Farmerfollow;
 import com.kosta.farm.entity.Product;
 import com.kosta.farm.entity.ProductFile;
 import com.kosta.farm.entity.Review;
-import com.kosta.farm.repository.FarmDslRepository;
-import com.kosta.farm.repository.FarmerDslRepository;
 import com.kosta.farm.repository.FarmerRepository;
 import com.kosta.farm.repository.FarmerfollowRepository;
 import com.kosta.farm.repository.ProductFileRepository;

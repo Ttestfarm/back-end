@@ -34,6 +34,19 @@ public class FarmerController {
 	// 팜 정보 관리
 	
 	// 매칭 주문 요청서 보기
+	
+	// farmerId를 받고 farmInterest return
+	@GetMapping("/farmInterest")
+	public ResponseEntity<List<String>> farmInterest (@RequestParam Long farmerId) {
+		try {
+			List<String> interestList = farmerService.findFarmInterestByFarmerId(farmerId);
+			return new ResponseEntity<List<String>>(interestList, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<List<String>>(HttpStatus.BAD_REQUEST);
+		}
+	}
+	
 	// 관심 농산물인 요청서 리스트 보기
 	@GetMapping("/requestlist")
 	public ResponseEntity<List<Request>> requestList(@RequestParam Long farmerId,

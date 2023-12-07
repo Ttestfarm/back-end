@@ -2,18 +2,18 @@ package com.kosta.farm.repository;
 
 import java.util.List;
 
-import org.hibernate.annotations.Where;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
+import com.kosta.farm.entity.Farmer;
 import com.kosta.farm.entity.QDelivery;
+import com.kosta.farm.entity.QFarmer;
 import com.kosta.farm.entity.QOrders;
 import com.kosta.farm.entity.QPayment;
 import com.kosta.farm.entity.QProduct;
 import com.kosta.farm.entity.QQuotation;
 import com.kosta.farm.entity.QRequest;
-import com.kosta.farm.entity.QUser;
 import com.kosta.farm.entity.Quotation;
 import com.kosta.farm.entity.Request;
 import com.querydsl.core.Tuple;
@@ -27,6 +27,14 @@ import lombok.RequiredArgsConstructor;
 public class FarmerDslRepository {
 	@Autowired
 	private JPAQueryFactory jpaQueryFactory;
+	
+	// 파머 관심 농산물 조회
+//	public Farmer findFarmerByFarmerId(Long farmerId) {
+//		QFarmer farmer = QFarmer.farmer;
+//		return jpaQueryFactory.selectFrom(farmer)
+//				.where(farmer.farmerId.eq(farmerId))
+//				.fetchOne();
+//	}
 	
 	// 매칭 주문 요청서 리스트
 	public List<Request> findRequestByInterestAndFarmerId(Long farmerId, String farmInterest) {
@@ -226,6 +234,8 @@ public class FarmerDslRepository {
 				,deli.deliveryState)
 				.from(ord)
 				.join(deli).on(ord.ordersId.eq(deli.orderId))
+				.join(quot).on(ord.quotationId.eq(quot.quotationId))
+				.join(prod).on(ord.productId.eq(prod.productId))
 				.where(ord.farmerId.eq(farmerId)
 						.and(deli.deliveryState.eq(deliveryState)))
 				.orderBy(ord.ordersId.desc())

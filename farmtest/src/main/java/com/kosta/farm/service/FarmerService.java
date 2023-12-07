@@ -12,6 +12,8 @@ import com.querydsl.core.Tuple;
 
 public interface FarmerService {
 	// 매칭 주문 요청서 보기
+	// 파머 관심 농산물 리스트
+	public List<String> findFarmInterestByFarmerId(Long farmerId) throws Exception;
 	// 관심 농산물인 요청서 리스트 보기
 	public List<Request> findRequestsByFarmInterest(Long farmerId, String farmInterest) throws Exception;
 	

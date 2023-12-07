@@ -3,6 +3,7 @@ package com.kosta.farm.service;
 import java.security.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -12,6 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kosta.farm.dto.DeliveryDto;
 import com.kosta.farm.dto.OrdersDto;
 import com.kosta.farm.dto.QuotationDto;
+import com.kosta.farm.entity.Farmer;
 import com.kosta.farm.entity.Quotation;
 import com.kosta.farm.entity.Request;
 import com.kosta.farm.repository.FarmerDslRepository;
@@ -36,6 +38,22 @@ public class FarmerServiceImpl implements FarmerService {
 	private final ObjectMapper objectMapper;
 	
 	// ** 매칭 주문 요청서 보기 **
+	// 파머 관신 농산물 조회
+	@Override
+	public List<String> findFarmInterestByFarmerId(Long farmerId) throws Exception{
+		Farmer farmer = farmerRepository.findByFarmerId(farmerId);
+		
+		List<String> interestList = new ArrayList<String>();
+		interestList.add(farmer.getFarmInterest1());
+		interestList.add(farmer.getFarmInterest2());
+		interestList.add(farmer.getFarmInterest3());
+		interestList.add(farmer.getFarmInterest4());
+		interestList.add(farmer.getFarmInterest5());
+		
+		return interestList;
+	}
+
+	
 	// 관심 농산물인 요청서 리스트 보기
 	@Override
 	public List<Request> findRequestsByFarmInterest(Long farmerId, String farmInterest) throws Exception {

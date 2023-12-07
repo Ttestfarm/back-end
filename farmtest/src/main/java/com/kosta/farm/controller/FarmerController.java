@@ -30,14 +30,14 @@ import com.kosta.farm.unti.PageInfo;
 public class FarmerController {
 	@Autowired
 	private FarmerService farmerService;
-	
+
 	// 팜 정보 관리
-	
+
 	// 매칭 주문 요청서 보기
-	
+
 	// farmerId를 받고 farmInterest return
 	@GetMapping("/farmInterest")
-	public ResponseEntity<List<String>> farmInterest (@RequestParam Long farmerId) {
+	public ResponseEntity<List<String>> farmInterest(@RequestParam Long farmerId) {
 		try {
 			List<String> interestList = farmerService.findFarmInterestByFarmerId(farmerId);
 			return new ResponseEntity<List<String>>(interestList, HttpStatus.OK);
@@ -46,7 +46,7 @@ public class FarmerController {
 			return new ResponseEntity<List<String>>(HttpStatus.BAD_REQUEST);
 		}
 	}
-	
+
 	// 관심 농산물인 요청서 리스트 보기
 	@GetMapping("/requestlist")
 	public ResponseEntity<List<Request>> requestList(@RequestParam Long farmerId,
@@ -54,7 +54,7 @@ public class FarmerController {
 		try {
 			System.out.println(farmerId);
 			System.out.println(farmInterest);
-			List<Request> reqList = farmerService.findRequestsByFarmInterest(farmerId ,farmInterest);			
+			List<Request> reqList = farmerService.findRequestsByFarmInterest(farmerId, farmInterest);
 			System.out.println(reqList);
 			return new ResponseEntity<List<Request>>(reqList, HttpStatus.OK);
 		} catch (Exception e) {
@@ -62,22 +62,22 @@ public class FarmerController {
 			return new ResponseEntity<List<Request>>(HttpStatus.BAD_REQUEST);
 		}
 	}
-	
+
 	// 견적서 보내기
 	@PostMapping("/regquot")
 	public ResponseEntity<String> regQuotation(@RequestBody Quotation quot) {
 		try {
-			return new ResponseEntity<String>("성공" ,HttpStatus.OK);
+			return new ResponseEntity<String>("성공", HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new ResponseEntity<String>("실패", HttpStatus.BAD_REQUEST);
 		}
 	}
-	
+
 	// 견적 현황 페이지
 	// 견적서 상태로(0 : 견적서 취소, 1 : 대기중, 2 : 기간 만료, 3 : 결제완료) 견적서 리스트 보여주기
 	@GetMapping("/quotlist/{page}/{farmerId}/{state}")
-	public ResponseEntity<Map<String, Object>> quotList(@PathVariable Integer page, 
+	public ResponseEntity<Map<String, Object>> quotList(@PathVariable Integer page,
 			@PathVariable Long farmerId, @PathVariable String state) {
 		try {
 			PageInfo pageInfo = new PageInfo(page);
@@ -85,13 +85,13 @@ public class FarmerController {
 			Map<String, Object> res = new HashMap<>();
 			res.put("pageInfo", pageInfo);
 			res.put("quotList", quotList);
-			return new ResponseEntity<Map<String,Object>>(res, HttpStatus.OK);
+			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
-			return new ResponseEntity<Map<String,Object>>(HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
 		}
 	}
-	
+
 	// 견적서 취소
 	@PatchMapping("/quotdelete")
 	public ResponseEntity<String> quotdelete(@RequestBody QuotDelDto dto) {
@@ -103,7 +103,7 @@ public class FarmerController {
 			return new ResponseEntity<String>(HttpStatus.BAD_REQUEST);
 		}
 	}
-	
+
 	// 견적서 상세보기
 	@GetMapping("/quotdetail")
 	public ResponseEntity<Quotation> quotdetail(@PathVariable Long quotId) {
@@ -115,10 +115,10 @@ public class FarmerController {
 			return new ResponseEntity<Quotation>(HttpStatus.BAD_REQUEST);
 		}
 	}
-	
+
 	// 결제 완료 페이지
 	@GetMapping("/orderlist/{page}/{farmerId}/{type}")
-	public ResponseEntity<Map<String, Object>> orderList(@PathVariable Integer page, 
+	public ResponseEntity<Map<String, Object>> orderList(@PathVariable Integer page,
 			@PathVariable Long farmerId, @PathVariable String type) {
 		try {
 			PageInfo pageInfo = new PageInfo(page);
@@ -126,22 +126,22 @@ public class FarmerController {
 			Map<String, Object> res = new HashMap<>();
 			res.put("pageInfo", pageInfo);
 			res.put("orderList", orderList);
-			return new ResponseEntity<Map<String,Object>>(res, HttpStatus.OK);
+			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
-			return new ResponseEntity<Map<String,Object>>(HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
 		}
 	}
-	
+
 	// 결제 완료(매칭, 주문) 상세 보기
 	@GetMapping("/orderdetail/{farmerId}/{ordersId}/{type}")
 	public ResponseEntity<OrdersDto> orderDetail(@PathVariable Long farmerId,
 			@PathVariable Long ordersId, @PathVariable String type) {
 		try {
 			OrdersDto dto = null;
-			if(type.equals("0")) { // 매칭
+			if (type.equals("0")) { // 매칭
 				dto = farmerService.OrdersDetailQuotationId(farmerId, ordersId);
-			} else if(type.equals("1")){ // 주문
+			} else if (type.equals("1")) { // 주문
 				dto = farmerService.OrdersDetailNotQuotationId(farmerId, ordersId);
 			}
 			return new ResponseEntity<OrdersDto>(dto, HttpStatus.OK);
@@ -153,7 +153,8 @@ public class FarmerController {
 
 	// 발송 완료 order 상태 변화, delivery 생성, 택배사 코드, 운송장번호
 	@GetMapping("/orderdelivery/{ordersId}/{tCode}/{tInvoice}")
-	public ResponseEntity<String> delivery(@PathVariable Long ordersId, @PathVariable String tCode, @PathVariable String tInvioce) {
+	public ResponseEntity<String> delivery(@PathVariable Long ordersId, @PathVariable String tCode,
+			@PathVariable String tInvioce) {
 		try {
 			farmerService.updateDelivery(ordersId, tCode, tInvioce);
 			return new ResponseEntity<String>("성공", HttpStatus.OK);
@@ -162,7 +163,7 @@ public class FarmerController {
 			return new ResponseEntity<String>("실패", HttpStatus.BAD_REQUEST);
 		}
 	}
-	
+
 	// 판매 취소
 	@GetMapping("/ordercancel/{farmerId}/{ordersId}")
 	public ResponseEntity<String> delivery(@PathVariable Long farmerId, @PathVariable Long ordersId) {
@@ -174,7 +175,7 @@ public class FarmerController {
 			return new ResponseEntity<String>("실패", HttpStatus.BAD_REQUEST);
 		}
 	}
-	
+
 	// 배송 현황(배송중, 배송완료) deliveryState
 	@GetMapping("/deliverylist/{page}/{deliveryState}/{farmerId}")
 	public ResponseEntity<Map<String, Object>> deliveryList(@PathVariable Integer page,
@@ -191,7 +192,6 @@ public class FarmerController {
 			return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
 		}
 	}
-	
 	// 정산 내역
-	
+
 }

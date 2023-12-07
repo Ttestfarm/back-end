@@ -7,4 +7,6 @@ import com.kosta.farm.entity.User;
 public interface UserRepository extends JpaRepository<User, Long> {
 	User findByUserEmail(String userEmail);
 	User findByUserId(Long userId);
+
+	Boolean existsByUserEmail(String userEmail);
 }

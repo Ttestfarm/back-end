@@ -2,21 +2,14 @@ package com.kosta.farm.service;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
-import javax.annotation.PostConstruct;
 import javax.servlet.ServletOutputStream;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
@@ -26,17 +19,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kosta.farm.entity.Farmer;
 import com.kosta.farm.entity.Farmerfollow;
 import com.kosta.farm.entity.Orders;
-import com.kosta.farm.entity.Payment;
 import com.kosta.farm.entity.Product;
 import com.kosta.farm.entity.ProductFile;
 import com.kosta.farm.entity.Review;
+import com.kosta.farm.repository.FarmDslRepository;
+import com.kosta.farm.repository.FarmerDslRepository;
 import com.kosta.farm.repository.FarmerRepository;
 import com.kosta.farm.repository.FarmerfollowRepository;
 import com.kosta.farm.repository.OrdersRepository;
 import com.kosta.farm.repository.ProductFileRepository;
 import com.kosta.farm.repository.ProductRepository;
+import com.kosta.farm.repository.ReviewRepository;
 import com.kosta.farm.util.PageInfo;
-import com.querydsl.core.Tuple;
 
 import lombok.RequiredArgsConstructor;
 
@@ -55,30 +49,6 @@ public class FarmServiceImpl implements FarmService {
 
 	@Override
 	public void regFarmer(Farmer farmer) throws Exception {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public List<Farmer> getFarmerByReviewCount(Integer reviewCount) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<Review> getReviewListByFarmer(Integer farmerId) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<Review> getReviewListByUser(Integer userId) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void insertReview(Review review) throws Exception {
 		// TODO Auto-generated method stub
 		
 	}

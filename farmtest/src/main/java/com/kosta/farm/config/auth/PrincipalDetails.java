@@ -1,68 +1,65 @@
 package com.kosta.farm.config.auth;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.kosta.farm.entity.User;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 public class PrincipalDetails implements UserDetails {
+
 	private User user;
-	
+
 	public PrincipalDetails(User user) {
 		this.user = user;
 	}
-	
-	public User getUser() {
-		return user;
-	}
 
-	public void setUser(User user) {
-		this.user = user;
-	}
-
+	// 권한 관련 작업을 하기 위한 role return
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
-    Collection<GrantedAuthority> collect = new ArrayList<>();
-    collect.add(new GrantedAuthority() {
-       @Override
-       public String getAuthority() {
-          return user.getUserRoles();
-       }
-    });
-    return collect;
+		Collection<GrantedAuthority> collections = new ArrayList<>();
+		collections.add(() -> {
+			return user.getUserRoles();
+		});
+
+		return collections;
 	}
 
+	// get Password 메서드
 	@Override
-  public String getPassword() {
-     return user.getUserPassword();
-  }
+	public String getPassword() {
+		return user.getUserPassword();
+	}
 
-  @Override
-  public String getUsername() {
-     return user.getUserEmail(); // 로그인을 이메일로 함
-  }
+	// get Username 메서드 (생성한 User은 loginId 사용)
+	@Override
+	public String getUsername() {
+		return user.getUserEmail();
+	}
 
-  @Override
-  public boolean isAccountNonExpired() { // 계정 만료 여부
-     return true;
-  }
+	// 계정이 만료 되었는지 (true: 만료X)
+	@Override
+	public boolean isAccountNonExpired() {
+		return true;
+	}
 
-  @Override
-  public boolean isAccountNonLocked() { // 계정 잠금 여부
-     return true;
-  }
+	// 계정이 잠겼는지 (true: 잠기지 않음)
+	@Override
+	public boolean isAccountNonLocked() {
+		return true;
+	}
 
-  @Override
-  public boolean isCredentialsNonExpired() { // 비밀번호 만료 여부
-     return true;
-  }
+	// 비밀번호가 만료되었는지 (true: 만료X)
+	@Override
+	public boolean isCredentialsNonExpired() {
+		return true;
+	}
 
-  @Override
-  public boolean isEnabled() { // 계정 활성화 여부
-     return true;
-  }
-
+	// 계정이 활성화(사용가능)인지 (true: 활성화)
+	@Override
+	public boolean isEnabled() {
+		return true;
+	}
 }

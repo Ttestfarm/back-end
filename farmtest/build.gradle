@@ -44,7 +44,8 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	// https://mvnrepository.com/artifact/com.auth0/java-jwt
-implementation 'com.auth0:java-jwt:3.19.2'
+	implementation 'com.auth0:java-jwt:3.19.2'
+	implementation 'io.jsonwebtoken:jjwt:0.9.1'
 	//쿼리DSL 추가
 	implementation "com.querydsl:querydsl-jpa:${queryDslVersion}"
 	implementation "com.querydsl:querydsl-apt:${queryDslVersion}"

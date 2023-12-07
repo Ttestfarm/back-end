@@ -52,10 +52,12 @@ public class Product {
 //    private LocalDateTime regTime; //등록 시간
 //    private LocalDateTime updateTime; //수정 시간
 
-	public void removeStock(Integer orderQuantity) throws Exception {
-		if (productStock < orderQuantity)
-			throw new Exception("상품의 재고가 부족합니다");
-		productStock -= orderQuantity; //상품 주문하면 재고 줄어드는 로직
+	public void removeStock(Integer productStock) throws Exception {
+		Integer restStock = this.productStock - productStock;
+		if (restStock < 0) {
+			throw new Exception("상품의 재고가 부족합니다. 현재 재고 수량: " + this.productStock);
+		}
+		this.productStock = restStock;
 
 	}
 

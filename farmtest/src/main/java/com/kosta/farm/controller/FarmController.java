@@ -1,5 +1,7 @@
 package com.kosta.farm.controller;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -109,10 +111,11 @@ public class FarmController {
 
 	}
 
-	@GetMapping("/findfarmer/search/{page}/{keyword}") // 파머 검색 interest로
+	@GetMapping("/findfarmer/search/{page}/{keyword}") // 파머 검색 interest로 //한글 안깨지는인코딩
 	public ResponseEntity<Map<String, Object>> searchFarmer(@PathVariable(required = false) Integer page,
 			@PathVariable(required = false) String keyword) {
 		try {
+			System.out.println(keyword);
 			PageInfo pageInfo = PageInfo.builder().curPage(page).build();
 			List<Farmer> farmerList = farmService.FarmerSearchList(keyword, pageInfo);
 			Map<String, Object> res = new HashMap<>();
@@ -185,11 +188,12 @@ public class FarmController {
 		}
 	}
 
+	
+	//아직 다 안함
 	@GetMapping("/matching") // 매칭 메인 페이지
-	public ResponseEntity<Map<String, Object>> Matching(@RequestParam(required=false) Integer page) {
+	public ResponseEntity<Map<String, Object>> Matching(@RequestParam(required = false) Integer page) {
 		try {
 			PageInfo pageInfo = PageInfo.builder().curPage(page).build();
-//			List<Request> requestList=Fa
 			return new ResponseEntity<Map<String, Object>>(HttpStatus.OK);
 
 		} catch (Exception e) {
@@ -197,15 +201,19 @@ public class FarmController {
 		}
 		return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
 	}
-	//구매내역 불러오기
+
+	// 구매내역 불러오기
 	@GetMapping("/user/buylist")
-	public ResponseEntity<List<Orders>> buyList(){
-		List<Orders> buyList= new ArrayList<>();
+	public ResponseEntity<List<Orders>> buyList() {
+		List<Orders> buyList = new ArrayList<>();
 		return null;
-		
+
 	}
+
+	// 오더 끝내기
 	
 	
+
 //	
 //	@GetMapping("/findfarmer/{page}") // 파머찾기 메인페이지 정렬을 추가한
 //	public ResponseEntity<Map<String, Object>> findFarmer(@PathVariable(required = false) Integer page,

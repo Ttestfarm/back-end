@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kosta.farm.entity.Farmer;
 import com.kosta.farm.entity.Farmerfollow;
 import com.kosta.farm.entity.Orders;
+import com.kosta.farm.entity.Payment;
 import com.kosta.farm.entity.Product;
 import com.kosta.farm.entity.ProductFile;
 import com.kosta.farm.entity.Review;
@@ -33,6 +34,7 @@ import com.kosta.farm.repository.FarmDslRepository;
 import com.kosta.farm.repository.FarmerDslRepository;
 import com.kosta.farm.repository.FarmerRepository;
 import com.kosta.farm.repository.FarmerfollowRepository;
+import com.kosta.farm.repository.OrdersRepository;
 import com.kosta.farm.repository.ProductFileRepository;
 import com.kosta.farm.repository.ProductRepository;
 import com.kosta.farm.repository.ReviewRepository;
@@ -52,6 +54,7 @@ public class FarmServiceImpl implements FarmService {
 	private final ProductRepository productRepository;
 	private final ProductFileRepository productFileRepository;
 	private final ReviewRepository reviewRepository;
+	private final OrdersRepository ordersRepository;
 
 	@Override
 	public void regFarmer(Farmer farmer) throws Exception {
@@ -223,7 +226,7 @@ public class FarmServiceImpl implements FarmService {
 	public List<Product> getProductListByFarmer(Long farmerId, PageInfo pageInfo) throws Exception {
 		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 6,
 				Sort.by(Sort.Direction.DESC, "productId"));
-		//몇개씩 넣을지 고민
+		// 몇개씩 넣을지 고민
 		Page<Product> pages = productRepository.findProductByFarmerId(farmerId, pageRequest);
 		pageInfo.setAllPage(pages.getTotalPages());
 		int startPage = (pageInfo.getCurPage() - 1) / 10 * 10 + 1;
@@ -287,11 +290,18 @@ public class FarmServiceImpl implements FarmService {
 	}
 
 	@Override
-	public Long createsOrder(Orders orders) throws Exception {
-		
-		return null;
+	public Orders createOrder(Orders orders) throws Exception {
+		return ordersRepository.save(orders);
 	}
 
+	@Override
+	public void completePay(Long orderId) throws Exception {
+		Orders orders = ordersRepository.findById(orderId).orElse(null);
+		if (orders != null) {orders.getPaymentId();
+
+		}
+
+	}
 }
 
 //	@PostConstruct

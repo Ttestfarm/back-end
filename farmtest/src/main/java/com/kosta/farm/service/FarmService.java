@@ -63,13 +63,16 @@ public interface FarmService {
 	List<Farmerfollow> getFollowingFarmersByUserId(Long userId) throws Exception;
 
 	void readImage(Integer num, ServletOutputStream outputStream) throws Exception;
-
-	Long createsOrder(Orders orders) throws Exception;
-	
 	
 	// 키워드로 농부 검색하기
 	List<Farmer> FarmerSearchList(String keyword, PageInfo pageInfo) throws Exception;
 
+	//주문 구현
+	Orders createOrder(Orders order) throws Exception;
+	
+	void completePay(Long orderId) throws Exception;
+	
+	
 //	List<Farmer> farmerListByReview(PageInfo pageInfo) throws Exception;
 
 	// 필드별로 정렬

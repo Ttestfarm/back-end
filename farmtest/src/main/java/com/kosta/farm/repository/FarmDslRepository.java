@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 import com.kosta.farm.entity.Farmer;
 import com.kosta.farm.entity.Farmerfollow;
 import com.kosta.farm.entity.Orders;
+import com.kosta.farm.entity.Payment;
 import com.kosta.farm.entity.Product;
 import com.kosta.farm.entity.QCategory;
 import com.kosta.farm.entity.QFarmer;
@@ -84,7 +85,8 @@ public class FarmDslRepository {
 	}
 	
 	
-	
+//	public Payment findByPaymentId(Long paymentId);
+
 	
 	
 	

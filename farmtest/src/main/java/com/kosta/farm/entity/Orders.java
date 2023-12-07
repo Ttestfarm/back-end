@@ -44,6 +44,7 @@ public class Orders { //order> orders로 대체 entity 생성 오류 때문에
 	@Column
 	private String ordersState; // 결제완료 0, 판매취소 1, 배송완료 2
 	//주문 상태
+	
 	@Column
 	private Long productId; //상품정보
 	//상시판매를 위한 컬럼들

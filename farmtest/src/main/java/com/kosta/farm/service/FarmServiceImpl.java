@@ -26,7 +26,6 @@ import com.kosta.farm.repository.FarmerRepository;
 import com.kosta.farm.repository.FarmerfollowRepository;
 import com.kosta.farm.repository.ProductFileRepository;
 import com.kosta.farm.repository.ProductRepository;
-import com.kosta.farm.repository.ReviewRepository;
 import com.kosta.farm.util.PageInfo;
 
 import lombok.RequiredArgsConstructor;

@@ -4,9 +4,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.kosta.farm.entity.User;
 
-public interface UserRepository extends JpaRepository<User, Integer> {
+public interface UserRepository extends JpaRepository<User, Long> {
+	boolean existsByUserEmail(String userEmail);
 	User findByUserEmail(String userEmail);
-	// join에서 씀
-  // boolean existsByUserEmail(String userEmail);
-  // boolean existsByUserNickname(String userNickname);
+	User findByUserId(Long userId);
 }

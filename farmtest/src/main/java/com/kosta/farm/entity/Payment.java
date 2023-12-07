@@ -10,10 +10,12 @@ import javax.persistence.Id;
 
 import org.hibernate.annotations.CreationTimestamp;
 
+import lombok.Builder;
 import lombok.Data;
 
 @Entity
 @Data
+@Builder
 public class Payment {
 	@Id @GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Long paymentId;

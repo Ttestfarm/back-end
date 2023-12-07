@@ -6,6 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.kosta.farm.entity.Farmerfollow;
 
-public interface FarmerfollowRepository extends JpaRepository<Farmerfollow, Integer> {
-	List<Farmerfollow> findByUserId(Integer userId);
+public interface FarmerfollowRepository extends JpaRepository<Farmerfollow, Long> {
+	List<Farmerfollow> findByUserId(Long userId);
 }

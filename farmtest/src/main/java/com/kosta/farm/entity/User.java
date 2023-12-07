@@ -8,6 +8,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
@@ -49,11 +50,11 @@ public class User {
 	@Column
 	private String providerId;
 	@Column
-	private String userRoles; // user, farmer, admin
+	private String userRoles; // USER, FARMER, ADMIN
 	@CreationTimestamp
 	@Column
 	private Timestamp createDate;
 	@Column
-	private boolean userState; // 탈퇴 : 0 , ? : 1
+	private boolean userState; // 탈퇴 : 0 , 유효한 유저 : 1
 
 }

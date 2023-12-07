@@ -29,15 +29,13 @@ public class User {
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Long userId; // 서버에서 사용하는 userId
 	@Column
-	private Long farmerId;	
+	private Long farmerId;
 	@Column
-	private String userName; // 이름 (실명)
+	private String userName; // 서비스에서 사용할 이름 (소셜로그인의 경우 닉네임 전달받음)
 	@Column
-	private String userEmail; // ID
+	private String userEmail; // 로그인 ID
 	@Column
 	private String userPassword;
-	@Column
-	private String userNickname;
 	@Column
 	private String userTel;
 	@Column
@@ -57,4 +55,5 @@ public class User {
 	private Timestamp createDate;
 	@Column
 	private boolean userState; // 탈퇴 : 0 , ? : 1
+
 }

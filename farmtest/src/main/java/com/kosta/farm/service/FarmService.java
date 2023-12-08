@@ -14,6 +14,7 @@ import com.kosta.farm.entity.Farmerfollow;
 import com.kosta.farm.entity.Orders;
 import com.kosta.farm.entity.Payment;
 import com.kosta.farm.entity.Product;
+import com.kosta.farm.entity.Request;
 import com.kosta.farm.entity.Review;
 import com.kosta.farm.entity.User;
 import com.kosta.farm.util.PageInfo;
@@ -39,13 +40,16 @@ public interface FarmService {
 
 	List<Review> getReviewListByUser(Long userId) throws Exception;
 	
-	//리뷰 등록
+	//구매내역
+	List<Orders> getOrdersListByUser(Long userId) throws Exception;
+
+	// 리뷰 등록
 	void insertReview(Review review) throws Exception;
 
 	// 파머리스트 페이지
 	List<Farmer> farmerListByPage(PageInfo pageInfo) throws Exception;
 
-//소트별로
+	// 소트별로
 	List<Farmer> findFarmersWithSorting(String sortType, PageInfo pageInfo) throws Exception;
 
 	// 파머리스트 페이지 (무한스크롤)
@@ -70,10 +74,13 @@ public interface FarmService {
 	// 키워드로 농부 검색하기
 	List<Farmer> FarmerSearchList(String keyword, PageInfo pageInfo) throws Exception;
 
-	// 주문 구현
-	void makeOrder(Orders orders) throws Exception;
+	// 주문 하기
+	void makeOrder(Long productId, Long paymentId) throws Exception;
 
-	
+	// 결제 확인
+	Boolean checkPaymentState(Long userId) throws Exception;
 
+	// 매칭 리스트 가져오기?
+	List<Request> requestListByPage(PageInfo pageInfo) throws Exception;
 
 }

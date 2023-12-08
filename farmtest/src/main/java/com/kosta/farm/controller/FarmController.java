@@ -91,12 +91,15 @@ public class FarmController {
 		}
 	}
 
-	@GetMapping("/findfarmer/{page}") // 파머찾기 메인페이지 정렬을 추가한
+	@GetMapping({ "/findfarmer/{page}", "/findfarmer", "/findfarmer/{page}/{sortType}" }) // 파머찾기 메인페이지 정렬을 추가한
 	public ResponseEntity<Map<String, Object>> findFarmer(@PathVariable(required = false) Integer page,
-			@RequestParam(required = false, defaultValue = "farmerId") String sortType) {
+			@PathVariable(required = false) String sortType) {
 		try {
 			if (page == null) {
-				page = 0;
+				page = 1;
+			}
+			if (sortType == null || sortType.equals("")) {
+				sortType = "farmerId";
 			}
 			PageInfo pageInfo = PageInfo.builder().curPage(page).build();
 			List<Farmer> farmerList = farmService.findFarmersWithSorting(sortType, pageInfo);
@@ -134,7 +137,6 @@ public class FarmController {
 			@PathVariable(required = false) Long farmerId) {
 		try {
 			Map<String, Object> res = new HashMap<>();
-
 			PageInfo pageInfo = PageInfo.builder().curPage(1).build();
 			List<Review> reviewList = farmService.getReviewListByFarmer(farmerId, pageInfo);
 			res.put("reviewList", reviewList);
@@ -189,83 +191,68 @@ public class FarmController {
 	}
 
 	// 아직 다 안함
-	@GetMapping("/matching") // 매칭 메인 페이지
+	@GetMapping("/matching") // 매칭 메인 페이지 requestlist를 보여준다
 	public ResponseEntity<Map<String, Object>> Matching(@RequestParam(required = false) Integer page) {
 		try {
+//			List<Farmer> farmerList = farmService.findFarmersWithSorting(sortType, pageInfo);
+//			Map<String, Object> res = new HashMap<>();
+//			res.put("farmerList", farmerList);
+//			res.put("pageInfo", pageInfo);
+//			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
+
 			PageInfo pageInfo = PageInfo.builder().curPage(page).build();
+//			List<Request> requestList= ;
 			return new ResponseEntity<Map<String, Object>>(HttpStatus.OK);
 
 		} catch (Exception e) {
 			e.printStackTrace();
+			return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
 		}
-		return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
 	}
 
-	// 구매내역 불러오기
+//	@PostMapping("/matching") //요청서 작성하기
+//	public ResponseEntity<>
+
+	// 구매내역 불러오기 하기 이거도 해야함
 	@GetMapping("/user/buylist")
 	public ResponseEntity<List<Orders>> buyList() {
 		List<Orders> buyList = new ArrayList<>();
 		return null;
 
 	}
-	
-	@PostMapping("/orders")
-	public ResponseEntity<Long>createOrders() {
-		return null;
-		
+
+	// 필요 없는 controller 이거 안씀
+	@PostMapping("/placeorder")
+	public ResponseEntity<String> placeOrders(@RequestParam Long productId, @RequestParam Long userId,
+			@RequestParam Integer count, @RequestParam Long paymentId) {
+		try {
+			farmService.makeOrder(productId, paymentId);
+			return new ResponseEntity<String>("주문이 성공적으로 생성되었습니다", HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<String>(HttpStatus.BAD_REQUEST);
+		}
+
 	}
+
 	// controller,에는 front에서 productid를 가져온다
 	// order 하는방법 1,2,3 서비스에서
-	
-	//1 productid로 product 조회
-	//2 product일부내용을 builder를 이용하여 orders객체생성
-	//3. repository 이용해서 save;
 
-
-	// 오더 끝내기
+	// 1 productid로 product 조회
+	// 2 product일부내용을 builder를 이용하여 orders객체생성
+	// 3. repository 이용해서 save;
 
 	// 리뷰 작성하기
 	@PostMapping("/review")
-	public ResponseEntity<Integer> insertReview(Review review) {
-		
-		return null;
+	public ResponseEntity<String> insertReview(Review review) {
+		try {
+			farmService.insertReview(review);
+			return new ResponseEntity<String>("리뷰작성이 완료되었습니다", HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<String>(HttpStatus.BAD_REQUEST);
+		}
 
 	}
-	
-
-	
-
-//	//리뷰 작성
-//		@PostMapping("/api/review") 
-//		public ResponseEntity<String> reviewWrite(ReviewDto reviewDto, @AuthenticationPrincipal CustomUserDetails principal){
-//			
-//			reviewDto.setUserId(principal.getId());
-//			if(storeService.reviewWrite(reviewDto))
-//				return ResponseEntity.ok().body("리뷰 작성 완료");
-//			
-//			
-//			return ResponseEntity.badRequest().body("파일 저장 실패");
-//			
-//		}
-//		
-//		//리뷰 수정
-//		@PutMapping("/api/review") 
-//		public ResponseEntity<String> reviewModify(ReviewDto reviewDto, @AuthenticationPrincipal CustomUserDetails principal){
-//			System.out.println(reviewDto.toString());
-//			reviewDto.setUserId(principal.getId());
-//			if(storeService.reviewModify(reviewDto))
-//				return ResponseEntity.ok().body("리뷰 수정 완료");
-//			
-//			
-//			return ResponseEntity.badRequest().body("파일 저장 실패");
-//			
-//		}
-
-
-
-//	@PostMapping("/matching") //요청서 작성하기
-
-
-
 
 }

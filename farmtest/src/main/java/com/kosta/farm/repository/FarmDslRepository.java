@@ -37,7 +37,6 @@ import lombok.RequiredArgsConstructor;
 public class FarmDslRepository {
 	@Autowired
 	private JPAQueryFactory jpaQueryFactory;
-	private final EntityManager em;
 
 	// 파머 수 가져오기
 	public Long findFarmerCount() throws Exception {
@@ -86,17 +85,6 @@ public class FarmDslRepository {
 	}
 	
 	
-	// 이미 존재하는 주문 조회
-//	public Orders getExistingOrder(Long userId, Long productId) {
-//		QOrders orders = QOrders.orders;
-//		QUser user = QUser.user;
-//		QProduct product = QProduct.product;
-//
-//		return jpaQueryFactory.selectFrom(orders).where(orders.userId.eq(userId).and(orders.productId.eq(productId)))
-//				.fetchOne();
-//	}
-
-	
 	// 파머의 카테고리 이름 가져오기? ㄴㄴ farminterest 검색하기
 	public List<Tuple> getFarmersByCategory(String categoryName) {
 		QFarmer farmer = QFarmer.farmer;
@@ -108,3 +96,14 @@ public class FarmDslRepository {
 	}
 
 }
+
+	
+// 이미 존재하는 주문 조회
+//public Orders getExistingOrder(Long userId, Long productId) {
+//	QOrders orders = QOrders.orders;
+//	QUser user = QUser.user;
+//	QProduct product = QProduct.product;
+//
+//	return jpaQueryFactory.selectFrom(orders).where(orders.userId.eq(userId).and(orders.productId.eq(productId)))
+//			.fetchOne();
+//}

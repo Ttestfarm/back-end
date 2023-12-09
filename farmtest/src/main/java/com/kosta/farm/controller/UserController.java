@@ -59,16 +59,18 @@ public class UserController {
 		try {
 			User user = userService.login(loginRequest);
 			if (user == null) {
-				return ResponseEntity.status(401).body("이메일 또는 비밀번호가 틀렸습니다.");
+				return ResponseEntity.status(401).body("{\"message\": \"이메일 또는 비밀번호가 틀렸습니다.\"}");
 			}
 
 			String token = JwtTokenUtil.createToken(user.getUserEmail(), secretKey, expireTime);
-			HttpHeaders headers = new HttpHeaders();
-			headers.add("Authrozation", "Bearer " + token);
+			// HttpHeaders headers = new HttpHeaders();
+			// headers.add("authorization", "Bearer " + token);
 
-			return ResponseEntity.ok().headers(headers).body("로그인 성공");
+			return ResponseEntity.ok().body("{\"token\": \"" + token + "\", \"message\": \"로그인 성공\"}");
 		} catch (Exception e) {
-			return ResponseEntity.badRequest().body("이메일 중복 확인 실패: " + e.getMessage());
+			
+			return ResponseEntity.badRequest().body("{\"message\": \"이메일 중복 확인 실패: " + e.getMessage() + "\"}");
+			// return ResponseEntity.badRequest().body("이메일 중복 확인 실패: " + e.getMessage());
 		}
 	}
 	

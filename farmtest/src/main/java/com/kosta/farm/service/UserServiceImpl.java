@@ -4,6 +4,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.kosta.farm.UserRole;
 import com.kosta.farm.dto.JoinRequestDto;
 import com.kosta.farm.dto.LoginRequestDto;
 import com.kosta.farm.entity.User;
@@ -24,8 +25,12 @@ public class UserServiceImpl implements UserService {
 	// 회원가입
 	@Override
 	public void join(JoinRequestDto request) throws Exception {
-		userRepository.save(User.builder().userName(request.getUserName()).userEmail(request.getUserEmail())
-				.userPassword(encoder.encode(request.getUserPassword())).build());
+		userRepository.save(User.builder()
+				.userName(request.getUserName())
+				.userEmail(request.getUserEmail())
+				.userPassword(encoder.encode(request.getUserPassword()))
+				.userRole(UserRole.USER)
+				.build());
 	}
 
 	// 이메일 중복 체크

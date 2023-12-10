@@ -6,13 +6,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.kosta.farm.config.jwt.JwtTokenUtil;
+import com.kosta.farm.dto.ErrorResponseDto;
 import com.kosta.farm.dto.JoinRequestDto;
 import com.kosta.farm.dto.LoginRequestDto;
+import com.kosta.farm.dto.UserInfoResponseDto;
 import com.kosta.farm.entity.User;
 import com.kosta.farm.service.UserService;
 
@@ -64,17 +68,41 @@ public class UserController {
 			}
 
 			String token = JwtTokenUtil.createToken(user.getUserEmail(), secretKey, expireTime);
-			System.out.println(token);
+			//System.out.println(token);
 			
 			HttpHeaders headers = new HttpHeaders();
 			headers.add("Authorization", "Bearer " + token);
+			// System.out.println(user.isUserState());
 			return ResponseEntity.ok().headers(headers).body("로그인 성공");
-//			return new ResponseEntity<>("로그인 성공", headers, HttpStatus.OK);
+			// return new ResponseEntity<>("로그인 성공", headers, HttpStatus.OK);
 		} catch (Exception e) {
-			
 			return ResponseEntity.badRequest().body("{\"message\": \"이메일 중복 확인 실패: " + e.getMessage() + "\"}");
 			// return ResponseEntity.badRequest().body("이메일 중복 확인 실패: " + e.getMessage());
 		}
 	}
 	
+	@GetMapping("/login/userInfo")
+  public ResponseEntity<?> userInfo(Authentication auth) throws Exception {
+		try {
+			User loginUser = userService.getLoginUserByUserEmail(auth.getName());
+
+	    UserInfoResponseDto userInfoResponse = new UserInfoResponseDto(
+	            loginUser.getUserId(),
+	            loginUser.getFarmerId(),
+	            loginUser.getUserName(),
+	            loginUser.getUserEmail(),
+	            loginUser.getUserPassword(),
+	            loginUser.getUserTel(),
+	            loginUser.getAddress1(),
+	            loginUser.getAddress2(),
+	            loginUser.getAddress3(),
+	            loginUser.getUserRole().name()
+	    );
+
+	    return ResponseEntity.ok(userInfoResponse);
+		} catch (Exception e) {
+			ErrorResponseDto errorResponse = new ErrorResponseDto("유저 정보 불러오기 실패", e.getMessage());
+      return ResponseEntity.badRequest().body(errorResponse);
+		}
+	}
 }

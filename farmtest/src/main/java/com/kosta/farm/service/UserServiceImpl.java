@@ -90,4 +90,9 @@ public class UserServiceImpl implements UserService {
 
 		return user;
 	}
+
+	@Override
+	public void saveUser(User user) throws Exception {
+		userRepository.save(user);
+	}
 }

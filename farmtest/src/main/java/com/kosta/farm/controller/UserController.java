@@ -4,11 +4,11 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -16,7 +16,8 @@ import com.kosta.farm.config.jwt.JwtTokenUtil;
 import com.kosta.farm.dto.ErrorResponseDto;
 import com.kosta.farm.dto.JoinRequestDto;
 import com.kosta.farm.dto.LoginRequestDto;
-import com.kosta.farm.dto.UserInfoResponseDto;
+import com.kosta.farm.dto.ModifyUserDto;
+import com.kosta.farm.dto.UserInfoDto;
 import com.kosta.farm.entity.User;
 import com.kosta.farm.service.UserService;
 
@@ -86,7 +87,7 @@ public class UserController {
 		try {
 			User loginUser = userService.getLoginUserByUserEmail(auth.getName());
 
-	    UserInfoResponseDto userInfoResponse = new UserInfoResponseDto(
+	    UserInfoDto userInfoResponse = new UserInfoDto(
 	            loginUser.getUserId(),
 	            loginUser.getFarmerId(),
 	            loginUser.getUserName(),
@@ -98,11 +99,49 @@ public class UserController {
 	            loginUser.getAddress3(),
 	            loginUser.getUserRole().name()
 	    );
-
-	    return ResponseEntity.ok(userInfoResponse);
+	    
+	    return ResponseEntity.ok().body(userInfoResponse);
 		} catch (Exception e) {
 			ErrorResponseDto errorResponse = new ErrorResponseDto("유저 정보 불러오기 실패", e.getMessage());
       return ResponseEntity.badRequest().body(errorResponse);
 		}
+	}
+	
+	@PutMapping("/mypage/modify-user")
+	public ResponseEntity<?> modifyUser(@RequestBody ModifyUserDto modifyUserRequest, Authentication auth) {
+	    try {
+	        // 로그인한 사용자 정보 가져오기
+	        User loginUser = userService.getLoginUserByUserEmail(auth.getName());
+
+	        // 사용자 정보 수정
+	        loginUser.setUserName(modifyUserRequest.getUserName());
+	        loginUser.setUserPassword(modifyUserRequest.getUserPassword());
+	        loginUser.setUserTel(modifyUserRequest.getUserTel());
+	        loginUser.setAddress1(modifyUserRequest.getAddress1());
+	        loginUser.setAddress2(modifyUserRequest.getAddress2());
+	        loginUser.setAddress3(modifyUserRequest.getAddress3());
+
+	        // 수정된 사용자 정보 저장
+	        userService.saveUser(loginUser);
+
+	        // 수정된 사용자 정보 응답
+	        UserInfoDto modifiedUserInfo = new UserInfoDto(
+	                loginUser.getUserId(),
+	                loginUser.getFarmerId(),
+	                loginUser.getUserName(),
+	                loginUser.getUserEmail(),
+	                loginUser.getUserPassword(),
+	                loginUser.getUserTel(),
+	                loginUser.getAddress1(),
+	                loginUser.getAddress2(),
+	                loginUser.getAddress3(),
+	                loginUser.getUserRole().name()
+	        );
+
+	        return ResponseEntity.ok().body(modifiedUserInfo);
+	    } catch (Exception e) {
+	        ErrorResponseDto errorResponse = new ErrorResponseDto("회원 정보 수정 실패", e.getMessage());
+	        return ResponseEntity.badRequest().body(errorResponse);
+	    }
 	}
 }

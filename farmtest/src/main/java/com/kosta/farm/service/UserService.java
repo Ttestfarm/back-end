@@ -11,4 +11,6 @@ public interface UserService {
   User login(LoginRequestDto request) throws Exception;
   User getLoginUserByUserId(Long userId) throws Exception;
   User getLoginUserByUserEmail(String userEmail) throws Exception;
+  
+  void saveUser(User user) throws Exception;
 }

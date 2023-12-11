@@ -204,11 +204,11 @@ public class FarmController {
 	@PostMapping("/matching") // 요청서 작성하기
 	public ResponseEntity<String> writeRequest(@RequestBody Request req) {
 		try {
-			String requestProduct=req.getRequestProduct();
-			String requestQuantity=req.getRequestQuantity();
-			String requestDate=req.getRequestDate();
-			String requestMessage=req.getRequestMessage();
-			
+			String requestProduct = req.getRequestProduct();
+			String requestQuantity = req.getRequestQuantity();
+			String requestDate = req.getRequestDate();
+			String requestMessage = req.getRequestMessage();
+
 			return ResponseEntity.ok("요청서 작성이 완료되었습니다");
 		} catch (Exception e) {
 			e.printStackTrace();

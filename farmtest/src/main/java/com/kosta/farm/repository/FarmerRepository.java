@@ -31,11 +31,6 @@ public interface FarmerRepository extends JpaRepository<Farmer, Long> {
 	// 파머이름 포함한
 
 	// 파머 팜 인터레스트 123 포함한
-	Page<Farmer> findByFarmInterest1Contains(String farmInterest1, PageRequest pageRequest);
-
-	Page<Farmer> findByFarmInterest2Contains(String farmInterest2, PageRequest pageRequest);
-
-	Page<Farmer> findByFarmInterest3Contains(String farmInterest3, PageRequest pageRequest);
 
 	Page<Farmer> findByFarmInterest1ContainingOrFarmInterest2ContainingOrFarmInterest3Containing(String farmInterest1,
 			String farmInterest2, String farmInterest3, PageRequest pageRequest);
@@ -44,6 +39,5 @@ public interface FarmerRepository extends JpaRepository<Farmer, Long> {
 
 	Page<Farmer> findPageBy(Pageable pageable);
 
-	Slice<Farmer> findSliceBy(Pageable pageable);
 
 }

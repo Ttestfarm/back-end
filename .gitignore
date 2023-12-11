@@ -15,8 +15,9 @@ local.properties
 .recommenders
 *.bin
 *.lock
+.gradle
 application.properties
-Servers
+Servers/
 
 # External tool builders
 .externalToolBuilders/

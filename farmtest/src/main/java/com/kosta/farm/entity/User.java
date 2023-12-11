@@ -4,6 +4,8 @@ import java.sql.Timestamp;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -12,6 +14,8 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+
+import com.kosta.farm.UserRole;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -50,11 +54,13 @@ public class User {
 	@Column
 	private String providerId;
 	@Column
-	private String userRoles; // USER, FARMER, ADMIN
+	@Enumerated(EnumType.STRING)
+	private UserRole userRole; // USER, FARMER, ADMIN
 	@CreationTimestamp
 	@Column
 	private Timestamp createDate;
-	@Column
-	private boolean userState; // 탈퇴 : 0 , 유효한 유저 : 1
+	@Column(columnDefinition = "BOOLEAN DEFAULT true")
+	private boolean userState; // 탈퇴: false, 유효한 유저: true
+	// error : 스키마도 1로 잘 설정되어있는데 0으로 들어감
 
 }

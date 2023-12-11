@@ -4,6 +4,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.kosta.farm.UserRole;
 import com.kosta.farm.dto.JoinRequestDto;
 import com.kosta.farm.dto.LoginRequestDto;
 import com.kosta.farm.entity.User;
@@ -24,8 +25,12 @@ public class UserServiceImpl implements UserService {
 	// 회원가입
 	@Override
 	public void join(JoinRequestDto request) throws Exception {
-		userRepository.save(User.builder().userName(request.getUserName()).userEmail(request.getUserEmail())
-				.userPassword(encoder.encode(request.getUserPassword())).build());
+		userRepository.save(User.builder()
+				.userName(request.getUserName())
+				.userEmail(request.getUserEmail())
+				.userPassword(encoder.encode(request.getUserPassword()))
+				.userRole(UserRole.USER)
+				.build());
 	}
 
 	// 이메일 중복 체크
@@ -84,5 +89,24 @@ public class UserServiceImpl implements UserService {
 		}
 
 		return user;
+	}
+	
+	// 수정된 유저 정보 저장
+	@Override
+	public void saveUser(User user) throws Exception {
+		userRepository.save(user);
+	}
+	
+	// 이메일 찾기
+	@Override
+	public User findUserEmail(String userName, String userTel) throws Exception {
+		return userRepository.findByUserNameAndUserTel(userName, userTel);
+	}
+
+	// 비밀번호 찾기
+	@Override
+	public User findUserPassword(String userName, String userEmail) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

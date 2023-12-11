@@ -1,5 +1,5 @@
-//package com.kosta.farm;
-//
-//public enum UserRole {
-//  USER, FARMER, ADMIN;
-//}
+package com.kosta.farm;
+
+public enum UserRole {
+  USER, FARMER, ADMIN;
+}

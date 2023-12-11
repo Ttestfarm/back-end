@@ -9,13 +9,14 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
-import com.kosta.farm.UserRole;
+import com.kosta.farm.util.UserRole;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -34,7 +35,7 @@ public class User {
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Long userId; // 서버에서 사용하는 userId
 	@Column
-	private Long farmerId;
+  private Long farmerId;
 	@Column
 	private String userName; // 서비스에서 사용할 이름 (소셜로그인의 경우 닉네임 전달받음)
 	@Column
@@ -59,8 +60,7 @@ public class User {
 	@CreationTimestamp
 	@Column
 	private Timestamp createDate;
-	@Column(columnDefinition = "BOOLEAN DEFAULT true")
-	private boolean userState; // 탈퇴: false, 유효한 유저: true
-	// error : 스키마도 1로 잘 설정되어있는데 0으로 들어감
+	@Builder.Default
+	private boolean userState = true; // 탈퇴: false, 유효한 유저: true
 
 }

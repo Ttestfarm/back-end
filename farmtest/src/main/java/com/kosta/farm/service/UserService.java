@@ -16,4 +16,6 @@ public interface UserService {
   
   User findUserEmail(String userName, String userTel) throws Exception;
   User findUserPassword(String userName, String userEmail) throws Exception;
+  
+  void updateUserInfoAfterRegFarmer(User user, Long farmerId) throws Exception;
 }

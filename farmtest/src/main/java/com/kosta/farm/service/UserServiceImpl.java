@@ -4,11 +4,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.kosta.farm.UserRole;
 import com.kosta.farm.dto.JoinRequestDto;
 import com.kosta.farm.dto.LoginRequestDto;
 import com.kosta.farm.entity.User;
 import com.kosta.farm.repository.UserRepository;
+import com.kosta.farm.util.UserRole;
 
 @Service
 @Transactional
@@ -37,7 +37,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public boolean checkEmail(String userEmail) throws Exception {
 		if (userRepository.existsByUserEmail(userEmail)) {
-			throw new RuntimeException("중복된 이메일입니다.");
+			throw new RuntimeException("중복된 이메일입니다`.");
 		}
 		return true;
 	}
@@ -106,7 +106,19 @@ public class UserServiceImpl implements UserService {
 	// 비밀번호 찾기
 	@Override
 	public User findUserPassword(String userName, String userEmail) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+		return userRepository.findByUserNameAndUserEmail(userName, userEmail);
+	}
+	
+	// 파머 등록 후 유저 정보 update
+	@Override
+	public void updateUserInfoAfterRegFarmer(User user, Long farmerId) throws Exception {
+		if (user == null || farmerId == null) {
+			throw new IllegalArgumentException("유효하지 않은 유저입니다.");
+		}
+
+		user.setFarmerId(farmerId);
+		user.setUserRole(UserRole.FARMER);
+
+		saveUser(user);
 	}
 }

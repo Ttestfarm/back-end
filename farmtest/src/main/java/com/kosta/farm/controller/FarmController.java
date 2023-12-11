@@ -20,10 +20,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.kosta.farm.dto.FarmerDto;
 import com.kosta.farm.entity.Farmer;
 import com.kosta.farm.entity.Farmerfollow;
 import com.kosta.farm.entity.Orders;
@@ -91,12 +93,12 @@ public class FarmController {
 		}
 	}
 
-	@GetMapping("findfarmer") //파머찾기 검색, sorting기능
+	@GetMapping("/findfarmer") // 파머찾기 검색, sorting기능
 	public ResponseEntity<Map<String, Object>> findFarmer(
-			@RequestParam(required = false, name = "keyword", defaultValue= "all") String keyword,
-			@RequestParam(required = false, name= "sortType",defaultValue = "farmerId") String sortType,
-			@RequestParam(required = false, name = "page", defaultValue="1") Integer page) {
-		
+			@RequestParam(required = false, name = "keyword", defaultValue = "all") String keyword,
+			@RequestParam(required = false, name = "sortType", defaultValue = "farmerId") String sortType,
+			@RequestParam(required = false, name = "page", defaultValue = "1") Integer page) {
+
 		try {
 
 			if (sortType == null || sortType.equals("") || sortType.equals("latest")) {
@@ -104,7 +106,7 @@ public class FarmController {
 			}
 			System.out.println(keyword);
 			PageInfo pageInfo = PageInfo.builder().curPage(page).build();
-			List<Farmer> farmerList = null;
+			List<FarmerDto> farmerList = null;
 			if (keyword.equals("all")) {
 				// 전체파머스 리스트를 보여준다
 				farmerList = farmService.findFarmersWithSorting(sortType, pageInfo);
@@ -182,18 +184,16 @@ public class FarmController {
 
 	}
 
-	// 아직 다 안함
 	@GetMapping("/matching") // 매칭 메인 페이지 requestlist를 보여준다
-	public ResponseEntity<Map<String, Object>> Matching(@RequestParam(required = false) Integer page) {
+	public ResponseEntity<Map<String, Object>> Matching(
+			@RequestParam(required = false, name = "page", defaultValue = "1") Integer page) {
 		try {
-//			List<Farmer> farmerList = farmService.findFarmersWithSorting(sortType, pageInfo);
-//			Map<String, Object> res = new HashMap<>();
-//			res.put("farmerList", farmerList);
-//			res.put("pageInfo", pageInfo);
-//			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
-
 			PageInfo pageInfo = PageInfo.builder().curPage(page).build();
-			return new ResponseEntity<Map<String, Object>>(HttpStatus.OK);
+			List<Request> matchingList = farmService.requestListByPage(pageInfo);
+			Map<String, Object> res = new HashMap<>();
+			res.put("matchingList", matchingList);
+			res.put("pageInfo", pageInfo);
+			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -201,8 +201,21 @@ public class FarmController {
 		}
 	}
 
-//	@PostMapping("/matching") //요청서 작성하기
-//	public ResponseEntity<>
+	@PostMapping("/matching") // 요청서 작성하기
+	public ResponseEntity<String> writeRequest(@RequestBody Request req) {
+		try {
+			String requestProduct=req.getRequestProduct();
+			String requestQuantity=req.getRequestQuantity();
+			String requestDate=req.getRequestDate();
+			String requestMessage=req.getRequestMessage();
+			
+			return ResponseEntity.ok("요청서 작성이 완료되었습니다");
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.badRequest().body("요청서 작성을 실패하였습니다");
+		}
+
+	}
 
 	// 구매내역 불러오기 하기 이거도 해야함 후기도 같이 불러와야함
 	@GetMapping("/mypage/buylist/{userId}")

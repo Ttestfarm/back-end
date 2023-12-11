@@ -21,6 +21,7 @@ import org.springframework.util.FileCopyUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kosta.farm.dto.FarmerDto;
 import com.kosta.farm.dto.ReviewDto;
 import com.kosta.farm.entity.Delivery;
 import com.kosta.farm.entity.Farmer;
@@ -90,32 +91,32 @@ public class FarmServiceImpl implements FarmService {
 	}
 
 	@Override // 파머 서치리스트 sorting 추가
-	public List<Farmer> farmerSearchList(String keyword, String sortType, PageInfo pageInfo) throws Exception {
+	public List<FarmerDto> farmerSearchList(String keyword, String sortType, PageInfo pageInfo) throws Exception {
 		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 8, Sort.by(Sort.Direction.DESC, sortType));
 		Page<Farmer> pages = farmerRepository
 				.findByFarmInterest1ContainingOrFarmInterest2ContainingOrFarmInterest3Containing(keyword, keyword,
 						keyword, pageRequest);
 
 		pageInfo.setAllPage(pages.getTotalPages()); // 나머지가 필요 없다 b/c 무한 스크롤 현재 페이지랑 마지막 페이지만 필요하단
-		List<Farmer> farmerList = new ArrayList<>();
+		List<FarmerDto> farmerDtoList = new ArrayList<>();
 		for (Farmer farmer : pages.getContent()) {
-			farmerList.add(farmer);
+			farmerDtoList.add(farmer.toDto());
 		}
 
-		return farmerList;
+		return farmerDtoList;
 	}
 
 	@Override // 파머리스트 sorting으로
-	public List<Farmer> findFarmersWithSorting(String sortType, PageInfo pageInfo) throws Exception {
+	public List<FarmerDto> findFarmersWithSorting(String sortType, PageInfo pageInfo) throws Exception {
 		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 8, Sort.by(Sort.Direction.DESC, sortType));
 		Page<Farmer> pages = farmerRepository.findAll(pageRequest);
 		pageInfo.setAllPage(pages.getTotalPages()); // 나머지가 필요 없다 b/c 무한 스크롤 현재 페이지랑 마지막 페이지만 필요하단
 
-		List<Farmer> farmerList = new ArrayList<>();
+		List<FarmerDto> farmerDtoList = new ArrayList<>();
 		for (Farmer farmer : pages.getContent()) {
-			farmerList.add(farmer);
+			farmerDtoList.add(farmer.toDto());
 		}
-		return farmerList;
+		return farmerDtoList;
 	}
 
 	@Override
@@ -261,7 +262,7 @@ public class FarmServiceImpl implements FarmService {
 	@Override // payment상태 불러오기
 	public Boolean checkPaymentState(Long userId) throws Exception {
 		Payment payment = paymentRepository.findByUserId(userId);
-		if ("1".equals(payment.getState())) { //1이 결제완료
+		if ("1".equals(payment.getState())) { // 1이 결제완료
 			return true;
 		}
 		return false;
@@ -316,10 +317,10 @@ public class FarmServiceImpl implements FarmService {
 		return null;
 	}
 
-	@Override // 리퀘스트 메인페이지
+	@Override // 매칭 메인페이지
 	public List<Request> requestListByPage(PageInfo pageInfo) throws Exception {
-		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 8,
-				Sort.by(Sort.Direction.DESC, "requestId"));
+		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 8);
+//						Sort.by(Sort.Direction.DESC, "requestId"));
 		Page<Request> pages = requestRepository.findAll(pageRequest);
 		pageInfo.setAllPage(pages.getTotalPages());
 		List<Request> requestList = new ArrayList<>();
@@ -327,6 +328,16 @@ public class FarmServiceImpl implements FarmService {
 			requestList.add(request);
 		}
 		return requestList;
+	}
+
+	//요청서 쓰기
+	@Override
+	public void addRequest(Request request) throws Exception {
+		requestRepository.save(request);
+	}
+	@Override
+	public List<Request> findRequestListByPage(PageInfo pageInfo) throws Exception {
+		return null;
 	}
 
 	@Override // 리뷰 작성하기 ordersId에 해당하면 리뷰를 쓸 수 있다 근데 하나의 주문에 하나의 review만 쓸 수 있다 리뷰가 추가되면 파머
@@ -405,6 +416,7 @@ public class FarmServiceImpl implements FarmService {
 		}
 		return orderswithreviews;
 	}
+
 
 }
 

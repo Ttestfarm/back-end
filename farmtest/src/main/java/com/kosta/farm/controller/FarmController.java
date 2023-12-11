@@ -20,10 +20,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.kosta.farm.dto.FarmerDto;
 import com.kosta.farm.entity.Farmer;
 import com.kosta.farm.entity.Farmerfollow;
 import com.kosta.farm.entity.Orders;
@@ -44,7 +46,7 @@ public class FarmController {
 	private FarmerRepository farmerRepository;
 
 	// 상품 등록
-	@PostMapping("farmer/regprod")
+	@PostMapping("/farmer/regprod")
 	public ResponseEntity<Integer> regProduct(@ModelAttribute Product product, MultipartFile mainFile,
 			List<MultipartFile> additionalFiles) {
 		try {
@@ -91,33 +93,27 @@ public class FarmController {
 		}
 	}
 
-	@GetMapping("/findfarmer/{page}") // 파머찾기 메인페이지 정렬을 추가한
-	public ResponseEntity<Map<String, Object>> findFarmer(@PathVariable(required = false) Integer page,
-			@RequestParam(required = false, defaultValue = "farmerId") String sortType) {
+	@GetMapping("/findfarmer") // 파머찾기 검색, sorting기능
+	public ResponseEntity<Map<String, Object>> findFarmer(
+			@RequestParam(required = false, name = "keyword", defaultValue = "all") String keyword,
+			@RequestParam(required = false, name = "sortType", defaultValue = "farmerId") String sortType,
+			@RequestParam(required = false, name = "page", defaultValue = "1") Integer page) {
+
 		try {
-			if (page == null) {
-				page = 0;
+
+			if (sortType == null || sortType.equals("") || sortType.equals("latest")) {
+				sortType = "farmerId";
 			}
-			PageInfo pageInfo = PageInfo.builder().curPage(page).build();
-			List<Farmer> farmerList = farmService.findFarmersWithSorting(sortType, pageInfo);
-			Map<String, Object> res = new HashMap<>();
-			res.put("farmerList", farmerList);
-			res.put("pageInfo", pageInfo);
-			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
-		} catch (Exception e) {
-			e.printStackTrace();
-			return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
-		}
-
-	}
-
-	@GetMapping("/findfarmer/search/{page}/{keyword}") // 파머 검색 interest로 //한글 안깨지는인코딩
-	public ResponseEntity<Map<String, Object>> searchFarmer(@PathVariable(required = false) Integer page,
-			@PathVariable(required = false) String keyword) {
-		try {
 			System.out.println(keyword);
 			PageInfo pageInfo = PageInfo.builder().curPage(page).build();
-			List<Farmer> farmerList = farmService.FarmerSearchList(keyword, pageInfo);
+			List<FarmerDto> farmerList = null;
+			if (keyword.equals("all")) {
+				// 전체파머스 리스트를 보여준다
+				farmerList = farmService.findFarmersWithSorting(sortType, pageInfo);
+
+			} else {
+				farmerList = farmService.farmerSearchList(keyword, sortType, pageInfo);
+			}
 			Map<String, Object> res = new HashMap<>();
 			res.put("farmerList", farmerList);
 			res.put("pageInfo", pageInfo);
@@ -126,48 +122,11 @@ public class FarmController {
 			e.printStackTrace();
 			return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
 		}
-	}
-
-// 리뷰 리스트 페이징처리
-	@GetMapping("findfarmer/detail/{farmerId}/review/{page}")
-	public ResponseEntity<Map<String, Object>> farmerReviewList(@PathVariable(required = false) Integer page,
-			@PathVariable(required = false) Long farmerId) {
-		try {
-			Map<String, Object> res = new HashMap<>();
-
-			PageInfo pageInfo = PageInfo.builder().curPage(1).build();
-			List<Review> reviewList = farmService.getReviewListByFarmer(farmerId, pageInfo);
-			res.put("reviewList", reviewList);
-			res.put("pageInfo", pageInfo);
-			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
-		} catch (Exception e) {
-			e.printStackTrace();
-			return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
-		}
 
 	}
 
-	// 프로덕트 리스트 페이징처리
-	@GetMapping("findfarmer/detail/{farmerId}/product/{page}")
-	public ResponseEntity<Map<String, Object>> farmerProductList(@PathVariable(required = false) Integer page,
-			@PathVariable(required = false) Long farmerId) {
-		try {
-			Map<String, Object> res = new HashMap<>();
-
-			PageInfo pageInfo = PageInfo.builder().curPage(1).build();
-			List<Product> productList = farmService.getProductListByFarmer(farmerId, pageInfo);
-			res.put("productList", productList);
-			res.put("pageInfo", pageInfo);
-			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
-		} catch (Exception e) {
-			e.printStackTrace();
-			return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
-		}
-
-	}
-
-	@GetMapping("findfarmer/detail/{farmerId}") // default 기본페이지
-	public ResponseEntity<Map<String, Object>> farmerDetail(@PathVariable Long farmerId) {
+	@GetMapping("/findfarmer/{farmerId}") // default 기본페이지 디테일
+	public ResponseEntity<Map<String, Object>> farmerDetail(@PathVariable(name = "farmerId") Long farmerId) {
 		try {
 			Map<String, Object> res = new HashMap<>();
 			Farmer farmer = farmService.farmerDetail(farmerId);
@@ -188,130 +147,131 @@ public class FarmController {
 		}
 	}
 
-	
-	//아직 다 안함
-	@GetMapping("/matching") // 매칭 메인 페이지
-	public ResponseEntity<Map<String, Object>> Matching(@RequestParam(required = false) Integer page) {
+// 리뷰 리스트 페이징처리
+	@GetMapping("findfarmer/{farmerId}/review/{page}")
+	public ResponseEntity<Map<String, Object>> farmerReviewList(@PathVariable(required = false) Integer page,
+			@PathVariable(required = false) Long farmerId) {
+		try {
+			Map<String, Object> res = new HashMap<>();
+			PageInfo pageInfo = PageInfo.builder().curPage(1).build();
+			List<Review> reviewList = farmService.getReviewListByFarmer(farmerId, pageInfo);
+			res.put("reviewList", reviewList);
+			res.put("pageInfo", pageInfo);
+			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
+		}
+
+	}
+
+	// 프로덕트 리스트 페이징처리
+	@GetMapping("findfarmer/{farmerId}/product/{page}")
+	public ResponseEntity<Map<String, Object>> farmerProductList(@PathVariable(required = false) Integer page,
+			@PathVariable(required = false) Long farmerId) {
+		try {
+			Map<String, Object> res = new HashMap<>();
+
+			PageInfo pageInfo = PageInfo.builder().curPage(1).build();
+			List<Product> productList = farmService.getProductListByFarmer(farmerId, pageInfo);
+			res.put("productList", productList);
+			res.put("pageInfo", pageInfo);
+			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
+		}
+
+	}
+
+	@GetMapping("/matching") // 매칭 메인 페이지 requestlist를 보여준다
+	public ResponseEntity<Map<String, Object>> Matching(
+			@RequestParam(required = false, name = "page", defaultValue = "1") Integer page) {
 		try {
 			PageInfo pageInfo = PageInfo.builder().curPage(page).build();
-			return new ResponseEntity<Map<String, Object>>(HttpStatus.OK);
+			List<Request> matchingList = farmService.requestListByPage(pageInfo);
+			Map<String, Object> res = new HashMap<>();
+			res.put("matchingList", matchingList);
+			res.put("pageInfo", pageInfo);
+			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
 
 		} catch (Exception e) {
 			e.printStackTrace();
+			return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
 		}
-		return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
 	}
 
-	// 구매내역 불러오기
-	@GetMapping("/user/buylist")
-	public ResponseEntity<List<Orders>> buyList() {
-		List<Orders> buyList = new ArrayList<>();
+	@PostMapping("/matching") // 요청서 작성하기
+	public ResponseEntity<String> writeRequest(@RequestBody Request req) {
+		try {
+			String requestProduct=req.getRequestProduct();
+			String requestQuantity=req.getRequestQuantity();
+			String requestDate=req.getRequestDate();
+			String requestMessage=req.getRequestMessage();
+			
+			return ResponseEntity.ok("요청서 작성이 완료되었습니다");
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.badRequest().body("요청서 작성을 실패하였습니다");
+		}
+
+	}
+
+	// 구매내역 불러오기 하기 이거도 해야함 후기도 같이 불러와야함
+	@GetMapping("/mypage/buylist/{userId}")
+	public ResponseEntity<Map<String, Object>> buyList(@PathVariable Long userId) {
+		try {
+//			List<Orders> buyList = farmService.getOrdersListByUser(userId);
+//			List<Review> reviewList= farmService.getReviewListByUser(userId);
+			farmService.getOrdersandReviewByUser(userId);
+			return new ResponseEntity<Map<String, Object>>(HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.badRequest().build();
+
+		}
+
+	}
+
+	@GetMapping("/mypage/buylist{ordersId}") // 주문 상세
+	public ResponseEntity<String> ordersDetail(@PathVariable Long ordersId) {
+		try {
+			Map<String, Object> res = new HashMap<>();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+
+		}
 		return null;
 
 	}
 
-	// 오더 끝내기
-	
-	
+	// 리뷰 작성하기
+	@PostMapping("/mypage/buylist/{ordersId}")
+	public ResponseEntity<String> insertReview(@PathVariable Long ordersId, @RequestParam("rating") Integer rating,
+			@RequestParam("content") String content, @RequestParam("files") List<MultipartFile> files) {
+		try {
+			farmService.addReview(ordersId, files, rating, content);
+			return ResponseEntity.ok("리뷰 작성이 완료되었습니다");
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.badRequest().body("리뷰 작성에 실패하였습니다");
+		}
 
-//	
-//	@GetMapping("/findfarmer/{page}") // 파머찾기 메인페이지 정렬을 추가한
-//	public ResponseEntity<Map<String, Object>> findFarmer(@PathVariable(required = false) Integer page,
-//			@RequestParam(required = false, defaultValue = "farmerId") String sortType) {
-//		try {
-//			if (page == null) {
-//				page = 0;
-//			}
-//			PageInfo pageInfo = PageInfo.builder().curPage(page).build();
-//			List<Farmer> farmerList = farmService.findFarmersWithSorting(sortType, pageInfo);
-//			Map<String, Object> res = new HashMap<>();
-//			res.put("farmerList", farmerList);
-//			res.put("pageInfo", pageInfo);
-//			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
-//		}
-//
-//	}
+	}
 
-//	@PostMapping("/matching") //요청서 작성하기
+	// 필요 없는 controller 이거 안씀
+	@PostMapping("/placeorder")
+	public ResponseEntity<String> placeOrders(@RequestParam Long productId, @RequestParam Long userId,
+			@RequestParam Integer count, @RequestParam Long paymentId) {
+		try {
+			farmService.makeOrder(productId, paymentId);
+			return new ResponseEntity<String>("주문이 성공적으로 생성되었습니다", HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<String>(HttpStatus.BAD_REQUEST);
+		}
 
-//	@PostMapping("/matching") //요청서 작성하기
-//	@GetMapping("test/{id}")
-//	@GetMapping("/findfarmer/{page}") // 파머찾기 메인페이지 이거 되는거
-//	public ResponseEntity<Map<String, Object>> findFarmer(@PathVariable(required = false) Integer page) {
-//		try {
-//			if (page == null) {
-//				page = 0;
-//			}
-//			PageInfo pageInfo = PageInfo.builder().curPage(page).build();
-//			List<Farmer> farmerList = farmService.farmerListByPage(pageInfo);
-//			Map<String, Object> res = new HashMap<>();
-//			res.put("farmerList", farmerList);
-//			res.put("pageInfo", pageInfo);
-//			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
-//		}
-//
-//	}
-//	@GetMapping("/findfarmer/{page}/{reviewcount}")
-//	public ResponseEntity<Map<String, Object>> findFarmerbyReview(@PathVariable(required = false) Integer page) {
-//		try {
-//			PageInfo pageInfo= PageInfo.builder().curPage(page).build();
-//			List<Farmer>farmerorderbyreview= farmService.farmerListByReview(pageInfo);
-//			Map<String, Object> res = new HashMap<>();
-//			res.put("farmerorderbyreview", farmerorderbyreview);
-//			res.put("pageInfo", pageInfo);
-//			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
-//		}catch(Exception e) {
-//			e.printStackTrace();
-//			return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
-//		}
-//	}
-//	@GetMapping("/findfarmer/{page}") // 파머찾기 메인페이지 정렬 reviewcount랑 rating
-//	public ResponseEntity<Map<String, Object>> findFarmer(@PathVariable(required = false) Integer page,
-//			@RequestParam(required = false, defaultValue = "id") String sortBy) {
-//		try {
-//			if (page == null) {
-//				page = 0;
-//			}
-//			PageInfo pageInfo = PageInfo.builder().curPage(page).build();
-//	        PageRequest pageRequest;
-//	        if ("reviewcount".equals(sortBy)) {
-//	            pageRequest = PageRequest.of(page, 10, Sort.by("reviewCount").descending());
-//	        } else if ("rating".equals(sortBy)) {
-//	            pageRequest = PageRequest.of(page, 10, Sort.by("rating").descending());
-//	        } else {
-//	            // 기본적으로 id 순으로 정렬
-//	            pageRequest = PageRequest.of(page, 10, Sort.by("id").descending());
-//	        }
-//			
-//			
-//			List<Farmer> farmerList = farmService.farmerListByPage(pageInfo);
-//			Map<String, Object> res = new HashMap<>();
-//			res.put("farmerList", farmerList);
-//			res.put("pageInfo", pageInfo);
-//			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
-//		}
-//
-//	}
+	}
 
-//	@GetMapping("/findfarmer") // 파머찾기 requestparam 가능ㅇㅇ
-//	public ResponseEntity<List<Farmer>> findfarmermain(@RequestParam("page") Integer page, @RequestParam("size") Integer size) {
-//		try {
-//			Pageable pageable = PageRequest.of(page, size, Sort.by("farmerId").descending());
-//			Page<Farmer> farmersList = farmerRepository.findAll(pageable);
-//
-//			return new ResponseEntity<List<Farmer>>(farmersList.getContent(), HttpStatus.OK);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			return new ResponseEntity<List<Farmer>>(HttpStatus.BAD_REQUEST);
-//		}
-//	}
 }

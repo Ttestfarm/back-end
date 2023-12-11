@@ -1,6 +1,7 @@
 package com.kosta.farm.entity;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,6 +13,8 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+
+import com.kosta.farm.dto.FarmerDto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,8 +30,11 @@ import lombok.NoArgsConstructor;
 @Builder
 public class Farmer {
 	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long farmerId;
+	// FK
+	// @Column
+	// private Long userId;
 	@Column
 	private String farmName; // 팜 이름
 	@Column
@@ -67,5 +73,24 @@ public class Farmer {
 	@ColumnDefault("0")
 	private Integer reviewCount;
 	@Column
-	private double rating;
+	private Double rating;
+
+	public void updateAvgRating(List<Review> reviews) {
+		if (reviews == null || reviews.isEmpty()) {
+			this.rating = 0.0;
+			return;
+		}
+		double totalRating = 0.0;
+		for (Review review : reviews) {
+			totalRating += review.getRating();
+		}
+		this.rating = totalRating / reviews.size();
+	}
+
+	public FarmerDto toDto() {
+		return FarmerDto.builder().farmerId(farmerId).farmName(farmName).farmPixurl(farmPixurl).farmAddress(farmAddress)
+				.farmInterest(farmInterest1 + "," + farmInterest2 + "," + farmInterest3 + "," + farmInterest4 + ","
+						+ farmInterest5)
+				.followCount(followCount).reviewCount(reviewCount).rating(rating).build();
+	}
 }

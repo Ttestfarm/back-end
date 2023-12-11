@@ -14,6 +14,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
+import com.kosta.farm.dto.FarmerDto;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -85,4 +87,10 @@ public class Farmer {
 		this.rating = totalRating / reviews.size();
 	}
 
+	public FarmerDto toDto() {
+		return FarmerDto.builder().farmerId(farmerId).farmName(farmName).farmPixurl(farmPixurl).farmAddress(farmAddress)
+				.farmInterest(farmInterest1 + "," + farmInterest2 + "," + farmInterest3 + "," + farmInterest4 + ","
+						+ farmInterest5)
+				.followCount(followCount).reviewCount(reviewCount).rating(rating).build();
+	}
 }

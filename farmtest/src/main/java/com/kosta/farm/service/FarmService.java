@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.kosta.farm.dto.FarmerDto;
 import com.kosta.farm.entity.Farmer;
 import com.kosta.farm.entity.Farmerfollow;
 import com.kosta.farm.entity.Orders;
@@ -42,19 +43,24 @@ public interface FarmService {
 
 	// 구매내역
 	List<Orders> getOrdersListByUser(Long userId) throws Exception;
-	
-	List<Map<String, Object>>getOrdersandReviewByUser(Long userId) throws Exception;
-	
+
+	List<Map<String, Object>> getOrdersandReviewByUser(Long userId) throws Exception;
+
 	// 리뷰 등록
 	void addReview(Long ordersId, List<MultipartFile> files, Integer rating, String content) throws Exception;
+
+	// 요청서 등록
+	void addRequest(Request request) throws Exception;
 
 	// 파머리스트 페이지
 	List<Farmer> farmerListByPage(PageInfo pageInfo) throws Exception;
 
 	// 소트별로
-	List<Farmer> findFarmersWithSorting(String sortType, PageInfo pageInfo) throws Exception;
+	List<FarmerDto> findFarmersWithSorting(String sortType, PageInfo pageInfo) throws Exception;
 
 	// 파머리스트 페이지 (무한스크롤)
+
+	List<Request> findRequestListByPage(PageInfo pageInfo) throws Exception;
 
 	Long farmerCount() throws Exception;
 
@@ -74,7 +80,7 @@ public interface FarmService {
 	void readImage(Integer num, ServletOutputStream outputStream) throws Exception;
 
 	// 키워드로 농부 검색하기
-	List<Farmer> farmerSearchList(String sortType, String keyword, PageInfo pageInfo) throws Exception;
+	List<FarmerDto> farmerSearchList(String sortType, String keyword, PageInfo pageInfo) throws Exception;
 
 	// 주문 하기
 	void makeOrder(Long productId, Long paymentId) throws Exception;

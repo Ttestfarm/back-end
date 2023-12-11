@@ -77,7 +77,7 @@ public class UserController {
 			//System.out.println(token);
 			
 			HttpHeaders headers = new HttpHeaders();
-			headers.add("Authorization", token);
+			headers.add("Authorization", "Bearer " + token);
 			// System.out.println(user.isUserState());
 			return ResponseEntity.ok().headers(headers).body("로그인 성공");
 			// return new ResponseEntity<>("로그인 성공", headers, HttpStatus.OK);

@@ -12,8 +12,11 @@ import org.springframework.web.multipart.MultipartFile;
 import com.kosta.farm.entity.Farmer;
 import com.kosta.farm.entity.Farmerfollow;
 import com.kosta.farm.entity.Orders;
+import com.kosta.farm.entity.Payment;
 import com.kosta.farm.entity.Product;
+import com.kosta.farm.entity.Request;
 import com.kosta.farm.entity.Review;
+import com.kosta.farm.entity.User;
 import com.kosta.farm.util.PageInfo;
 import com.querydsl.core.Tuple;
 
@@ -37,12 +40,18 @@ public interface FarmService {
 
 	List<Review> getReviewListByUser(Long userId) throws Exception;
 
-	void insertReview(Review review) throws Exception;
+	// 구매내역
+	List<Orders> getOrdersListByUser(Long userId) throws Exception;
+	
+	List<Map<String, Object>>getOrdersandReviewByUser(Long userId) throws Exception;
+	
+	// 리뷰 등록
+	void addReview(Long ordersId, List<MultipartFile> files, Integer rating, String content) throws Exception;
 
 	// 파머리스트 페이지
 	List<Farmer> farmerListByPage(PageInfo pageInfo) throws Exception;
 
-//소트별로
+	// 소트별로
 	List<Farmer> findFarmersWithSorting(String sortType, PageInfo pageInfo) throws Exception;
 
 	// 파머리스트 페이지 (무한스크롤)
@@ -63,20 +72,17 @@ public interface FarmService {
 	List<Farmerfollow> getFollowingFarmersByUserId(Long userId) throws Exception;
 
 	void readImage(Integer num, ServletOutputStream outputStream) throws Exception;
-	
+
 	// 키워드로 농부 검색하기
-	List<Farmer> FarmerSearchList(String keyword, PageInfo pageInfo) throws Exception;
+	List<Farmer> farmerSearchList(String sortType, String keyword, PageInfo pageInfo) throws Exception;
 
-	//주문 구현
-	Orders createOrder(Orders order) throws Exception;
-	
-	void completePay(Long orderId) throws Exception;
-	
-	
-//	List<Farmer> farmerListByReview(PageInfo pageInfo) throws Exception;
+	// 주문 하기
+	void makeOrder(Long productId, Long paymentId) throws Exception;
 
-	// 필드별로 정렬
-//	List<Farmer> farmerListByRating(PageInfo pageInfo) throws Exception;
-//
-//	List<Farmer> farmerListByfollower(PageInfo pageInfo) throws Exception;
+	// 결제 확인
+	Boolean checkPaymentState(Long userId) throws Exception;
+
+	// 매칭 리스트 가져오기?
+	List<Request> requestListByPage(PageInfo pageInfo) throws Exception;
+
 }

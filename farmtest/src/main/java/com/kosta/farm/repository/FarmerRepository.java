@@ -44,6 +44,5 @@ public interface FarmerRepository extends JpaRepository<Farmer, Long> {
 
 	Page<Farmer> findPageBy(Pageable pageable);
 
-	Slice<Farmer> findSliceBy(Pageable pageable);
 
 }

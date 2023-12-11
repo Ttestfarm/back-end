@@ -43,5 +43,7 @@ public class Review {
 	private Long farmerId;
 	@Column
 	private Long userId;
+	@Column
+	private Long ordersId;
 	
 }

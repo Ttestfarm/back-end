@@ -1,6 +1,7 @@
 package com.kosta.farm.entity;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -27,11 +28,11 @@ import lombok.NoArgsConstructor;
 @Builder
 public class Farmer {
 	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long farmerId;
-  // FK
-  // @Column
-  // private Integer userId;
+	// FK
+	// @Column
+	// private Integer userId;
 	@Column
 	private String farmName; // 팜 이름
 	@Column
@@ -70,5 +71,18 @@ public class Farmer {
 	@ColumnDefault("0")
 	private Integer reviewCount;
 	@Column
-	private Long rating;
+	private Double rating;
+
+	public void updateAvgRating(List<Review> reviews) {
+		if (reviews == null || reviews.isEmpty()) {
+			this.rating = 0.0;
+			return;
+		}
+		double totalRating = 0.0;
+		for (Review review : reviews) {
+			totalRating += review.getRating();
+		}
+		this.rating = totalRating / reviews.size();
+	}
+
 }

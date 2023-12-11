@@ -30,24 +30,25 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
+		
 		String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
-		// Header의 Authorization 값이 비어있으면 => token을 전송하지 않음 (로그인 X)
+		// Header의 Authorization 값이 비어있으면 token을 전송하지 않음 (로그인 X)
 		if (authorizationHeader == null) {
 			filterChain.doFilter(request, response);
 			return;
 		}
 
-		// Header의 Authorization 값이 'Bearer '로 시작하지 않으면 => 잘못된 토큰
+		// Header의 Authorization 값이 'Bearer '로 시작하지 않으면 잘못된 토큰
 		if (!authorizationHeader.startsWith("Bearer ")) {
 			filterChain.doFilter(request, response);
 			return;
 		}
 
-		// 전송받은 값에서 'Bearer ' 뒷부분(Jwt Token) 추출
+		// 전송받은 값에서 Bearer 뒷부분(token) 추출
 		String token = authorizationHeader.split(" ")[1];
-
-		// 전송받은 Jwt Token이 만료되었으면 => 다음 필터 진행(인증 X)
+		// System.out.println(token);
+		// 전송받은 token이 만료되었으면 다음 필터 진행(인증 X)
 		if (JwtTokenUtil.isExpired(token, secretKey)) {
 			filterChain.doFilter(request, response);
 			return;
@@ -66,7 +67,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
 		// loginUser 정보로 UsernamePasswordAuthenticationToken 발급
 		UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-				loginUser.getUserEmail(), null, List.of(new SimpleGrantedAuthority(loginUser.getUserRoles())));
+				loginUser.getUserEmail(), null, List.of(new SimpleGrantedAuthority(loginUser.getUserRole().name())));
 
 		authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 

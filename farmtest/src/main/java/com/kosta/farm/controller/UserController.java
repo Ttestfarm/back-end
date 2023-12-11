@@ -18,8 +18,11 @@ import com.kosta.farm.dto.ErrorResponseDto;
 import com.kosta.farm.dto.JoinRequestDto;
 import com.kosta.farm.dto.LoginRequestDto;
 import com.kosta.farm.dto.ModifyUserDto;
+import com.kosta.farm.dto.RegFarmerDto;
 import com.kosta.farm.dto.UserInfoDto;
+import com.kosta.farm.entity.Farmer;
 import com.kosta.farm.entity.User;
+import com.kosta.farm.service.FarmerService;
 import com.kosta.farm.service.UserService;
 
 import lombok.RequiredArgsConstructor;
@@ -29,6 +32,7 @@ import lombok.RequiredArgsConstructor;
 public class UserController {
 
 	private final UserService userService;
+	private final FarmerService farmerService;
 	
   @Value("${jwt.secretKey}")
   private String secretKey;
@@ -73,12 +77,12 @@ public class UserController {
 			//System.out.println(token);
 			
 			HttpHeaders headers = new HttpHeaders();
-			headers.add("Authorization", "Bearer " + token);
+			headers.add("Authorization", token);
 			// System.out.println(user.isUserState());
 			return ResponseEntity.ok().headers(headers).body("로그인 성공");
 			// return new ResponseEntity<>("로그인 성공", headers, HttpStatus.OK);
 		} catch (Exception e) {
-			return ResponseEntity.badRequest().body("{\"message\": \"이메일 중복 확인 실패: " + e.getMessage() + "\"}");
+			return ResponseEntity.badRequest().body(e.getMessage());
 			// return ResponseEntity.badRequest().body("이메일 중복 확인 실패: " + e.getMessage());
 		}
 	}
@@ -160,9 +164,40 @@ public class UserController {
 				return ResponseEntity.badRequest().body("해당 사용자를 찾을 수 없습니다.");
 			}
 		} catch (Exception e) {
-			// 예외 발생 시
 			ErrorResponseDto errorResponse = new ErrorResponseDto("이메일 찾기 실패", e.getMessage());
 			return ResponseEntity.badRequest().body(errorResponse);
+		}
+	}
+	
+	@GetMapping("/find-pw")
+	public ResponseEntity<?> findPassword(@RequestParam String userName, @RequestParam String userEmail) {
+		try {
+			// UserService를 이용하여 userName과 userEmail로 사용자 찾기
+			User foundUser = userService.findUserPassword(userName, userEmail);
+
+			if (foundUser != null) {
+				// 사용자를 찾았을 경우 패스워드 응답
+				return ResponseEntity.ok().body(foundUser.getUserPassword());
+			} else {
+				// 사용자를 찾지 못했을 경우
+				return ResponseEntity.badRequest().body("해당 사용자를 찾을 수 없습니다.");
+			}
+		} catch (Exception e) {
+			ErrorResponseDto errorResponse = new ErrorResponseDto("비밀번호 찾기 실패", e.getMessage());
+			return ResponseEntity.badRequest().body(errorResponse);
+		}
+	}
+	
+	@PostMapping("/reg-farmer")
+	public ResponseEntity<String> regFarmer(@RequestBody RegFarmerDto request, Authentication auth) throws Exception {
+		try {
+			User loginUser = userService.getLoginUserByUserEmail(auth.getName());
+			Farmer registeredFarmer = farmerService.registerFarmer(request);
+			
+			userService.updateUserInfoAfterRegFarmer(loginUser, registeredFarmer.getFarmerId());
+			return ResponseEntity.ok("파머등록 성공");
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().body("파머등록 실패: " + e.getMessage());
 		}
 	}
 }

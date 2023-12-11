@@ -29,9 +29,6 @@ public class Farmer {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Long farmerId;
-  // FK
-  // @Column
-  // private Integer userId;
 	@Column
 	private String farmName; // 팜 이름
 	@Column
@@ -48,21 +45,21 @@ public class Farmer {
 	private String farmBank; // 팜 계좌 은행
 	@Column
 	private String farmAccountNum; // 팜 계좌번호
-	@Column
+	@Column(nullable = true)
 	private String farmInterest1; // 관심 농산물
-	@Column
+	@Column(nullable = true)
 	private String farmInterest2;
-	@Column
+	@Column(nullable = true)
 	private String farmInterest3;
-	@Column
+	@Column(nullable = true)
 	private String farmInterest4;
-	@Column
+	@Column(nullable = true)
 	private String farmInterest5;
 	@Column
 	@CreationTimestamp
 	private Timestamp createDate;
-	@Column
-	private boolean state; // 0 탈퇴 , 1 계정유지
+	@Builder.Default
+	private boolean farmerState = true; // 0 탈퇴 , 1 계정유지
 	@Column
 	@ColumnDefault("0")
 	private Integer followCount;
@@ -70,5 +67,5 @@ public class Farmer {
 	@ColumnDefault("0")
 	private Integer reviewCount;
 	@Column
-	private Long rating;
+	private double rating;
 }

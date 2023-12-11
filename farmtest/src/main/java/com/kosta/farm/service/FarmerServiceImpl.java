@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kosta.farm.dto.DeliveryDto;
 import com.kosta.farm.dto.OrdersDto;
 import com.kosta.farm.dto.QuotationDto;
+import com.kosta.farm.dto.RegFarmerDto;
 import com.kosta.farm.entity.Farmer;
 import com.kosta.farm.entity.Quotation;
 import com.kosta.farm.entity.Request;
@@ -262,6 +263,36 @@ public class FarmerServiceImpl implements FarmerService {
 		pageInfo.setEndPage(endPage);
 		
 		return deliveryList;
+	}
+
+	// 파머등록
+	@Override
+	public Farmer registerFarmer(RegFarmerDto request) throws Exception {
+		// Farmer 인스턴스 생성
+		Farmer farmer = Farmer.builder()
+				.farmName(request.getFarmName())
+				.farmPixurl(request.getFarmPixurl())
+				.farmTel(request.getFarmTel())
+				.farmAddress(request.getFarmAddress())
+				.farmAddressDetail(request.getFarmAddressDetail())
+				.registrationNum(request.getRegistrationNum())
+				.farmBank(request.getFarmBank())
+				.farmAccountNum(request.getFarmAccountNum())
+				.build();
+		
+		// 관심품목 입력받아서 # 기준으로 파싱하여 저장
+		String[] interests = request.getFarmInterests().replaceAll("^\\s*#*", "").split("#");
+    int numInterests = Math.min(interests.length, 5); // 최대 5개의 관심사로 제한
+
+    farmer.setFarmInterest1(numInterests > 0 ? interests[0].trim() : null);
+    farmer.setFarmInterest2(numInterests > 1 ? interests[1].trim() : null);
+    farmer.setFarmInterest3(numInterests > 2 ? interests[2].trim() : null);
+    farmer.setFarmInterest4(numInterests > 3 ? interests[3].trim() : null);
+    farmer.setFarmInterest5(numInterests > 4 ? interests[4].trim() : null);
+		
+		Farmer savedFarmer = farmerRepository.save(farmer);
+
+		return savedFarmer;
 	}
 	
 }

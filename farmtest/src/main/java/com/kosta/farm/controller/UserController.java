@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.kosta.farm.config.jwt.JwtTokenUtil;
@@ -143,5 +144,25 @@ public class UserController {
 	        ErrorResponseDto errorResponse = new ErrorResponseDto("회원 정보 수정 실패", e.getMessage());
 	        return ResponseEntity.badRequest().body(errorResponse);
 	    }
+	}
+	
+	@GetMapping("/find-email")
+	public ResponseEntity<?> findEmail(@RequestParam String userName, @RequestParam String userTel) {
+		try {
+			// UserService를 이용하여 userName과 userTel로 사용자 찾기
+			User foundUser = userService.findUserEmail(userName, userTel);
+
+			if (foundUser != null) {
+				// 사용자를 찾았을 경우 이메일 응답
+				return ResponseEntity.ok().body(foundUser.getUserEmail());
+			} else {
+				// 사용자를 찾지 못했을 경우
+				return ResponseEntity.badRequest().body("해당 사용자를 찾을 수 없습니다.");
+			}
+		} catch (Exception e) {
+			// 예외 발생 시
+			ErrorResponseDto errorResponse = new ErrorResponseDto("이메일 찾기 실패", e.getMessage());
+			return ResponseEntity.badRequest().body(errorResponse);
+		}
 	}
 }

@@ -13,4 +13,7 @@ public interface UserService {
   User getLoginUserByUserEmail(String userEmail) throws Exception;
   
   void saveUser(User user) throws Exception;
+  
+  User findUserEmail(String userName, String userTel) throws Exception;
+  User findUserPassword(String userName, String userEmail) throws Exception;
 }

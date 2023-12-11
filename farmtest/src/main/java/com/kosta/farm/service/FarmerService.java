@@ -5,10 +5,11 @@ import java.util.List;
 import com.kosta.farm.dto.DeliveryDto;
 import com.kosta.farm.dto.OrdersDto;
 import com.kosta.farm.dto.QuotationDto;
+import com.kosta.farm.dto.RegFarmerDto;
+import com.kosta.farm.entity.Farmer;
 import com.kosta.farm.entity.Quotation;
 import com.kosta.farm.entity.Request;
 import com.kosta.farm.unti.PageInfo;
-import com.querydsl.core.Tuple;
 
 public interface FarmerService {
 	// 매칭 주문 요청서 보기
@@ -43,4 +44,7 @@ public interface FarmerService {
 	
 	// 배송 현황 리스트
 	public List<DeliveryDto> findDeliberyByFarmerIdAndDeliveryState(Long farmerId, String deliveryState, PageInfo pageInfo) throws Exception;
+	
+	// 파머등록
+	Farmer registerFarmer(RegFarmerDto regFarmerDto) throws Exception;
 }

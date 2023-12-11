@@ -39,12 +39,14 @@ public interface FarmService {
 	List<Product> getProductListByFarmer(Long farmerId, PageInfo pageInfo) throws Exception;
 
 	List<Review> getReviewListByUser(Long userId) throws Exception;
-	
-	//구매내역
-	List<Orders> getOrdersListByUser(Long userId) throws Exception;
 
+	// 구매내역
+	List<Orders> getOrdersListByUser(Long userId) throws Exception;
+	
+	List<Map<String, Object>>getOrdersandReviewByUser(Long userId) throws Exception;
+	
 	// 리뷰 등록
-	void insertReview(Review review) throws Exception;
+	void addReview(Long ordersId, List<MultipartFile> files, Integer rating, String content) throws Exception;
 
 	// 파머리스트 페이지
 	List<Farmer> farmerListByPage(PageInfo pageInfo) throws Exception;
@@ -72,7 +74,7 @@ public interface FarmService {
 	void readImage(Integer num, ServletOutputStream outputStream) throws Exception;
 
 	// 키워드로 농부 검색하기
-	List<Farmer> FarmerSearchList(String keyword, PageInfo pageInfo) throws Exception;
+	List<Farmer> farmerSearchList(String sortType, String keyword, PageInfo pageInfo) throws Exception;
 
 	// 주문 하기
 	void makeOrder(Long productId, Long paymentId) throws Exception;

@@ -7,6 +7,7 @@ import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
@@ -28,6 +29,7 @@ import com.kosta.farm.util.PageInfo;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
@@ -83,8 +85,25 @@ public class FarmDslRepository {
 		QReview review = QReview.review;
 		return jpaQueryFactory.selectFrom(review).where(review.userId.eq(userId)).fetch();
 	}
-	
-	
+
+	public Double getAvgRatingByFarmersId(Long farmerId) {
+		QReview review = QReview.review;
+		Double avgRating = jpaQueryFactory.select(review.rating.doubleValue().avg()).from(review)
+				.where(review.farmerId.eq(farmerId)).fetchOne();
+
+		return avgRating != null ? avgRating : 0.0;
+
+	}
+
+	public List<Farmer> findbyKeyword(String keyword, PageRequest pageRequest) {
+		QFarmer farmer = QFarmer.farmer;
+		BooleanExpression keywords = farmer.farmInterest1.containsIgnoreCase(keyword)
+				.or(farmer.farmInterest2.containsIgnoreCase(keyword))
+				.or(farmer.farmInterest3.containsIgnoreCase(keyword))
+				.or(farmer.farmInterest4.containsIgnoreCase(keyword));
+		return jpaQueryFactory.selectFrom(farmer).where(keywords).fetch();
+	}
+
 	// 파머의 카테고리 이름 가져오기? ㄴㄴ farminterest 검색하기
 	public List<Tuple> getFarmersByCategory(String categoryName) {
 		QFarmer farmer = QFarmer.farmer;
@@ -97,7 +116,6 @@ public class FarmDslRepository {
 
 }
 
-	
 // 이미 존재하는 주문 조회
 //public Orders getExistingOrder(Long userId, Long productId) {
 //	QOrders orders = QOrders.orders;

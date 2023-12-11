@@ -61,7 +61,5 @@ public class Orders { // order> orders로 대체 entity 생성 오류 때문에
 	private Integer count; // 주문상품 수량
 	@Column
 	private Integer price; // 주문 상품 가격
-//  @ManyToOne(fetch = FetchType.LAZY)
-//	@JoinColumn(name="product_id")
-//  private Product product;
+
 }

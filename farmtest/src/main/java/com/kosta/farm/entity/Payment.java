@@ -39,7 +39,7 @@ public class Payment {
 	@Column
 	private Integer productPrice; //상품가격
 	@Column
-	private Integer count;
+	private Integer count; //수량
 	@Column
 	private Long farmerId;
 	@Column

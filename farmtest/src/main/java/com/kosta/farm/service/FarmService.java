@@ -15,6 +15,7 @@ import com.kosta.farm.entity.Farmerfollow;
 import com.kosta.farm.entity.Orders;
 import com.kosta.farm.entity.Payment;
 import com.kosta.farm.entity.Product;
+import com.kosta.farm.entity.Quotation;
 import com.kosta.farm.entity.Request;
 import com.kosta.farm.entity.Review;
 import com.kosta.farm.entity.User;
@@ -50,7 +51,7 @@ public interface FarmService {
 	void addReview(Long ordersId, List<MultipartFile> files, Integer rating, String content) throws Exception;
 
 	// 요청서 등록
-	void addRequest(Request request) throws Exception;
+	Long addRequest(Request request) throws Exception;
 
 	// 파머리스트 페이지
 	List<Farmer> farmerListByPage(PageInfo pageInfo) throws Exception;
@@ -60,15 +61,13 @@ public interface FarmService {
 
 	// 파머리스트 페이지 (무한스크롤)
 
-	List<Request> findRequestListByPage(PageInfo pageInfo) throws Exception;
-
 	Long farmerCount() throws Exception;
 
 	// 파머 상세 페이지
 	Farmer farmerDetail(Long farmerId) throws Exception;
 
 	// 파머 팔로우 하기
-	Boolean Farmerfollow(Long userId, Long farmerId) throws Exception;
+	Boolean farmerfollow(Long userId, Long farmerId) throws Exception;
 
 	// 이미 파머팔로우완료 한거
 	Boolean selectedFarmerfollow(Long userId, Long farmerId) throws Exception;
@@ -88,7 +87,16 @@ public interface FarmService {
 	// 결제 확인
 	Boolean checkPaymentState(Long userId) throws Exception;
 
-	// 매칭 리스트 가져오기?
+	// 매칭 리스트 가져오기? 매칭 메인 페이지
 	List<Request> requestListByPage(PageInfo pageInfo) throws Exception;
+
+	List<Request> requestListByUser(Long userId) throws Exception;
+
+	List<Quotation> quoteListByRequest(Long requestId) throws Exception;
+	
+	List<Tuple> quoteandRequestListByRequestId(Long requestId) throws Exception;
+	
+	//견적서 수 
+	Long quoteCount(Long requestId) throws Exception;
 
 }

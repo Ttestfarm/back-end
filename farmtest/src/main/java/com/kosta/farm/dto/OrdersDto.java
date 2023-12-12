@@ -19,5 +19,6 @@ public class OrdersDto {
 	private String paymentBank;
 	private Integer price; // 금액
 	private Integer delivery; // 배송비
-
+	
+	
 }

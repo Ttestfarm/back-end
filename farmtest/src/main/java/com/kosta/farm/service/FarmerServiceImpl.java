@@ -18,7 +18,7 @@ import com.kosta.farm.entity.Quotation;
 import com.kosta.farm.entity.Request;
 import com.kosta.farm.repository.FarmerDslRepository;
 import com.kosta.farm.repository.FarmerRepository;
-import com.kosta.farm.repository.QuotationRepositrory;
+import com.kosta.farm.repository.QuotationRepository;
 import com.kosta.farm.repository.RequestRepository;
 import com.kosta.farm.unti.PageInfo;
 import com.querydsl.core.Tuple;
@@ -32,7 +32,7 @@ public class FarmerServiceImpl implements FarmerService {
 	// Repository
 	private final FarmerRepository farmerRepository;
 	private final RequestRepository requestRepository;
-	private final QuotationRepositrory quotationRepositrory;
+	private final QuotationRepository quotationRepository;
 	// DSL
 	private final FarmerDslRepository farmerDslRepository;
 	private final ObjectMapper objectMapper;
@@ -63,7 +63,7 @@ public class FarmerServiceImpl implements FarmerService {
 	// ** 견적서 **
 	@Override // 견적서 양식 (보내기 이벤트)-> 견적서 저장 
 	public void saveQuotation(Quotation quotation) throws Exception {
-		quotationRepositrory.save(quotation);
+		quotationRepository.save(quotation);
 	}
 
 	// ** 견적 현황 페이지 **

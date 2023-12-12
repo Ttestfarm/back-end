@@ -9,4 +9,5 @@ import com.kosta.farm.entity.Payment;
 
 public interface OrdersRepository extends JpaRepository<Orders, Long> {
 	List<Orders> findOrdersByUserId(Long userId);
+	
 }

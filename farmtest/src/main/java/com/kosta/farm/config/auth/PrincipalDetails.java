@@ -1,13 +1,16 @@
 package com.kosta.farm.config.auth;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.kosta.farm.entity.User;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import lombok.Getter;
 
+@Getter
 public class PrincipalDetails implements UserDetails {
 
 	private User user;

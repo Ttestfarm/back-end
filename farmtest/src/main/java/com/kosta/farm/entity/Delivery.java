@@ -26,7 +26,7 @@ public class Delivery {
 	private Long deliveryId;
 	// FK
 	@Column
-	private Long orderId; // ordersId로 수정
+	private Long ordersId; // ordersId로 수정
 	@Column 
 	private String tCode; // 택배사 코드
 	@Column

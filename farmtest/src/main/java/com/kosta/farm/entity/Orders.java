@@ -13,6 +13,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
@@ -41,9 +42,10 @@ public class Orders { //order> orders로 대체 entity 생성 오류 때문에
 	@Column
 	@CreationTimestamp
 	private Timestamp createDate;
-	@Column
-	private String ordersState; // 결제완료 0, 판매취소 1, 배송완료 2
 	//주문 상태
+	@Column
+	@ColumnDefault("1")
+	private String ordersState; // 0: 판매취소, 1: 결제완료, 2: 배송완료
 	
 	@Column
 	private Long productId; //상품정보

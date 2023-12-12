@@ -39,10 +39,14 @@ public class FarmerDslRepository {
 		QRequest req = QRequest.request;
 		QQuotation quot = QQuotation.quotation;
 		return jpaQueryFactory.selectFrom(req)
-//				.leftJoin(quot)
-//				.on(req.requestId.eq(quot.requestId))
-				.where(req.requestProduct.eq(farmInterest))
-//						.and(quot.quotationId.isNull())
+				.leftJoin(quot)
+				.on(req.requestId.eq(quot.requestId))
+				.where(req.requestProduct.eq(farmInterest)
+						.and(
+								quot.farmerId.isNull()
+								.or(quot.farmerId.ne(farmerId))
+								)
+						)
 				.fetch();
 	}
 	
@@ -64,7 +68,7 @@ public class FarmerDslRepository {
 				.fetch();
 	}
 	
-	// 
+	// 견적서 수
 	public Long findQuotationCountByFarmerId(Long farmerId, String state) {
 		QQuotation quotation = QQuotation.quotation;
 		return jpaQueryFactory.select(quotation.count())
@@ -81,16 +85,17 @@ public class FarmerDslRepository {
 		for(Long id : ids) {
 			jpaQueryFactory.update(quot)
 				.set(quot.quotationState, "0")
-				.where(quot.farmerId.eq(farmerId).and(quot.requestId.eq(id)))
+				.where(quot.farmerId.eq(farmerId).and(quot.quotationId.eq(id)))
 				.execute();
 		}
 	}
 	
 	// 견적서 자세히보기
-	public Quotation findQuotationByQuotationId(Long quotationId) {
+	public Quotation findQuotationByQuotationId(Long farmerId, Long quotationId) {
 		QQuotation quot = QQuotation.quotation;
 		return jpaQueryFactory.selectFrom(quot)
-				.where(quot.quotationId.eq(quotationId))
+				.where(quot.farmerId.eq(farmerId)
+						.and(quot.quotationId.eq(quotationId)))
 				.fetchOne();
 	}
 	
@@ -104,13 +109,12 @@ public class FarmerDslRepository {
 				quot.quotationQuantity, quot.quotationPrice
 				, req.name, req.tel, req.address)
 				.from(ord)
-				.join(quot)
+				.innerJoin(quot)
 				.on(ord.quotationId.eq(quot.quotationId))
-				.join(req)
+				.innerJoin(req)
 				.on(ord.requestId.eq(req.requestId))
-				.where(ord.quotationId.isNotNull()
-						.and(ord.farmerId.eq(farmerId))
-						.and(ord.ordersState.eq("0")))
+				.where(ord.farmerId.eq(farmerId)
+						.and(ord.ordersState.eq("1")))
 				.orderBy(ord.ordersId.desc())
 				.offset(pageRequest.getOffset())
 				.limit(pageRequest.getPageSize())
@@ -131,24 +135,25 @@ public class FarmerDslRepository {
 				.on(ord.requestId.eq(req.requestId))
 				.where(ord.quotationId.isNull()
 						.and(ord.farmerId.eq(farmerId))
-						.and(ord.ordersState.eq("0")))
+						.and(ord.ordersState.eq("1")))
 				.orderBy(ord.ordersId.desc())
 				.offset(pageRequest.getOffset())
 				.limit(pageRequest.getPageSize())
 				.fetch();
 	}
 	
-	// 결제 완료(매칭)현환 총 수
+	// 결제 완료(매칭)현환 수
 		public Long findOrdersCountByFarmerIdAndQuotationIsNotNull(Long farmerId) {
 			QOrders ord = QOrders.orders;
 			return jpaQueryFactory.select(ord.count())
 					.from(ord)
 					.where(ord.farmerId.eq(farmerId)
-							.and(ord.quotationId.isNotNull()))
+							.and(ord.quotationId.isNotNull())
+							)
 					.fetchOne();
 		}
 		
-	// 결제 완료(주문)현환 총 수
+	// 결제 완료(주문)현황 수
 	public Long findOrdersCountByFarmerIdAndQuotationIsNull(Long farmerId) {
 		QOrders ord = QOrders.orders;
 		return jpaQueryFactory.select(ord.count())
@@ -165,16 +170,17 @@ public class FarmerDslRepository {
 		QQuotation quot = QQuotation.quotation;
 		QPayment pay = QPayment.payment;
 		
-		return jpaQueryFactory.select(ord.ordersId, pay.createDate,
+		return jpaQueryFactory.select(ord.ordersId,
 				quot.quotationProduct, quot.quotationQuantity, 
-				req.name, req.tel, req.address, pay.paymentBank,
-				quot.quotationPrice,pay.paymentDelivery)
+				req.name, req.tel, req.address, quot.quotationPrice,
+				pay.paymentBank, pay.paymentDelivery, pay.state, pay.paymentPrice
+				, pay.createDate
+				)
 				.from(ord)
-				.join(quot).on(ord.quotationId.eq(quot.quotationId))
+				.innerJoin(quot).on(ord.quotationId.eq(quot.quotationId))
 				.join(req).on(ord.requestId.eq(req.requestId))
 				.join(pay).on(ord.paymentId.eq(pay.paymentId))
-				.where(ord.farmerId.eq(farmerId).and(ord.ordersId.eq(ordersId))
-						.and(ord.quotationId.isNotNull()))
+				.where(ord.farmerId.eq(farmerId).and(ord.ordersId.eq(ordersId)))
 				.fetchOne();
 	}
 	

@@ -26,7 +26,7 @@ public class Delivery {
 	private Long deliveryId;
 	// FK
 	@Column
-	private Long orderId; // ordersId로 수정
+	private Long ordesrId;
 	@Column 
 	private String tCode; // 택배사 코드
 	@Column
@@ -35,7 +35,7 @@ public class Delivery {
 	@CreationTimestamp
 	private Timestamp createDate;
 	@Column
-	@ColumnDefault("0")
-	private String deliveryState; // 배송중, 배송 완료
+	@ColumnDefault("1")
+	private String deliveryState; // 0: 오류, 1: 배송중, 2: 배송 완료
 	
 }

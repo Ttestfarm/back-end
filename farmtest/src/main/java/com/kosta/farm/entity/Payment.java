@@ -8,6 +8,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 
 import lombok.Builder;
@@ -29,6 +30,7 @@ public class Payment {
 	@CreationTimestamp
 	private Timestamp createDate; // 결제 완료 날짜
 	@Column
+	@ColumnDefault("1")
 	private String state; // 결제취소 0, 결제완료 1
 	
 }

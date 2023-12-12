@@ -5,9 +5,12 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import com.kosta.farm.entity.User;
 
+import lombok.Getter;
+
 import java.util.ArrayList;
 import java.util.Collection;
 
+@Getter
 public class PrincipalDetails implements UserDetails {
 
 	private User user;

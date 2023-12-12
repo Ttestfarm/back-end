@@ -6,9 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
-import com.kosta.farm.entity.Farmer;
 import com.kosta.farm.entity.QDelivery;
-import com.kosta.farm.entity.QFarmer;
 import com.kosta.farm.entity.QOrders;
 import com.kosta.farm.entity.QPayment;
 import com.kosta.farm.entity.QProduct;

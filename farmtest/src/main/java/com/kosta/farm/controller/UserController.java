@@ -2,7 +2,9 @@ package com.kosta.farm.controller;
 
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,6 +23,12 @@ import lombok.RequiredArgsConstructor;
 public class UserController {
 
 	private final UserService userService;
+	
+  @Value("${jwt.secretKey}")
+  private String secretKey;
+
+  @Value("${jwt.expireTime}")
+  private int expireTime;
 
 	@PostMapping("/join")
 	public ResponseEntity<String> join(@RequestBody JoinRequestDto joinRequest) throws Exception {
@@ -54,16 +62,14 @@ public class UserController {
 			if (user == null) {
 				return ResponseEntity.status(401).body("이메일 또는 비밀번호가 틀렸습니다.");
 			}
-			
-			String secretKey = "pretty-farmers";
-			int expireTime = 60000 * 24; // 24시간
 
 			String token = JwtTokenUtil.createToken(user.getUserEmail(), secretKey, expireTime);
+			System.out.println(token);
 			
 			HttpHeaders headers = new HttpHeaders();
-			headers.add("Authrozation", "Bearer " + token);
-			
+			headers.add("Authorization", "Bearer " + token);
 			return ResponseEntity.ok().headers(headers).body("로그인 성공");
+//			return new ResponseEntity<>("로그인 성공", headers, HttpStatus.OK);
 		} catch (Exception e) {
 			return ResponseEntity.badRequest().body("이메일 중복 확인 실패: " + e.getMessage());
 		}

@@ -1,5 +1,9 @@
 package com.kosta.farm.service;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -7,6 +11,8 @@ import java.util.List;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kosta.farm.dto.DeliveryDto;
@@ -264,14 +270,13 @@ public class FarmerServiceImpl implements FarmerService {
 		
 		return deliveryList;
 	}
-
+	
 	// 파머등록
 	@Override
-	public Farmer registerFarmer(RegFarmerDto request) throws Exception {
-		// Farmer 인스턴스 생성
+	public Farmer registerFarmer(RegFarmerDto request, MultipartFile profileImage) throws Exception {
+		
 		Farmer farmer = Farmer.builder()
 				.farmName(request.getFarmName())
-				.farmPixurl(request.getFarmPixurl())
 				.farmTel(request.getFarmTel())
 				.farmAddress(request.getFarmAddress())
 				.farmAddressDetail(request.getFarmAddressDetail())
@@ -280,7 +285,7 @@ public class FarmerServiceImpl implements FarmerService {
 				.farmAccountNum(request.getFarmAccountNum())
 				.build();
 		
-		// 관심품목 입력받아서 # 기준으로 파싱하여 저장
+		// 관심품목 입력받아서 # 기준으로 파싱하여 각각 저장
 		String[] interests = request.getFarmInterests().replaceAll("^\\s*#*", "").split("#");
     int numInterests = Math.min(interests.length, 5); // 최대 5개의 관심사로 제한
 
@@ -291,7 +296,23 @@ public class FarmerServiceImpl implements FarmerService {
     farmer.setFarmInterest5(numInterests > 4 ? interests[4].trim() : null);
 		
 		Farmer savedFarmer = farmerRepository.save(farmer);
+		
+		if (profileImage != null && !profileImage.isEmpty()) {
+			String dir = "C:\\Users\\USER\\upload";
 
+			// 파일명 설정
+			String fileName = "profile_image_" + savedFarmer.getFarmerId() + "."
+					+ StringUtils.getFilenameExtension(profileImage.getOriginalFilename());
+
+			// 파일 저장 경로 설정
+			String filePath = Paths.get(dir, fileName).toString();
+
+			// 파일 저장
+			profileImage.transferTo(new File(filePath));
+
+			savedFarmer.setFarmPixurl(filePath);
+		}
+		
 		return savedFarmer;
 	}
 	

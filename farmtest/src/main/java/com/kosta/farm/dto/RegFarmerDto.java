@@ -1,5 +1,7 @@
 package com.kosta.farm.dto;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -7,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class RegFarmerDto {
 	private String farmName;
-	private String farmPixurl;
+	private MultipartFile farmPixurl;
 	private String farmTel;
 	private String farmAddress;
 	private String farmAddressDetail;

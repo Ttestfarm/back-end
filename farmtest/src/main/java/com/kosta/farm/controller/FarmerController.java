@@ -37,13 +37,17 @@ public class FarmerController {
 
 	// farmerId를 받고 farmInterest return
 	@GetMapping("/farmInterest")
-	public ResponseEntity<List<String>> farmInterest(@RequestParam Long farmerId) {
+	public ResponseEntity<Map<String, Object>> farmInterest(@RequestParam Long farmerId) {
 		try {
 			List<String> interestList = farmerService.findFarmInterestByFarmerId(farmerId);
-			return new ResponseEntity<List<String>>(interestList, HttpStatus.OK);
+			List<Request> reqList = farmerService.findRequestsByFarmInterest(farmerId, interestList.get(0));
+			Map<String, Object> res = new HashMap<>();
+			res.put("interestList", interestList);
+			res.put("reqList", reqList);
+			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
-			return new ResponseEntity<List<String>>(HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
 		}
 	}
 
@@ -52,10 +56,7 @@ public class FarmerController {
 	public ResponseEntity<List<Request>> requestList(@RequestParam Long farmerId,
 			@RequestParam String farmInterest) {
 		try {
-			System.out.println(farmerId);
-			System.out.println(farmInterest);
 			List<Request> reqList = farmerService.findRequestsByFarmInterest(farmerId, farmInterest);
-			System.out.println(reqList);
 			return new ResponseEntity<List<Request>>(reqList, HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();

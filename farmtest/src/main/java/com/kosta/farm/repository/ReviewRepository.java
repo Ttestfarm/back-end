@@ -1,6 +1,7 @@
 package com.kosta.farm.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -13,5 +14,7 @@ import com.kosta.farm.entity.Review;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
 	Page<Review> findByFarmerId(Long FarmerId, PageRequest pageRequest);
+	Optional<Review> findByOrdersId(Long ordersId);
+    List<Review> findAllByFarmerId(Long farmerId);
 
 }

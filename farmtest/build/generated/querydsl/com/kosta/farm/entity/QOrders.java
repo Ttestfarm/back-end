@@ -19,6 +19,8 @@ public class QOrders extends EntityPathBase<Orders> {
 
     public static final QOrders orders = new QOrders("orders");
 
+    public final StringPath cancelText = createString("cancelText");
+
     public final DateTimePath<java.sql.Timestamp> createDate = createDateTime("createDate", java.sql.Timestamp.class);
 
     public final NumberPath<Long> farmerId = createNumber("farmerId", Long.class);

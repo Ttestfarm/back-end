@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.kosta.farm.dto.DeliveryDto;
@@ -21,6 +22,7 @@ import com.kosta.farm.dto.QuotDelDto;
 import com.kosta.farm.dto.QuotationDto;
 import com.kosta.farm.entity.Quotation;
 import com.kosta.farm.entity.Request;
+import com.kosta.farm.repository.OrdersRepository;
 import com.kosta.farm.service.FarmerService;
 import com.kosta.farm.unti.PageInfo;
 
@@ -33,7 +35,6 @@ public class FarmerController {
 	// 팜 정보 관리
 
 	// 매칭 주문 요청서 보기
-
 	// farmerId를 받고 farmInterest return
 	@GetMapping("/farmInterest")
 	public ResponseEntity<Map<String, Object>> farmInterest(@RequestParam Long farmerId) {
@@ -154,9 +155,10 @@ public class FarmerController {
 	public ResponseEntity<String> delivery(@PathVariable Long ordersId, @PathVariable String code,
 			@PathVariable String invoice) {
 		try {
-			System.out.println(ordersId);
-			System.err.println(code);
-			System.out.println(invoice);
+			System.out.println("1");
+			System.out.println("id " + ordersId);
+			System.err.println("code " + code);
+			System.out.println("invoice " + invoice);
 			farmerService.insertDelivery(ordersId, code, invoice);
 			return new ResponseEntity<String>("성공", HttpStatus.OK);
 		} catch (Exception e) {
@@ -166,10 +168,14 @@ public class FarmerController {
 	}
 
 	// 판매 취소
-	@GetMapping("/ordercancel/{farmerId}/{ordersId}")
-	public ResponseEntity<String> delivery(@PathVariable Long farmerId, @PathVariable Long ordersId) {
+	@PostMapping("/ordercancel")
+	public ResponseEntity<String> delivery(@RequestBody OrdersDto ordDto) {
 		try {
-			farmerService.deleteOrderState(farmerId, ordersId);
+			Long farmerId = ordDto.getFarmerId();
+			Long ordersId = ordDto.getOrdersId();
+			String cancelText = ordDto.getCancelText();
+			
+			farmerService.deleteOrderState(farmerId, ordersId, cancelText);
 			return new ResponseEntity<String>("성공", HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -25,6 +25,10 @@ public class QFarmer extends EntityPathBase<Farmer> {
 
     public final StringPath farmAddress = createString("farmAddress");
 
+    public final StringPath farmAddressDetail = createString("farmAddressDetail");
+
+    public final StringPath farmBank = createString("farmBank");
+
     public final NumberPath<Long> farmerId = createNumber("farmerId", Long.class);
 
     public final StringPath farmInterest1 = createString("farmInterest1");

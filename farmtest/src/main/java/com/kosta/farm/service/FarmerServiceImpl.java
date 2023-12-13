@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -13,11 +14,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kosta.farm.dto.DeliveryDto;
 import com.kosta.farm.dto.OrdersDto;
 import com.kosta.farm.dto.QuotationDto;
+import com.kosta.farm.entity.Delivery;
 import com.kosta.farm.entity.Farmer;
+import com.kosta.farm.entity.Orders;
 import com.kosta.farm.entity.Quotation;
 import com.kosta.farm.entity.Request;
+import com.kosta.farm.repository.DeliveryRepository;
 import com.kosta.farm.repository.FarmerDslRepository;
 import com.kosta.farm.repository.FarmerRepository;
+import com.kosta.farm.repository.OrdersRepository;
 import com.kosta.farm.repository.QuotationRepositrory;
 import com.kosta.farm.repository.RequestRepository;
 import com.kosta.farm.unti.PageInfo;
@@ -33,6 +38,8 @@ public class FarmerServiceImpl implements FarmerService {
 	private final FarmerRepository farmerRepository;
 	private final RequestRepository requestRepository;
 	private final QuotationRepositrory quotationRepositrory;
+	private final DeliveryRepository deliveryRepository;
+	private final OrdersRepository ordersRepository;
 	// DSL
 	private final FarmerDslRepository farmerDslRepository;
 	private final ObjectMapper objectMapper;
@@ -209,13 +216,25 @@ public class FarmerServiceImpl implements FarmerService {
 	// 발송 완료 처리
 	@Transactional
 	public void insertDelivery(Long ordersId, String tCode, String tInvoice) throws Exception {
-		farmerDslRepository.insertDeliveryWithOrdersIdAndTCodeAndTInvoice(ordersId, tCode, tInvoice);
+		System.out.println("2");
+		System.out.println("id " + ordersId);
+		System.err.println("tCode " + tCode);
+		System.out.println("tInvoice " + tInvoice);
+		Delivery delivery = new Delivery(ordersId, tCode, tInvoice);
+		deliveryRepository.save(delivery);
+//		farmerDslRepository.insertDeliveryWithOrdersIdAndTCodeAndTInvoice(ordersId, tCode, tInvoice);
 	}
 	
 	// 판매 취소
 	@Transactional
-	public void deleteOrderState(Long farmerId, Long ordersId) throws Exception {
-		farmerDslRepository.deleteOrderState(ordersId, farmerId);
+	public void deleteOrderState(Long farmerId, Long ordersId, String cancelText) throws Exception {
+		// Orders State 변경
+		farmerDslRepository.deleteOrderState(ordersId, farmerId, cancelText);
+		
+		// Payment State 변경
+		Orders ord = ordersRepository.findById(ordersId).get();
+		Long paymentId = ord.getPaymentId();
+		farmerDslRepository.updatePaymentByOrdersId(paymentId);
 	}
 
 	// 배송 현황 리스트

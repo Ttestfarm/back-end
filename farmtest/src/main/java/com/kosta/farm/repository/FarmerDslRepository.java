@@ -214,13 +214,23 @@ public class FarmerDslRepository {
 		    .execute();
 	}
 	
-	// 판매 취소
-	public void deleteOrderState(Long ordersId, Long farmerId) {
+	// 판매 취소(orders state 변경)
+	public void deleteOrderState(Long ordersId, Long farmerId, String cancelText) {
 		QOrders ord = QOrders.orders;
 		jpaQueryFactory.update(ord)
-			.set(ord.ordersState, "1")
-			.where(ord.ordersId.eq(ordersId)
-					.and(ord.farmerId.eq(farmerId)))
+			.set(ord.ordersState, "0")
+			.set(ord.cancelText, cancelText)
+			.where(ord.farmerId.eq(farmerId)
+					.and(ord.ordersId.eq(ordersId)))
+			.execute();
+	}
+	
+	// 판매 취소(payment state 변경)
+	public void updatePaymentByOrdersId(Long paymentId) {
+		QPayment pay = QPayment.payment;
+		jpaQueryFactory.update(pay)
+			.set(pay.state, "0")
+			.where(pay.paymentId.eq(paymentId))
 			.execute();
 	}
 	

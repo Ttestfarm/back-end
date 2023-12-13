@@ -12,6 +12,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
@@ -34,28 +35,25 @@ public class Orders { //order> orders로 대체 entity 생성 오류 때문에
 	private Long farmerId;
 	@Column
 	private Long requestId;
-
 	@Column
 	private Long quotationId;
 	@Column
 	private Long paymentId;
 	@Column
-	@CreationTimestamp
-	private Timestamp createDate;
-	//주문 상태
-	@Column
-	@ColumnDefault("1")
-	private String ordersState; // 0: 판매취소, 1: 결제완료
-//	, 2: 배송완료()
-	
-	@Column
 	private Long productId; //상품정보
 	//상시판매를 위한 컬럼들
 	@Column
 	private Integer ordersCount; //주문 수량
-
 	@Column
 	private Integer ordersPrice; //주문 가격
+	@Column
+	private String cancelText; // 판매 취소 사유
+	@Column
+	@CreationTimestamp
+	private Timestamp createDate;
+	@Column
+	@ColumnDefault("1")
+	private String ordersState; // 0: 판매취소, 1: 결제완료
 	
 //	@OneToMany(mappedBy = "orders", cascade = CascadeType.ALL)
 //	private List<OrderReg> orderReg=new ArrayList<>();

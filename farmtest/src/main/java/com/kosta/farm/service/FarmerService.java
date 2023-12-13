@@ -36,7 +36,7 @@ public interface FarmerService {
 	// 발송 완료 처리
 	public void insertDelivery(Long ordersId, String tCode, String tInvoice) throws Exception;
 	// 판매 취소 처리
-	public void deleteOrderState(Long farmerId, Long orderId) throws Exception;
+	public void deleteOrderState(Long farmerId, Long orderId, String cancelText) throws Exception;
 	
 	// 배송 현황 리스트
 	public List<DeliveryDto> findDeliberyByFarmerIdAndDeliveryState(Long farmerId, String deliveryState, PageInfo pageInfo) throws Exception;

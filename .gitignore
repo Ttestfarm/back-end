@@ -13,13 +13,9 @@ local.properties
 .settings/
 .loadpath
 .recommenders
-<<<<<<< HEAD
 *.bin
 *.lock
 .gradle
-=======
-
->>>>>>> parent of 196cce5 (Merge pull request #23 from Ttestfarm/jisu)
 application.properties
 Servers/
 

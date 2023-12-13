@@ -10,6 +10,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.kosta.farm.dto.FarmerDto;
+import com.kosta.farm.dto.RequestDto;
+import com.kosta.farm.dto.ReviewDto;
 import com.kosta.farm.entity.Farmer;
 import com.kosta.farm.entity.Farmerfollow;
 import com.kosta.farm.entity.Orders;
@@ -26,8 +28,10 @@ public interface FarmService {
 	// 상품 등록
 	Long productEnter(Product product, MultipartFile thmbnail, List<MultipartFile> file) throws Exception;
 
-	// 파머 등록
-	void regFarmer(Farmer farmer) throws Exception;
+	// 리뷰 등록
+	void addReview(Long ordersId, List<MultipartFile> files, Integer rating, String content) throws Exception;
+
+	Long addReviews(ReviewDto review, List<MultipartFile> files) throws Exception;
 
 	// 모든 파머 가져오기
 	List<Farmer> findAllFarmers() throws Exception;
@@ -45,13 +49,10 @@ public interface FarmService {
 	// 구매내역
 	List<Orders> getOrdersListByUser(Long userId) throws Exception;
 
-	List<Map<String, Object>> getOrdersandReviewByUser(Long userId) throws Exception;
-
-	// 리뷰 등록
-	void addReview(Long ordersId, List<MultipartFile> files, Integer rating, String content) throws Exception;
+	List<Orders> getOrdersandReviewByUser(Long userId) throws Exception;
 
 	// 요청서 등록
-	Long addRequest(Request request) throws Exception;
+	Request addRequest(RequestDto request) throws Exception;
 
 	// 파머리스트 페이지
 	List<Farmer> farmerListByPage(PageInfo pageInfo) throws Exception;
@@ -71,6 +72,8 @@ public interface FarmService {
 
 	// 이미 파머팔로우완료 한거
 	Boolean selectedFarmerfollow(Long userId, Long farmerId) throws Exception;
+
+//	Boolean selectedFarmerfollowByEmail(String userEmail, Long farmerId) throws Exception;
 
 	Farmer farmerInfo(Long farmerId) throws Exception;
 
@@ -93,10 +96,17 @@ public interface FarmService {
 	List<Request> requestListByUser(Long userId) throws Exception;
 
 	List<Quotation> quoteListByRequest(Long requestId) throws Exception;
-	
+
 	List<Tuple> quoteandRequestListByRequestId(Long requestId) throws Exception;
-	
-	//견적서 수 
+
+	// 견적서 수 요청서id별로
 	Long quoteCount(Long requestId) throws Exception;
+
+	// 모든 농부들의 별점 평균
+	Double avgRating() throws Exception;
+
+	// 모든 requestcount state이 1인거
+	Integer requestCount() throws Exception;
+	// requestCount state이 2인거?
 
 }

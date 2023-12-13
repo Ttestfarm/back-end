@@ -20,7 +20,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.kosta.farm.config.auth.PrincipalDetails;
 import com.kosta.farm.dto.FarmerDto;
+import com.kosta.farm.dto.OrderHistoryDto;
+import com.kosta.farm.dto.RequestDto;
 import com.kosta.farm.dto.RequestWithQuotationCountDTO;
+import com.kosta.farm.dto.ReviewDto;
 import com.kosta.farm.entity.Farmer;
 import com.kosta.farm.entity.Farmerfollow;
 import com.kosta.farm.entity.Orders;
@@ -28,23 +31,34 @@ import com.kosta.farm.entity.Product;
 import com.kosta.farm.entity.Quotation;
 import com.kosta.farm.entity.Request;
 import com.kosta.farm.entity.Review;
-import com.kosta.farm.repository.FarmerRepository;
+import com.kosta.farm.entity.User;
 import com.kosta.farm.service.FarmService;
+import com.kosta.farm.service.UserService;
 import com.kosta.farm.util.PageInfo;
 
 @RestController
 public class FarmController {
 	@Autowired
 	private FarmService farmService;
-	@Autowired
-	private FarmerRepository farmerRepository;
 
-	// 상품 등록
+	// 리뷰 작성하기 완성? 다시 확인해보기
+	@PostMapping("/mypage/buylist")
+	public ResponseEntity<String> insertReview(@ModelAttribute ReviewDto review, List<MultipartFile> files) {
+		try {
+			farmService.addReview(review.getOrdersId(), files, review.getRating(), review.getContent());
+			return ResponseEntity.ok("리뷰 작성이 완료되었습니다");
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.badRequest().body("리뷰작성 실패 " + e.getMessage());
+		}
+
+	}
+
+	// 상품 등록 이거도 나머지 완성해야함
 	@PostMapping("/farmer/regprod")
 	public ResponseEntity<Integer> regProduct(@ModelAttribute Product product, MultipartFile mainFile,
 			List<MultipartFile> additionalFiles) {
 		try {
-			System.out.println(additionalFiles.size());
 			Integer num = (farmService.productEnter(product, mainFile, additionalFiles)).intValue();
 			System.out.println(num);
 			return new ResponseEntity<Integer>(num, HttpStatus.OK);
@@ -54,14 +68,28 @@ public class FarmController {
 		}
 	}
 
-	@PostMapping("/matching") // 요청서 작성하기
-	public ResponseEntity<Integer> writeRequest(@ModelAttribute Request request) {
+	// 거의 완성
+	@PostMapping("/matching/{userId}") // 요청서 작성하기
+	public ResponseEntity<String> writeRequest(@RequestBody RequestDto request,
+//			@ModelAttribute RequestDto request,
+			Authentication authentication
+//			@PathVariable Long userId
+	) {
 		try {
-			Integer num = farmService.addRequest(request).intValue();
-			return new ResponseEntity<Integer>(num, HttpStatus.OK);
+			PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
+			User user = principalDetails.getUser();
+			Long userId = user.getUserId();
+			String tel = user.getUserTel();
+			String address = user.getAddress1() + user.getAddress2() + user.getAddress3();
+			// 만약 저기서 adderss를 입력 안햇으면 불러와야함
+			request.setUserId(userId);
+			request.setTel(tel);
+			Request req = farmService.addRequest(request);
+			return ResponseEntity.ok("요청서를 등록했습니다 : " + req);
+
 		} catch (Exception e) {
 			e.printStackTrace();
-			return new ResponseEntity<Integer>(HttpStatus.BAD_REQUEST);
+			return ResponseEntity.badRequest().body("요청서 등록을 실패했습니다: " + e.getMessage());
 		}
 	}
 
@@ -97,13 +125,18 @@ public class FarmController {
 
 	}
 
-	@GetMapping("/findfarmer/{farmerId}/{userId}") // default 기본페이지 디테일
+//    User loginUser = userService.getLoginUserByUserEmail(auth.getName());
+//이게 안됨 ㅜㅜ
+	@GetMapping("/findfarmer/{farmerId}") // default 기본페이지 디테일
 	public ResponseEntity<Map<String, Object>> farmerDetail(@PathVariable(name = "farmerId") Long farmerId,
 //			@PathVariable(name="userId") Long userId,
 			Authentication authentication) {
-		PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
-		Long userId = principalDetails.getUser().getUserId();
+
+		System.out.println(authentication);
+		User user = (User) authentication.getPrincipal();
+		Long userId = user.getUserId();
 		try {
+			System.out.println(userId);
 			Map<String, Object> res = new HashMap<>();
 			Farmer farmer = farmService.farmerDetail(farmerId);
 			res.put("farmer", farmer);
@@ -115,6 +148,7 @@ public class FarmController {
 			return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
 		}
 	}
+
 // 리뷰 리스트 페이징처리
 	@GetMapping("findfarmer/{farmerId}/review/{page}")
 	public ResponseEntity<Map<String, Object>> farmerReviewList(@PathVariable(required = false) Integer page,
@@ -151,7 +185,9 @@ public class FarmController {
 	}
 
 	@GetMapping("/matching") // 매칭 메인 페이지 requestlist를 보여준다
-	public ResponseEntity<Map<String, Object>> Matching(
+	// 별점 평균도 보여주고 매칭중도 보여주고 매칭완료도 보여줘야함
+	// 최신순으로 보여줘야함
+	public ResponseEntity<Map<String, Object>> matching(
 			@RequestParam(required = false, name = "page", defaultValue = "1") Integer page) {
 		try {
 			PageInfo pageInfo = PageInfo.builder().curPage(page).build();
@@ -165,20 +201,6 @@ public class FarmController {
 			e.printStackTrace();
 			return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
 		}
-	}
-
-	// 리뷰 작성하기
-	@PostMapping("/mypage/buylist/{ordersId}")
-	public ResponseEntity<String> insertReview(@PathVariable Long ordersId, @RequestParam("rating") Integer rating,
-			@RequestParam("content") String content, @RequestParam("files") List<MultipartFile> files) {
-		try {
-			farmService.addReview(ordersId, files, rating, content);
-			return ResponseEntity.ok("리뷰 작성이 완료되었습니다");
-		} catch (Exception e) {
-			e.printStackTrace();
-			return ResponseEntity.badRequest().body("리뷰 작성에 실패하였습니다");
-		}
-
 	}
 
 	// 유저의 파머찜리스트
@@ -199,7 +221,7 @@ public class FarmController {
 		}
 	}
 
-	// 파머찜 했는지 여부 안되었으면 파머찜이 된다
+	// 파머 follow 했는지 여부 안되었으면 follow가 된다
 	@GetMapping("/findfarmer/{farmerId}/follow/{userId}")
 	public ResponseEntity<Map<String, Object>> farmerFollow(Authentication authentication,
 			@PathVariable Long farmerId) {
@@ -247,6 +269,49 @@ public class FarmController {
 
 	}
 
+	// 구매내역 불러오기 하기 후기도 같이 불러옴
+	@GetMapping("/mypage/buylist")
+	public ResponseEntity<Map<String, Object>> buyList(
+//			@PathVariable Long userId,
+			Authentication authentication) {
+		PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
+		Long userId = principalDetails.getUser().getUserId();
+		try {
+			Map<String, Object> res = new HashMap<>();
+			List<Orders> buyList = farmService.getOrdersListByUser(userId);
+			List<OrderHistoryDto> OrdersWithReview = new ArrayList<>();
+			List<Review> reviewList = farmService.getReviewListByUser(userId);
+			for (Orders orders : buyList) {
+				Long ordersId = orders.getOrdersId();
+				OrderHistoryDto orderHistory = new OrderHistoryDto();
+				orderHistory.setOrders(orders);
+
+				// order에 따른 리뷰
+				Review findreview = findReviewForOrder(reviewList, ordersId);
+				if (findreview != null) {
+					orderHistory.setReview(findreview);
+				}
+				OrdersWithReview.add(orderHistory);
+			}
+			res.put("OrdersWithReview", OrdersWithReview);
+			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.badRequest().build();
+
+		}
+
+	}
+
+	private Review findReviewForOrder(List<Review> reviewList, Long ordersId) {
+		for (Review review : reviewList) {
+			if (review.getOrdersId().equals(ordersId)) {
+				return review;
+			}
+		}
+		return null; // 리뷰가 없으면 null로 반환
+	}
+
 	@GetMapping("/mypage/{requestId}") // 받은 매칭 견적에서 견적서 자세히 보기
 	public ResponseEntity<Map<String, Object>> matchingListDetail(@PathVariable Long requestId) {
 
@@ -263,37 +328,23 @@ public class FarmController {
 
 	}
 
-	// 구매내역 불러오기 하기 이거도 해야함 후기도 같이 불러와야함
-	@GetMapping("/mypage/buylist/{userId}")
-	public ResponseEntity<Map<String, Object>> buyList(@PathVariable Long userId) {
+	@GetMapping("/mypage/buylist/") // 주문 상세 farmerController에 있는지 보기
+	public ResponseEntity<String> ordersDetail(@RequestParam(required = false, name = "ordersId") Long ordersId) {
 		try {
 			Map<String, Object> res = new HashMap<>();
-			List<Orders> buyList = farmService.getOrdersListByUser(userId);
-			List<Review> reviewList = farmService.getReviewListByUser(userId);
-			farmService.getOrdersandReviewByUser(userId);
-			res.put("buyList", buyList);
-			res.put("reviewList", reviewList);
-			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
+//address 
+//tel 입력한 값?
+//수령인 getusername아니면 입력한 값 불러오기
+//배송메모
+//payment에서 불러오기?
+
 		} catch (Exception e) {
 			e.printStackTrace();
-			return ResponseEntity.badRequest().build();
 
 		}
+		return null;
 
 	}
-
-//	@GetMapping("/mypage/buylist/{ordersId}") // 주문 상세
-//	public ResponseEntity<String> ordersDetail(@PathVariable Long ordersId) {
-//		try {
-//			Map<String, Object> res = new HashMap<>();
-//
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//
-//		}
-//		return null;
-//
-//	}
 
 	// 필요 없는 controller 이거 안씀
 	@PostMapping("/placeorder")

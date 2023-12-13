@@ -17,6 +17,7 @@ import com.kosta.farm.entity.Product;
 import com.kosta.farm.entity.QCategory;
 import com.kosta.farm.entity.QFarmer;
 import com.kosta.farm.entity.QFarmerfollow;
+import com.kosta.farm.entity.QOrders;
 import com.kosta.farm.entity.QProduct;
 import com.kosta.farm.entity.QQuotation;
 import com.kosta.farm.entity.QRequest;
@@ -96,6 +97,13 @@ public class FarmDslRepository {
 		return jpaQueryFactory.select(request, quotation).from(request).leftJoin(quotation)
 				.on(request.requestId.eq(quotation.requestId)).where(request.requestId.eq(requestId)).fetch();
 
+	}
+
+	public List<Orders> findOrderswithReviewByUserId(Long userId) {
+		QOrders orders = QOrders.orders;
+		QReview review = QReview.review;
+		return jpaQueryFactory.select(orders).from(orders).leftJoin(review).on(orders.ordersId.eq(review.ordersId))
+				.where(orders.userId.eq(userId)).fetch();
 	}
 
 	@Transactional

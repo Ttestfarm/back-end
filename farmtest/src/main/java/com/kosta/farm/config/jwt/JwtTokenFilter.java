@@ -8,8 +8,11 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
@@ -23,7 +26,6 @@ import lombok.RequiredArgsConstructor;
 //OncePerRequestFilter : 매번 들어갈 때 마다 체크 해주는 필터
 @RequiredArgsConstructor
 public class JwtTokenFilter extends OncePerRequestFilter {
-
 	private final UserService userService;
 	private final String secretKey;
 
@@ -71,8 +73,9 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
 		authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
+		Authentication authentication = new UsernamePasswordAuthenticationToken(loginUser, "", List.of(new SimpleGrantedAuthority(loginUser.getUserRole().name())));
 		// 권한 부여
-		SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+		SecurityContextHolder.getContext().setAuthentication(authentication);
 		filterChain.doFilter(request, response);
 	}
 }

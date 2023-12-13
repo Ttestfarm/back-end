@@ -7,5 +7,4 @@ public class ReviewDto {
 	private Long ordersId;
 	private Integer rating;
 	private String content;
-	private String reviewpixUrl;
 }

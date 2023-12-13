@@ -149,12 +149,15 @@ public class FarmerController {
 		}
 	}
 
-	// 발송 완료 order 상태 변화, delivery 생성, 택배사 코드, 운송장번호
-	@GetMapping("/orderdelivery/{ordersId}/{tCode}/{tInvoice}")
-	public ResponseEntity<String> delivery(@PathVariable Long ordersId, @PathVariable String tCode,
-			@PathVariable String tInvioce) {
+	// 발송 완료(delivery 생성, 택배사 코드, 운송장번호)
+	@GetMapping("/sendparcel/{ordersId}/{code}/{invoice}")
+	public ResponseEntity<String> delivery(@PathVariable Long ordersId, @PathVariable String code,
+			@PathVariable String invoice) {
 		try {
-			farmerService.updateDelivery(ordersId, tCode, tInvioce);
+			System.out.println(ordersId);
+			System.err.println(code);
+			System.out.println(invoice);
+			farmerService.insertDelivery(ordersId, code, invoice);
 			return new ResponseEntity<String>("성공", HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -166,7 +169,7 @@ public class FarmerController {
 	@GetMapping("/ordercancel/{farmerId}/{ordersId}")
 	public ResponseEntity<String> delivery(@PathVariable Long farmerId, @PathVariable Long ordersId) {
 		try {
-			farmerService.updateOrderState(farmerId, ordersId);
+			farmerService.deleteOrderState(farmerId, ordersId);
 			return new ResponseEntity<String>("성공", HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -174,7 +177,7 @@ public class FarmerController {
 		}
 	}
 
-	// 배송 현황(배송중, 배송완료) deliveryState
+	// 배송 현황(0: 오류, 1: 배송중, 2: 배송 완료)
 	@GetMapping("/deliverylist/{farmerId}/{deliveryState}/{page}")
 	public ResponseEntity<Map<String, Object>> deliveryList(@PathVariable Integer page,
 			@PathVariable String deliveryState, @PathVariable Long farmerId) {

@@ -203,37 +203,19 @@ public class FarmerServiceImpl implements FarmerService {
         String dateString = dateFormat.format(timestamp);        
 		orders.setDate(dateString);
 		
-		
 		return orders;
 	}
-	
-//	// 결제 완료(주문) 상세 보기
-//	public OrdersDto OrdersDetailNotQuotationId(Long farmerId, Long ordersId) throws Exception{
-//		
-//		OrdersDto orders = new OrdersDto();
-//		
-//		orders.setOrdersId(tuple.get(0, Long.class));
-//		orders.setDate(tuple.get(1, Timestamp.class));
-//		orders.setProduct(tuple.get(2, String.class));
-//		orders.setQuantity(tuple.get(3, String.class));
-//		orders.setName(tuple.get(4, String.class));
-//		orders.setTel(tuple.get(5, String.class));
-//		orders.setAddress(tuple.get(6, String.class));
-//		orders.setPaymentBank(tuple.get(7, String.class));
-//		orders.setPrice(tuple.get(8, Integer.class));
-//		orders.setDelivery(tuple.get(9, Integer.class));
-//		
-//		return orders;
-//	}
-//	
+
 	// 발송 완료 처리
-	public void updateDelivery(Long ordersId, String tCode, String tInvoice) throws Exception {
-		farmerDslRepository.updateDelivery(ordersId, tCode, tInvoice);
+	@Transactional
+	public void insertDelivery(Long ordersId, String tCode, String tInvoice) throws Exception {
+		farmerDslRepository.insertDeliveryWithOrdersIdAndTCodeAndTInvoice(ordersId, tCode, tInvoice);
 	}
 	
 	// 판매 취소
-	public void updateOrderState(Long farmerId, Long ordersId) throws Exception {
-		farmerDslRepository.updateOrderState(ordersId, farmerId);
+	@Transactional
+	public void deleteOrderState(Long farmerId, Long ordersId) throws Exception {
+		farmerDslRepository.deleteOrderState(ordersId, farmerId);
 	}
 
 	// 배송 현황 리스트
@@ -249,13 +231,13 @@ public class FarmerServiceImpl implements FarmerService {
 				DeliveryDto dto = new DeliveryDto();
 				Long ordersId = t.get(0, Long.class);
 				String tCode = t.get(1, String.class);
-				String tInvocie = t.get(2, String.class);
+				String tInvoice = t.get(2, String.class);
 				String product = t.get(3, String.class);
 				String state = t.get(4, String.class);
 				
 				dto.setOrdersId(ordersId);
 				dto.setTCode(tCode);
-				dto.setTInvocie(tInvocie);
+				dto.setTInvoice(tInvoice);
 				dto.setProduct(product);
 				dto.setDeliveryState(deliveryState);
 				deliveryList.add(dto);

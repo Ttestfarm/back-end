@@ -205,17 +205,17 @@ public class FarmerDslRepository {
 	}
 	
 	// 발송 완료 (ordersId, delivery update)
-	public void updateDelivery(Long ordersId, String tCode, String tInvoice) {
-		QDelivery d = QDelivery.delivery;
-		jpaQueryFactory.update(d)
-			.set(d.orderId, ordersId)
-			.set(d.tCode, tCode)
-			.set(d.tInvocie, tInvoice)
+	public void insertDeliveryWithOrdersIdAndTCodeAndTInvoice(Long ordersId, String tCode, String tInvoice) {
+		QDelivery deli = QDelivery.delivery;
+		jpaQueryFactory.insert(deli)
+			.set(deli.ordersId, ordersId)
+			.set(deli.tCode, tCode)
+			.set(deli.tInvoice, tInvoice)
 		    .execute();
 	}
 	
 	// 판매 취소
-	public void updateOrderState(Long ordersId, Long farmerId) {
+	public void deleteOrderState(Long ordersId, Long farmerId) {
 		QOrders ord = QOrders.orders;
 		jpaQueryFactory.update(ord)
 			.set(ord.ordersState, "1")
@@ -231,13 +231,13 @@ public class FarmerDslRepository {
 		QQuotation quot = QQuotation.quotation;
 		QProduct prod = QProduct.product;
 		
-		return jpaQueryFactory.select(ord.ordersId, deli.tCode, deli.tInvocie, 
+		return jpaQueryFactory.select(ord.ordersId, deli.tCode, deli.tInvoice, 
 				new CaseBuilder()
 					.when(ord.quotationId.isNotNull()).then(quot.quotationProduct)
 					.otherwise(prod.productName)
 				,deli.deliveryState)
 				.from(ord)
-				.join(deli).on(ord.ordersId.eq(deli.orderId))
+				.join(deli).on(ord.ordersId.eq(deli.ordersId))
 				.join(quot).on(ord.quotationId.eq(quot.quotationId))
 				.join(prod).on(ord.productId.eq(prod.productId))
 				.where(ord.farmerId.eq(farmerId)
@@ -254,7 +254,7 @@ public class FarmerDslRepository {
 		QOrders ord = QOrders.orders;
 		QDelivery deli = QDelivery.delivery;
 		return jpaQueryFactory.select(deli.count()).distinct()
-				.join(deli).on(ord.ordersId.eq(deli.orderId))
+				.join(deli).on(ord.ordersId.eq(deli.ordersId))
 				.where(ord.farmerId.eq(farmerId)
 						.and(deli.deliveryState.eq(deliveryState)))
 				.fetchOne();

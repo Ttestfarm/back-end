@@ -15,23 +15,18 @@ import org.hibernate.annotations.DynamicUpdate;
 
 import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Entity
 @Data
+@Builder
 @DynamicInsert
 @DynamicUpdate
-@NoArgsConstructor
-@Getter
-@Setter
 public class Delivery {
 	@Id @GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Long deliveryId;
 	// FK
 	@Column
-	private Long orderId; // ordersId로 수정
+	private Long ordersId; // ordersId로 수정
 	@Column 
 	private String tCode; // 택배사 코드
 	@Column

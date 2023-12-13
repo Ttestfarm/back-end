@@ -91,8 +91,9 @@ public class UserController {
 	
 	@GetMapping("/login/userInfo")
   public ResponseEntity<?> userInfo(Authentication auth) throws Exception {
+		User user =  (User)auth.getPrincipal();
 		try {
-			User loginUser = userService.getLoginUserByUserEmail(auth.getName());
+			User loginUser = userService.getLoginUserByUserEmail(user.getUserEmail());
 
 	    UserInfoDto userInfoResponse = new UserInfoDto(
 	            loginUser.getUserId(),

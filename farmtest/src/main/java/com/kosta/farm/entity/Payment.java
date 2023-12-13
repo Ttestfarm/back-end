@@ -28,7 +28,7 @@ public class Payment {
 	@Column
 	private Integer paymentDelivery; // 배송비
 	@Column
-	private Integer paymentPrice; // 결제금액
+	private Integer paymentPrice; // 상품금액
 	@Column
 	@CreationTimestamp
 	private Timestamp createDate; // 결제 완료 날짜
@@ -46,5 +46,4 @@ public class Payment {
 	private Long requestId; //요청서 아이디
 	@Column
 	private Long quotationId; //견적서 아이디
-	
 }

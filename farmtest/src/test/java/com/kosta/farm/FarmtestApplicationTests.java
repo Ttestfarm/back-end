@@ -20,6 +20,12 @@ class FarmtestApplicationTests {
 	void contextLoads() {
 	}
 
+	@Autowired
+	ProductRepository productRepository;
+	@Autowired
+	FarmerRepository farmerRepository;
+
+	
 	
 
 	

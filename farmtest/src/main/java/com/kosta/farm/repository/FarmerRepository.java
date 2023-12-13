@@ -16,7 +16,7 @@ import com.kosta.farm.util.PageInfo;
 public interface FarmerRepository extends JpaRepository<Farmer, Long> {
 	// farmerId로 관심 품목 조회
 	Farmer findByFarmerId(Long farmerId);
-	
+
 	// 리뷰카운트순으로 파머리스트 가져오기
 	List<Farmer> findByreviewCount(Integer reviewCount);
 
@@ -30,19 +30,14 @@ public interface FarmerRepository extends JpaRepository<Farmer, Long> {
 
 	// 파머이름 포함한
 
-	// 파머 팜 인터레스트 123 포함한
-	Page<Farmer> findByFarmInterest1Contains(String farmInterest1, PageRequest pageRequest);
+	// 파머 팜 인터레스트 12345 포함한
 
-	Page<Farmer> findByFarmInterest2Contains(String farmInterest2, PageRequest pageRequest);
-
-	Page<Farmer> findByFarmInterest3Contains(String farmInterest3, PageRequest pageRequest);
-
-	Page<Farmer> findByFarmInterest1ContainingOrFarmInterest2ContainingOrFarmInterest3Containing(String farmInterest1,
-			String farmInterest2, String farmInterest3, PageRequest pageRequest);
+	Page<Farmer> findByFarmInterest1ContainingOrFarmInterest2ContainingOrFarmInterest3ContainingOrFarmInterest4ContainingOrFarmInterest5Containing(
+			String farmInterest1, String farmInterest2, String farmInterest3, String farmInterest4,
+			String farmInterest5, PageRequest pageRequest);
 
 	List<Farmer> findByfollowCount(Integer followCount, Sort sort);
 
 	Page<Farmer> findPageBy(Pageable pageable);
-
 
 }

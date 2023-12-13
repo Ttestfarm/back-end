@@ -19,7 +19,11 @@ public class QPayment extends EntityPathBase<Payment> {
 
     public static final QPayment payment = new QPayment("payment");
 
+    public final NumberPath<Integer> count = createNumber("count", Integer.class);
+
     public final DateTimePath<java.sql.Timestamp> createDate = createDateTime("createDate", java.sql.Timestamp.class);
+
+    public final NumberPath<Long> farmerId = createNumber("farmerId", Long.class);
 
     public final StringPath paymentBank = createString("paymentBank");
 
@@ -29,7 +33,15 @@ public class QPayment extends EntityPathBase<Payment> {
 
     public final NumberPath<Integer> paymentPrice = createNumber("paymentPrice", Integer.class);
 
+    public final NumberPath<Integer> productPrice = createNumber("productPrice", Integer.class);
+
+    public final NumberPath<Long> quotationId = createNumber("quotationId", Long.class);
+
+    public final NumberPath<Long> requestId = createNumber("requestId", Long.class);
+
     public final StringPath state = createString("state");
+
+    public final NumberPath<Long> userId = createNumber("userId", Long.class);
 
     public QPayment(String variable) {
         super(Payment.class, forVariable(variable));

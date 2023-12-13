@@ -41,7 +41,7 @@ public class QUser extends EntityPathBase<User> {
 
     public final StringPath userPassword = createString("userPassword");
 
-    public final StringPath userRoles = createString("userRoles");
+    public final EnumPath<com.kosta.farm.util.UserRole> userRole = createEnum("userRole", com.kosta.farm.util.UserRole.class);
 
     public final BooleanPath userState = createBoolean("userState");
 

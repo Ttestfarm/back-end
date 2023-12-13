@@ -25,6 +25,8 @@ public class QReview extends EntityPathBase<Review> {
 
     public final NumberPath<Long> farmerId = createNumber("farmerId", Long.class);
 
+    public final NumberPath<Long> ordersId = createNumber("ordersId", Long.class);
+
     public final NumberPath<Integer> rating = createNumber("rating", Integer.class);
 
     public final NumberPath<Long> reviewId = createNumber("reviewId", Long.class);

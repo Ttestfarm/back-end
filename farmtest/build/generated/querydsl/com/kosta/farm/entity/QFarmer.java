@@ -31,6 +31,8 @@ public class QFarmer extends EntityPathBase<Farmer> {
 
     public final NumberPath<Long> farmerId = createNumber("farmerId", Long.class);
 
+    public final BooleanPath farmerState = createBoolean("farmerState");
+
     public final StringPath farmInterest1 = createString("farmInterest1");
 
     public final StringPath farmInterest2 = createString("farmInterest2");
@@ -49,13 +51,11 @@ public class QFarmer extends EntityPathBase<Farmer> {
 
     public final NumberPath<Integer> followCount = createNumber("followCount", Integer.class);
 
-    public final NumberPath<Long> rating = createNumber("rating", Long.class);
+    public final NumberPath<Double> rating = createNumber("rating", Double.class);
 
     public final StringPath registrationNum = createString("registrationNum");
 
     public final NumberPath<Integer> reviewCount = createNumber("reviewCount", Integer.class);
-
-    public final BooleanPath state = createBoolean("state");
 
     public QFarmer(String variable) {
         super(Farmer.class, forVariable(variable));

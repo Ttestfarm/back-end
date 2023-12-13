@@ -371,8 +371,8 @@ public class FarmServiceImpl implements FarmService {
 
 		Orders orders = Orders.builder().userId(payment.getUserId()).productId(productId)
 				.farmerId(payment.getFarmerId()) // 파머 아이디도 저장
-				.price(payment.getProductPrice()) // 총 가격은 상품 =가격 * 수량
-				.ordersState(payment.getState()).paymentId(paymentId).count(payment.getCount()).build();
+				.ordersPrice(payment.getProductPrice()) // 총 가격은 상품 =가격 * 수량
+				.ordersState(payment.getState()).paymentId(paymentId).ordersCount(payment.getCount()).build();
 		try {
 			// 3. repository 이용해서 save;
 			ordersRepository.save(orders);

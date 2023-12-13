@@ -7,11 +7,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.kosta.farm.entity.Farmer;
-import com.kosta.farm.entity.Product;
-import com.kosta.farm.repository.FarmerRepository;
-import com.kosta.farm.repository.ProductRepository;
-import com.kosta.farm.service.FarmService;
+//import com.kosta.farm.entity.Farmer;
+//import com.kosta.farm.entity.Product;
+//import com.kosta.farm.repository.FarmerRepository;
+//import com.kosta.farm.repository.ProductRepository;
+//import com.kosta.farm.service.FarmService;
 
 @SpringBootTest
 class FarmtestApplicationTests {
@@ -19,11 +19,6 @@ class FarmtestApplicationTests {
 	@Test
 	void contextLoads() {
 	}
-
-	@Autowired
-	ProductRepository productRepository;
-	@Autowired
-	FarmerRepository farmerRepository;
 
 	
 	

@@ -14,7 +14,9 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.UniqueConstraint;
 
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
@@ -40,26 +42,28 @@ public class Orders { // order> orders로 대체 entity 생성 오류 때문에
 	private Long farmerId;
 	@Column
 	private Long requestId;
-
 	@Column
 	private Long quotationId;
 	@Column
 	private Long paymentId;
 	@Column
+	private Long productId; //상품정보
+	//상시판매를 위한 컬럼들
+	@Column
+	private Integer ordersCount; //주문 수량
+	@Column
+	private Integer ordersPrice; //주문 가격
+	@Column
+	private String cancelText; // 판매 취소 사유
+	@Column
 	@CreationTimestamp
 	private Timestamp createDate;
 	@Column
-	private String ordersState; // 결제완료 0, 판매취소 1, 배송완료 2
-	// 주문 상태
-
-	@Column
-	private Long productId; // 상품정보
-
-	// 상시판매를 위한 컬럼들
-
-	@Column
-	private Integer count; // 주문상품 수량
-	@Column
-	private Integer price; // 주문 상품 가격
+	@ColumnDefault("1")
+	private String ordersState; // 0: 판매취소, 1: 결제완료
+	
+//	@OneToMany(mappedBy = "orders", cascade = CascadeType.ALL)
+//	private List<OrderReg> orderReg=new ArrayList<>();
+//	}
 
 }

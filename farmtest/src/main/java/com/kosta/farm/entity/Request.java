@@ -50,7 +50,7 @@ public class Request {
 	@Column
 	private Timestamp createDate; //자동
 	@Column
-	private String requestState; // 기간 만료 0, 요청 1, 성사 2 
+	private String requestState; // 기간 만료 0, 요청 1, 성사 2, 취소 3 
 	
 	
 	

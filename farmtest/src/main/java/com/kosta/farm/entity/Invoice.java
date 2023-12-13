@@ -26,13 +26,13 @@ public class Invoice {
 	@Column
 	private Long orderId;
 	@Column
-	private Date invocieDate1; // 정산예정일
+	private Date invoiceDate1; // 정산예정일
 	@Column
-	private Date invocieDate2; // 정산완료일
+	private Date invoiceDate2; // 정산완료일
 	@Column
-	private Long invocieCommission; // 수수료
+	private Long invoiceCommission; // 수수료
 	@Column
-	private Long invociePrice; // 가격
+	private Long invoicePrice; // 가격
 	@Column
 	@CreationTimestamp
 	private Timestamp createDate;

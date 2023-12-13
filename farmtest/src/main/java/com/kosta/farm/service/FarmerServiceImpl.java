@@ -1,12 +1,14 @@
 package com.kosta.farm.service;
 
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -18,13 +20,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kosta.farm.dto.DeliveryDto;
 import com.kosta.farm.dto.OrdersDto;
 import com.kosta.farm.dto.QuotationDto;
+import com.kosta.farm.entity.Delivery;
 import com.kosta.farm.dto.RegFarmerDto;
 import com.kosta.farm.entity.Farmer;
+import com.kosta.farm.entity.Orders;
 import com.kosta.farm.entity.Quotation;
 import com.kosta.farm.entity.Request;
+import com.kosta.farm.repository.DeliveryRepository;
 import com.kosta.farm.repository.FarmerDslRepository;
 import com.kosta.farm.repository.FarmerRepository;
-import com.kosta.farm.repository.QuotationRepositrory;
+import com.kosta.farm.repository.OrdersRepository;
+import com.kosta.farm.repository.QuotationRepository;
 import com.kosta.farm.repository.RequestRepository;
 import com.kosta.farm.unti.PageInfo;
 import com.querydsl.core.Tuple;
@@ -38,7 +44,9 @@ public class FarmerServiceImpl implements FarmerService {
 	// Repository
 	private final FarmerRepository farmerRepository;
 	private final RequestRepository requestRepository;
-	private final QuotationRepositrory quotationRepositrory;
+	private final DeliveryRepository deliveryRepository;
+	private final OrdersRepository ordersRepository;
+	private final QuotationRepository quotationRepository;
 	// DSL
 	private final FarmerDslRepository farmerDslRepository;
 	private final ObjectMapper objectMapper;
@@ -63,13 +71,14 @@ public class FarmerServiceImpl implements FarmerService {
 	// 관심 농산물인 요청서 리스트 보기
 	@Override
 	public List<Request> findRequestsByFarmInterest(Long farmerId, String farmInterest) throws Exception {
-		return farmerDslRepository.findRequestByInterestAndFarmerId(farmerId, farmInterest);
+		List<Request> list = farmerDslRepository.findRequestByInterestAndFarmerId(farmerId, farmInterest);
+		return list;
 	}
 
 	// ** 견적서 **
 	@Override // 견적서 양식 (보내기 이벤트)-> 견적서 저장 
 	public void saveQuotation(Quotation quotation) throws Exception {
-		quotationRepositrory.save(quotation);
+		quotationRepository.save(quotation);
 	}
 
 	// ** 견적 현황 페이지 **
@@ -115,8 +124,8 @@ public class FarmerServiceImpl implements FarmerService {
 
 	// 견적서 자세히보기
 	@Override
-	public Quotation findQuotationByQuotationId(Long quotationId) throws Exception {
-		return farmerDslRepository.findQuotationByQuotationId(quotationId);
+	public Quotation findQuotationByQuotationId(Long farmerId, Long quotationId) throws Exception {
+		return farmerDslRepository.findQuotationByQuotationId(farmerId, quotationId);
 	}
 
 	// 결제 완료 현황
@@ -126,19 +135,18 @@ public class FarmerServiceImpl implements FarmerService {
 		List<Tuple> tuples = null;
 		List<OrdersDto> ordList = new ArrayList<>();
 		Long allCount = null;
-		if(type.equals("0")) { // 매칭 주문
+		if(type.equals("1")) { // 매칭 주문
 			tuples = farmerDslRepository.findOrdersQuotByFarmerIdAndPaging(farmerId, pageRequest);
 			for(Tuple t : tuples) {
 				OrdersDto dto = new OrdersDto();
-				Long orderId = t.get(0, Long.class);
+				Long ordersId = t.get(0, Long.class);
 				String product = t.get(1, String.class);
 				String quantity = t.get(2, String.class);
 				Integer price = t.get(3, Integer.class);
 				String name = t.get(4, String.class);
 				String tel = t.get(5, String.class);
 				String address = t.get(6, String.class);
-				
-				dto.setOrderId(orderId);
+				dto.setOrdersId(ordersId);
 				dto.setProduct(product);
 				dto.setQuantity(quantity);
 				dto.setPrice(price);
@@ -146,14 +154,13 @@ public class FarmerServiceImpl implements FarmerService {
 				dto.setTel(tel);
 				dto.setAddress(address);
 				ordList.add(dto);
-				
-				allCount = farmerDslRepository.findOrdersCountByFarmerIdAndQuotationIsNotNull(farmerId);
 			}
-		} else if(type.equals("1")) { // 받은 주문
+			allCount = farmerDslRepository.findOrdersCountByFarmerIdAndQuotationIsNotNull(farmerId);
+		} else if(type.equals("2")) { // 받은 주문
 			tuples = farmerDslRepository.findOrdersByFarmerIdAndPaging(farmerId, pageRequest);
 			for(Tuple t : tuples) {
 				OrdersDto dto = new OrdersDto();
-				Long orderId = t.get(0, Long.class);
+				Long ordersId = t.get(0, Long.class);
 				String product = t.get(1, String.class);
 				String quantity = t.get(2, String.class);
 				Integer price = t.get(3, Integer.class);
@@ -161,7 +168,7 @@ public class FarmerServiceImpl implements FarmerService {
 				String tel = t.get(5, String.class);
 				String address = t.get(6, String.class);
 				
-				dto.setOrderId(orderId);
+				dto.setOrdersId(ordersId);
 				dto.setProduct(product);
 				dto.setQuantity(quantity);
 				dto.setPrice(price);
@@ -170,10 +177,9 @@ public class FarmerServiceImpl implements FarmerService {
 				dto.setAddress(address);
 				ordList.add(dto);
 				
-				allCount = farmerDslRepository.findOrdersCountByFarmerIdAndQuotationIsNull(farmerId);
 			}
+			allCount = farmerDslRepository.findOrdersCountByFarmerIdAndQuotationIsNotNull(farmerId);
 		}
-		
 		Integer allPage = (int)(Math.ceil(allCount.doubleValue()/pageRequest.getPageSize()));
 		Integer startPage = (pageInfo.getCurPage()-1)/10*10+1;
 		Integer endPage = Math.min(startPage+10-1, allPage);
@@ -186,51 +192,56 @@ public class FarmerServiceImpl implements FarmerService {
 	}
 	
 	// 결제 완료(매칭) 상세 보기
-	public OrdersDto OrdersDetailQuotationId(Long farmerId, Long ordersId) throws Exception{
-		Tuple tuple = farmerDslRepository.findOrderByFarmerIdAndOrderIdIsNotNull(farmerId, ordersId);
-		OrdersDto dto = new OrdersDto();
+	public OrdersDto OrdersDetailQuotationId(Long farmerId, Long ordersId, String type) throws Exception{
+		Tuple tuple = null;
+		OrdersDto orders = new OrdersDto();
+		if(type.equals("1")) {
+			tuple = farmerDslRepository.findOrderByFarmerIdAndOrderIdIsNotNull(farmerId, ordersId);
+		} else if(type.equals("2")) {
+			tuple = farmerDslRepository.findOrderByFarmerIdAndOrderIdAndQuotaionIdIsNull(farmerId, ordersId);
+		}
+		orders.setOrdersId(tuple.get(0, Long.class));
+		orders.setProduct(tuple.get(1, String.class));
+		orders.setQuantity(tuple.get(2, String.class));
+		orders.setName(tuple.get(3, String.class));
+		orders.setTel(tuple.get(4, String.class));
+		orders.setAddress(tuple.get(5, String.class));
+		orders.setPrice(tuple.get(6, Integer.class));
+		orders.setPaymentBank(tuple.get(7, String.class));
+		orders.setDelivery(tuple.get(8, Integer.class));
+		orders.setPaymentState(tuple.get(9, String.class));
+		orders.setPaymentPrice(tuple.get(10, Integer.class));
 		
-		dto.setOrderId(tuple.get(0, Long.class));
-		dto.setDate(tuple.get(1, Timestamp.class));
-		dto.setProduct(tuple.get(2, String.class));
-		dto.setQuantity(tuple.get(3, String.class));
-		dto.setName(tuple.get(4, String.class));
-		dto.setTel(tuple.get(5, String.class));
-		dto.setAddress(tuple.get(6, String.class));
-		dto.setPaymentBank(tuple.get(7, String.class));
-		dto.setPrice(tuple.get(8, Integer.class));
-		dto.setDelivery(tuple.get(9, Integer.class));
+		Timestamp timestamp = tuple.get(11, Timestamp.class);
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+        String dateString = dateFormat.format(timestamp);        
+		orders.setDate(dateString);
 		
-		return dto;
+		return orders;
 	}
-	
-	// 결제 완료(주문) 상세 보기
-	public OrdersDto OrdersDetailNotQuotationId(Long farmerId, Long ordersId) throws Exception{
-		Tuple tuple = farmerDslRepository.findOrderByFarmerIdAndOrderIdAndQuotaionIdIsNull(farmerId, ordersId);
-		OrdersDto dto = new OrdersDto();
-		
-		dto.setOrderId(tuple.get(0, Long.class));
-		dto.setDate(tuple.get(1, Timestamp.class));
-		dto.setProduct(tuple.get(2, String.class));
-		dto.setQuantity(tuple.get(3, String.class));
-		dto.setName(tuple.get(4, String.class));
-		dto.setTel(tuple.get(5, String.class));
-		dto.setAddress(tuple.get(6, String.class));
-		dto.setPaymentBank(tuple.get(7, String.class));
-		dto.setPrice(tuple.get(8, Integer.class));
-		dto.setDelivery(tuple.get(9, Integer.class));
-		
-		return dto;
-	}
-	
+
 	// 발송 완료 처리
-	public void updateDelivery(Long ordersId, String tCode, String tInvoice) throws Exception {
-		farmerDslRepository.updateDelivery(ordersId, tCode, tInvoice);
+	@Transactional
+	public void insertDelivery(Long ordersId, String tCode, String tInvoice) throws Exception {
+		System.out.println("2");
+		System.out.println("id " + ordersId);
+		System.err.println("tCode " + tCode);
+		System.out.println("tInvoice " + tInvoice);
+		Delivery delivery = new Delivery(ordersId, tCode, tInvoice);
+		deliveryRepository.save(delivery);
+//		farmerDslRepository.insertDeliveryWithOrdersIdAndTCodeAndTInvoice(ordersId, tCode, tInvoice);
 	}
 	
 	// 판매 취소
-	public void updateOrderState(Long farmerId, Long ordersId) throws Exception {
-		farmerDslRepository.updateOrderState(ordersId, farmerId);
+	@Transactional
+	public void deleteOrderState(Long farmerId, Long ordersId, String cancelText) throws Exception {
+		// Orders State 변경
+		farmerDslRepository.deleteOrderState(ordersId, farmerId, cancelText);
+		
+		// Payment State 변경
+		Orders ord = ordersRepository.findById(ordersId).get();
+		Long paymentId = ord.getPaymentId();
+		farmerDslRepository.updatePaymentByOrdersId(paymentId);
 	}
 
 	// 배송 현황 리스트
@@ -246,13 +257,13 @@ public class FarmerServiceImpl implements FarmerService {
 				DeliveryDto dto = new DeliveryDto();
 				Long ordersId = t.get(0, Long.class);
 				String tCode = t.get(1, String.class);
-				String tInvocie = t.get(2, String.class);
+				String tInvoice = t.get(2, String.class);
 				String product = t.get(3, String.class);
 				String state = t.get(4, String.class);
 				
 				dto.setOrdersId(ordersId);
 				dto.setTCode(tCode);
-				dto.setTInvocie(tInvocie);
+				dto.setTInvoice(tInvoice);
 				dto.setProduct(product);
 				dto.setDeliveryState(deliveryState);
 				deliveryList.add(dto);

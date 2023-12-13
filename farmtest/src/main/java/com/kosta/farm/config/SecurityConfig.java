@@ -27,6 +27,7 @@ public class SecurityConfig {
 	private final PrincipalOauth2UserService principalOauth2UserService;
   private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
+
 	@Value("${jwt.secretKey}")
 	private String secretKey;
 

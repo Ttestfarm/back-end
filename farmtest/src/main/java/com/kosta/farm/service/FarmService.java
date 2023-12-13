@@ -10,11 +10,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.kosta.farm.dto.FarmerDto;
+import com.kosta.farm.dto.RequestDto;
+import com.kosta.farm.dto.ReviewDto;
 import com.kosta.farm.entity.Farmer;
 import com.kosta.farm.entity.Farmerfollow;
 import com.kosta.farm.entity.Orders;
 import com.kosta.farm.entity.Payment;
 import com.kosta.farm.entity.Product;
+import com.kosta.farm.entity.Quotation;
 import com.kosta.farm.entity.Request;
 import com.kosta.farm.entity.Review;
 import com.kosta.farm.entity.User;
@@ -24,6 +27,11 @@ import com.querydsl.core.Tuple;
 public interface FarmService {
 	// 상품 등록
 	Long productEnter(Product product, MultipartFile thmbnail, List<MultipartFile> file) throws Exception;
+
+	// 리뷰 등록
+	void addReview(Long ordersId, List<MultipartFile> files, Integer rating, String content) throws Exception;
+
+	Long addReviews(ReviewDto review, List<MultipartFile> files) throws Exception;
 
 	// 모든 파머 가져오기
 	List<Farmer> findAllFarmers() throws Exception;
@@ -41,13 +49,10 @@ public interface FarmService {
 	// 구매내역
 	List<Orders> getOrdersListByUser(Long userId) throws Exception;
 
-	List<Map<String, Object>> getOrdersandReviewByUser(Long userId) throws Exception;
-
-	// 리뷰 등록
-	void addReview(Long ordersId, List<MultipartFile> files, Integer rating, String content) throws Exception;
+	List<Orders> getOrdersandReviewByUser(Long userId) throws Exception;
 
 	// 요청서 등록
-	void addRequest(Request request) throws Exception;
+	Request addRequest(RequestDto request) throws Exception;
 
 	// 파머리스트 페이지
 	List<Farmer> farmerListByPage(PageInfo pageInfo) throws Exception;
@@ -57,18 +62,18 @@ public interface FarmService {
 
 	// 파머리스트 페이지 (무한스크롤)
 
-	List<Request> findRequestListByPage(PageInfo pageInfo) throws Exception;
-
 	Long farmerCount() throws Exception;
 
 	// 파머 상세 페이지
 	Farmer farmerDetail(Long farmerId) throws Exception;
 
 	// 파머 팔로우 하기
-	Boolean Farmerfollow(Long userId, Long farmerId) throws Exception;
+	Boolean farmerfollow(Long userId, Long farmerId) throws Exception;
 
 	// 이미 파머팔로우완료 한거
 	Boolean selectedFarmerfollow(Long userId, Long farmerId) throws Exception;
+
+//	Boolean selectedFarmerfollowByEmail(String userEmail, Long farmerId) throws Exception;
 
 	Farmer farmerInfo(Long farmerId) throws Exception;
 
@@ -85,7 +90,23 @@ public interface FarmService {
 	// 결제 확인
 	Boolean checkPaymentState(Long userId) throws Exception;
 
-	// 매칭 리스트 가져오기?
+	// 매칭 리스트 가져오기? 매칭 메인 페이지
 	List<Request> requestListByPage(PageInfo pageInfo) throws Exception;
+
+	List<Request> requestListByUser(Long userId) throws Exception;
+
+	List<Quotation> quoteListByRequest(Long requestId) throws Exception;
+
+	List<Tuple> quoteandRequestListByRequestId(Long requestId) throws Exception;
+
+	// 견적서 수 요청서id별로
+	Long quoteCount(Long requestId) throws Exception;
+
+	// 모든 농부들의 별점 평균
+	Double avgRating() throws Exception;
+
+	// 모든 requestcount state이 1인거
+	Integer requestCount() throws Exception;
+	// requestCount state이 2인거?
 
 }

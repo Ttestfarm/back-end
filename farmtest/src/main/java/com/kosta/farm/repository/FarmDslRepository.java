@@ -3,11 +3,9 @@ package com.kosta.farm.repository;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
@@ -21,15 +19,14 @@ import com.kosta.farm.entity.QFarmer;
 import com.kosta.farm.entity.QFarmerfollow;
 import com.kosta.farm.entity.QOrders;
 import com.kosta.farm.entity.QProduct;
+import com.kosta.farm.entity.QQuotation;
+import com.kosta.farm.entity.QRequest;
 import com.kosta.farm.entity.QReview;
-import com.kosta.farm.entity.QUser;
 import com.kosta.farm.entity.Review;
-import com.kosta.farm.entity.User;
 import com.kosta.farm.util.PageInfo;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Projections;
-import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
@@ -39,6 +36,14 @@ import lombok.RequiredArgsConstructor;
 public class FarmDslRepository {
 	@Autowired
 	private JPAQueryFactory jpaQueryFactory;
+
+	// quotecount 가져오기
+	public Long findQuoteCountByRequestId(Long requestId) throws Exception {
+		QQuotation quotation = QQuotation.quotation;
+		return jpaQueryFactory.select(quotation.count()).from(quotation).where(quotation.requestId.eq(requestId))
+				.fetchOne();
+//		return count;
+	};
 
 	// 파머 수 가져오기
 	public Long findFarmerCount() throws Exception {
@@ -86,22 +91,24 @@ public class FarmDslRepository {
 		return jpaQueryFactory.selectFrom(review).where(review.userId.eq(userId)).fetch();
 	}
 
-	public Double getAvgRatingByFarmersId(Long farmerId) {
-		QReview review = QReview.review;
-		Double avgRating = jpaQueryFactory.select(review.rating.doubleValue().avg()).from(review)
-				.where(review.farmerId.eq(farmerId)).fetchOne();
-
-		return avgRating != null ? avgRating : 0.0;
+	public List<Tuple> getReqandQuoteByRequestId(Long requestId) {
+		QRequest request = QRequest.request;
+		QQuotation quotation = QQuotation.quotation;
+		return jpaQueryFactory.select(request, quotation).from(request).leftJoin(quotation)
+				.on(request.requestId.eq(quotation.requestId)).where(request.requestId.eq(requestId)).fetch();
 
 	}
 
-	public List<Farmer> findbyKeyword(String keyword, PageRequest pageRequest) {
-		QFarmer farmer = QFarmer.farmer;
-		BooleanExpression keywords = farmer.farmInterest1.containsIgnoreCase(keyword)
-				.or(farmer.farmInterest2.containsIgnoreCase(keyword))
-				.or(farmer.farmInterest3.containsIgnoreCase(keyword))
-				.or(farmer.farmInterest4.containsIgnoreCase(keyword));
-		return jpaQueryFactory.selectFrom(farmer).where(keywords).fetch();
+	public List<Orders> findOrderswithReviewByUserId(Long userId) {
+		QOrders orders = QOrders.orders;
+		QReview review = QReview.review;
+		return jpaQueryFactory.select(orders).from(orders).leftJoin(review).on(orders.ordersId.eq(review.ordersId))
+				.where(orders.userId.eq(userId)).fetch();
+	}
+
+	@Transactional
+	public void updateStock(Long productId, Integer stock) {
+
 	}
 
 	// 파머의 카테고리 이름 가져오기? ㄴㄴ farminterest 검색하기
@@ -115,13 +122,3 @@ public class FarmDslRepository {
 	}
 
 }
-
-// 이미 존재하는 주문 조회
-//public Orders getExistingOrder(Long userId, Long productId) {
-//	QOrders orders = QOrders.orders;
-//	QUser user = QUser.user;
-//	QProduct product = QProduct.product;
-//
-//	return jpaQueryFactory.selectFrom(orders).where(orders.userId.eq(userId).and(orders.productId.eq(productId)))
-//			.fetchOne();
-//}

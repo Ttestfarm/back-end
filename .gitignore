@@ -13,9 +13,10 @@ local.properties
 .settings/
 .loadpath
 .recommenders
-
-application.properties
-Servers
+*.bin
+*.lock
+.gradle
+Servers/
 
 # External tool builders
 .externalToolBuilders/

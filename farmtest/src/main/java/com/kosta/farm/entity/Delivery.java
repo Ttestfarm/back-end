@@ -26,11 +26,11 @@ public class Delivery {
 	private Long deliveryId;
 	// FK
 	@Column
-	private Long ordesrId;
+	private Long ordersId;
 	@Column 
 	private String tCode; // 택배사 코드
 	@Column
-	private String tInvocie; // 송장번호
+	private String tInvoice; // 송장번호
 	@Column
 	@CreationTimestamp
 	private Timestamp createDate;

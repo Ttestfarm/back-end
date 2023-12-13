@@ -49,7 +49,7 @@ public class Quotation {
 	@CreationTimestamp
 	private Timestamp createDate; // 견적서 보낸 날짜
 	@Column
-//	@Builder.Default
+	@Builder.Default
 	@ColumnDefault("1")
 	private String quotationState = "1"; // 0 : 견적서 취소, 1 : 대기중, 2 : 기간 만료, 3 : 결제완료 
 }

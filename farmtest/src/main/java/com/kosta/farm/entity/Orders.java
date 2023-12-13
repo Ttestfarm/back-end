@@ -1,6 +1,5 @@
 package com.kosta.farm.entity;
 
-
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,9 +7,12 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.UniqueConstraint;
 
@@ -19,18 +21,23 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Data
+@Builder
 @NoArgsConstructor
-public class Orders { //order> orders로 대체 entity 생성 오류 때문에
-	@Id @GeneratedValue(strategy=GenerationType.IDENTITY)
+@AllArgsConstructor
+public class Orders { // order> orders로 대체 entity 생성 오류 때문에
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long ordersId;
 	// FK
 	@Column
-	private Long userId; //주문 회원
+	private Long userId; // 주문 회원
 	@Column
 	private Long farmerId;
 	@Column

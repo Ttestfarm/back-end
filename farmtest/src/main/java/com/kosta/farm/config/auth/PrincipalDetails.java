@@ -1,13 +1,16 @@
 package com.kosta.farm.config.auth;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.kosta.farm.entity.User;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import lombok.Getter;
 
+@Getter
 public class PrincipalDetails implements UserDetails {
 
 	private User user;
@@ -21,7 +24,7 @@ public class PrincipalDetails implements UserDetails {
 	public Collection<? extends GrantedAuthority> getAuthorities() {
 		Collection<GrantedAuthority> collections = new ArrayList<>();
 		collections.add(() -> {
-			return user.getUserRoles();
+			return user.getUserRole().name();
 		});
 
 		return collections;
@@ -33,7 +36,7 @@ public class PrincipalDetails implements UserDetails {
 		return user.getUserPassword();
 	}
 
-	// get Username 메서드 (생성한 User은 loginId 사용)
+	// get Username 메서드 (생성한 User은 userEmail 사용)
 	@Override
 	public String getUsername() {
 		return user.getUserEmail();

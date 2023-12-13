@@ -2,6 +2,11 @@ package com.kosta.farm.service;
 
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -9,12 +14,15 @@ import java.util.Optional;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kosta.farm.dto.DeliveryDto;
 import com.kosta.farm.dto.OrdersDto;
 import com.kosta.farm.dto.QuotationDto;
 import com.kosta.farm.entity.Delivery;
+import com.kosta.farm.dto.RegFarmerDto;
 import com.kosta.farm.entity.Farmer;
 import com.kosta.farm.entity.Orders;
 import com.kosta.farm.entity.Quotation;
@@ -23,7 +31,7 @@ import com.kosta.farm.repository.DeliveryRepository;
 import com.kosta.farm.repository.FarmerDslRepository;
 import com.kosta.farm.repository.FarmerRepository;
 import com.kosta.farm.repository.OrdersRepository;
-import com.kosta.farm.repository.QuotationRepositrory;
+import com.kosta.farm.repository.QuotationRepository;
 import com.kosta.farm.repository.RequestRepository;
 import com.kosta.farm.unti.PageInfo;
 import com.querydsl.core.Tuple;
@@ -37,9 +45,9 @@ public class FarmerServiceImpl implements FarmerService {
 	// Repository
 	private final FarmerRepository farmerRepository;
 	private final RequestRepository requestRepository;
-	private final QuotationRepositrory quotationRepositrory;
 	private final DeliveryRepository deliveryRepository;
 	private final OrdersRepository ordersRepository;
+	private final QuotationRepository quotationRepository;
 	// DSL
 	private final FarmerDslRepository farmerDslRepository;
 	private final ObjectMapper objectMapper;
@@ -71,7 +79,7 @@ public class FarmerServiceImpl implements FarmerService {
 	// ** 견적서 **
 	@Override // 견적서 양식 (보내기 이벤트)-> 견적서 저장 
 	public void saveQuotation(Quotation quotation) throws Exception {
-		quotationRepositrory.save(quotation);
+		quotationRepository.save(quotation);
 	}
 
 	// ** 견적 현황 페이지 **
@@ -273,6 +281,51 @@ public class FarmerServiceImpl implements FarmerService {
 		pageInfo.setEndPage(endPage);
 		
 		return deliveryList;
+	}
+	
+	// 파머등록
+	@Override
+	public Farmer registerFarmer(RegFarmerDto request, MultipartFile profileImage) throws Exception {
+		
+		Farmer farmer = Farmer.builder()
+				.farmName(request.getFarmName())
+				.farmTel(request.getFarmTel())
+				.farmAddress(request.getFarmAddress())
+				.farmAddressDetail(request.getFarmAddressDetail())
+				.registrationNum(request.getRegistrationNum())
+				.farmBank(request.getFarmBank())
+				.farmAccountNum(request.getFarmAccountNum())
+				.build();
+		
+		// 관심품목 입력받아서 # 기준으로 파싱하여 각각 저장
+		String[] interests = request.getFarmInterests().replaceAll("^\\s*#*", "").split("#");
+    int numInterests = Math.min(interests.length, 5); // 최대 5개의 관심사로 제한
+
+    farmer.setFarmInterest1(numInterests > 0 ? interests[0].trim() : null);
+    farmer.setFarmInterest2(numInterests > 1 ? interests[1].trim() : null);
+    farmer.setFarmInterest3(numInterests > 2 ? interests[2].trim() : null);
+    farmer.setFarmInterest4(numInterests > 3 ? interests[3].trim() : null);
+    farmer.setFarmInterest5(numInterests > 4 ? interests[4].trim() : null);
+		
+		Farmer savedFarmer = farmerRepository.save(farmer);
+		
+		if (profileImage != null && !profileImage.isEmpty()) {
+			String dir = "C:\\Users\\USER\\upload";
+
+			// 파일명 설정
+			String fileName = "profile_image_" + savedFarmer.getFarmerId() + "."
+					+ StringUtils.getFilenameExtension(profileImage.getOriginalFilename());
+
+			// 파일 저장 경로 설정
+			String filePath = Paths.get(dir, fileName).toString();
+
+			// 파일 저장
+			profileImage.transferTo(new File(filePath));
+
+			savedFarmer.setFarmPixurl(filePath);
+		}
+		
+		return savedFarmer;
 	}
 	
 }

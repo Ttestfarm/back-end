@@ -7,11 +7,13 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.kosta.farm.config.jwt.JwtTokenUtil;
 import com.kosta.farm.dto.ErrorResponseDto;
@@ -151,8 +153,8 @@ public class UserController {
 	    }
 	}
 	
-	@GetMapping("/find-email")
-	public ResponseEntity<?> findEmail(@RequestParam String userName, @RequestParam String userTel) {
+	@GetMapping("/find-email/{userName}/{userTel}")
+	public ResponseEntity<?> findEmail(@PathVariable String userName, @PathVariable String userTel) {
 		try {
 			// UserService를 이용하여 userName과 userTel로 사용자 찾기
 			User foundUser = userService.findUserEmail(userName, userTel);
@@ -170,17 +172,23 @@ public class UserController {
 		}
 	}
 	
-	@GetMapping("/find-pw")
-	public ResponseEntity<?> findPassword(@RequestParam String userName, @RequestParam String userEmail) {
+	@GetMapping("/find-pw/{userName}/{userEmail}")
+	public ResponseEntity<?> findPassword(@PathVariable String userName, @PathVariable String userEmail) {
 		try {
 			// UserService를 이용하여 userName과 userEmail로 사용자 찾기
 			User foundUser = userService.findUserPassword(userName, userEmail);
 
 			if (foundUser != null) {
-				// 사용자를 찾았을 경우 패스워드 응답
-				return ResponseEntity.ok().body(foundUser.getUserPassword());
+				// 사용자를 찾았을 경우 임시 비밀번호 생성
+				String tempPassword = userService.makeTempPassword();
+				
+				// 임시 비밀번호로 DB 업데이트
+				userService.updatePassword(foundUser.getUserId(), tempPassword);
+				
+				// 이메일 전송
+				userService.sendTempPasswordEmail(foundUser.getUserEmail(), tempPassword);
+				return ResponseEntity.ok().body("임시 비밀번호가 이메일로 전송되었습니다.");
 			} else {
-				// 사용자를 찾지 못했을 경우
 				return ResponseEntity.badRequest().body("해당 사용자를 찾을 수 없습니다.");
 			}
 		} catch (Exception e) {
@@ -190,10 +198,13 @@ public class UserController {
 	}
 	
 	@PostMapping("/reg-farmer")
-	public ResponseEntity<String> regFarmer(@RequestBody RegFarmerDto request, Authentication auth) throws Exception {
+	public ResponseEntity<String> regFarmer(@RequestParam("farmPixurl") MultipartFile profileImage,
+      @RequestBody RegFarmerDto request, Authentication auth) throws Exception {
 		try {
 			User loginUser = userService.getLoginUserByUserEmail(auth.getName());
-			Farmer registeredFarmer = farmerService.registerFarmer(request);
+			Farmer registeredFarmer = farmerService.registerFarmer(request, profileImage);
+			System.out.println(auth.getName());
+			System.out.println(request);
 			
 			userService.updateUserInfoAfterRegFarmer(loginUser, registeredFarmer.getFarmerId());
 			return ResponseEntity.ok("파머등록 성공");
@@ -201,4 +212,7 @@ public class UserController {
 			return ResponseEntity.badRequest().body("파머등록 실패: " + e.getMessage());
 		}
 	}
+	
+	// @GetMapping("/naver-login")
+	
 }

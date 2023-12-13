@@ -13,6 +13,7 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.kosta.farm.dto.FarmerDto;
 
@@ -38,7 +39,7 @@ public class Farmer {
 	@Column
 	private String farmName; // 팜 이름
 	@Column
-	private String farmPixurl; // 팜 사진
+	private String farmPixurl; // 팜 사진 파일경로
 	@Column
 	private String farmTel; // 팜 전화번호
 	@Column

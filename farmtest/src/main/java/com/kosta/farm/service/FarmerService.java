@@ -30,19 +30,16 @@ public interface FarmerService {
 	public void updateQuotationByFarmerIdAndRequestIds(Long farmerId, List<Long> ids) throws Exception;
 	
 	// 견적서 상세보기
-	public Quotation findQuotationByQuotationId(Long quotationId) throws Exception;
+	public Quotation findQuotationByQuotationId(Long farmerId, Long quotationId) throws Exception;
 	
 	// 결제 완료 현황
 	public List<OrdersDto> findOrdersByFarmerIdAndPage(Long farmerId, String type, PageInfo pageInfo) throws Exception;
-
-	// 결제 완료(매칭) 상세보기
-	public OrdersDto OrdersDetailQuotationId(Long farmerId, Long ordersId) throws Exception;
-	// 결제 완료(주문) 상세보기
-	public OrdersDto OrdersDetailNotQuotationId(Long farmerId, Long ordersId) throws Exception;
+	// 결제 완료(매칭, 주문) 상세보기
+	public OrdersDto OrdersDetailQuotationId(Long farmerId, Long ordersId, String type) throws Exception;
 	// 발송 완료 처리
-	public void updateDelivery(Long ordersId, String tCode, String tInvoice) throws Exception;
+	public void insertDelivery(Long ordersId, String tCode, String tInvoice) throws Exception;
 	// 판매 취소 처리
-	public void updateOrderState(Long farmerId, Long orderId) throws Exception;
+	public void deleteOrderState(Long farmerId, Long orderId, String cancelText) throws Exception;
 	
 	// 배송 현황 리스트
 	public List<DeliveryDto> findDeliberyByFarmerIdAndDeliveryState(Long farmerId, String deliveryState, PageInfo pageInfo) throws Exception;

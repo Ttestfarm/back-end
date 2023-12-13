@@ -13,11 +13,14 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Data
+@AllArgsConstructor
 @Builder
 @DynamicInsert
 @DynamicUpdate
@@ -25,17 +28,24 @@ public class Delivery {
 	@Id @GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Long deliveryId;
 	// FK
-	@Column
-	private Long ordersId; // ordersId로 수정
+	@Column(unique = true)
+	private Long ordersId;
 	@Column 
 	private String tCode; // 택배사 코드
 	@Column
-	private String tInvocie; // 송장번호
+	private String tInvoice; // 송장번호
 	@Column
 	@CreationTimestamp
 	private Timestamp createDate;
 	@Column
-	@ColumnDefault("0")
-	private String deliveryState; // 배송중, 배송 완료
+	@Builder.Default
+	@ColumnDefault("1")
+	private String deliveryState; // 0: 오류, 1: 배송중, 2: 배송 완료
 	
+	public Delivery() {};
+	public Delivery(Long ordersId, String tCode, String tInvoice) {
+		this.ordersId = ordersId;
+		this.tCode = tCode;
+		this.tInvoice = tInvoice;
+	}
 }

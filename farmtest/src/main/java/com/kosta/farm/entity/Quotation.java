@@ -8,6 +8,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
@@ -28,7 +29,7 @@ public class Quotation {
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Long quotationId;
-  // FK
+	// FK
 	@Column
 	private Long requestId;
 	@Column
@@ -48,5 +49,7 @@ public class Quotation {
 	@CreationTimestamp
 	private Timestamp createDate; // 견적서 보낸 날짜
 	@Column
-	private String quotationState; // 0 : 견적서 취소, 1 : 대기중, 2 : 기간 만료, 3 : 결제완료 
+	@Builder.Default
+	@ColumnDefault("1")
+	private String quotationState = "1"; // 0 : 견적서 취소, 1 : 대기중, 2 : 기간 만료, 3 : 결제완료 
 }

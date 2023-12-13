@@ -1,5 +1,6 @@
 package com.kosta.farm.controller;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -7,6 +8,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kosta.farm.config.jwt.JwtTokenUtil;
 import com.kosta.farm.dto.ErrorResponseDto;
 import com.kosta.farm.dto.JoinRequestDto;
@@ -23,6 +26,7 @@ import com.kosta.farm.dto.ModifyUserDto;
 import com.kosta.farm.dto.RegFarmerDto;
 import com.kosta.farm.dto.UserInfoDto;
 import com.kosta.farm.entity.Farmer;
+import com.kosta.farm.entity.Product;
 import com.kosta.farm.entity.User;
 import com.kosta.farm.service.FarmerService;
 import com.kosta.farm.service.UserService;
@@ -196,22 +200,52 @@ public class UserController {
 		}
 	}
 	
+//	@PostMapping("/reg-farmer")
+//	public ResponseEntity<String> regFarmer(@RequestParam("farmPixurl") MultipartFile profileImage,
+//      @RequestBody RegFarmerDto request, Authentication auth) throws Exception {
+//		
+//		try {
+//			User loginUser = userService.getLoginUserByUserEmail(auth.getName());
+//			Farmer registeredFarmer = farmerService.registerFarmer(request, profileImage);
+//			System.out.println(auth.getName());
+//			System.out.println(request);
+//			
+//			userService.updateUserInfoAfterRegFarmer(loginUser, registeredFarmer.getFarmerId());
+//			return ResponseEntity.ok("파머등록 성공");
+//		} catch (Exception e) {
+//			return ResponseEntity.badRequest().body("파머등록 실패: " + e.getMessage());
+//		}
+//	}
+	
+//	@PostMapping("/reg-farmer")
+//	public ResponseEntity<String> regFarmer(@RequestParam("farmPixurl") MultipartFile profileImage,
+//			@RequestParam("request") String requestJson, Authentication auth) throws Exception {
+//		try {
+//			ObjectMapper objectMapper = new ObjectMapper();
+//			RegFarmerDto request = objectMapper.readValue(requestJson, RegFarmerDto.class);
+//
+//			User loginUser = userService.getLoginUserByUserEmail(auth.getName());
+//			Farmer registeredFarmer = farmerService.registerFarmer(request, profileImage);
+//
+//			userService.updateUserInfoAfterRegFarmer(loginUser, registeredFarmer.getFarmerId());
+//			return ResponseEntity.ok("파머등록 성공");
+//		} catch (Exception e) {
+//			return ResponseEntity.badRequest().body("파머등록 실패: " + e.getMessage());
+//		}
+//	}
+	
 	@PostMapping("/reg-farmer")
-	public ResponseEntity<String> regFarmer(@RequestParam("farmPixurl") MultipartFile profileImage,
-      @RequestBody RegFarmerDto request, Authentication auth) throws Exception {
+	public ResponseEntity<String> regFarmer(@ModelAttribute RegFarmerDto request, MultipartFile profileImage,
+			Authentication auth) throws Exception {
 		try {
 			User loginUser = userService.getLoginUserByUserEmail(auth.getName());
 			Farmer registeredFarmer = farmerService.registerFarmer(request, profileImage);
-			System.out.println(auth.getName());
-			System.out.println(request);
-			
+
 			userService.updateUserInfoAfterRegFarmer(loginUser, registeredFarmer.getFarmerId());
 			return ResponseEntity.ok("파머등록 성공");
 		} catch (Exception e) {
 			return ResponseEntity.badRequest().body("파머등록 실패: " + e.getMessage());
 		}
 	}
-	
-	// @GetMapping("/naver-login")
-	
+
 }

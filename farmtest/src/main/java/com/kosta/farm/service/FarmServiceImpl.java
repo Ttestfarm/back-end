@@ -64,12 +64,6 @@ public class FarmServiceImpl implements FarmService {
 	private final PaymentRepository paymentRepository;
 	private final RequestRepository requestRepository;
 
-	@Override
-	public void regFarmer(Farmer farmer) throws Exception {
-		// TODO Auto-generated method stub
-
-	}
-
 	@Override // 이건 페이지네이션을 지원
 	public List<Farmer> farmerListByPage(PageInfo pageInfo) throws Exception {
 		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 8,

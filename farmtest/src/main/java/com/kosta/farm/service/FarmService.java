@@ -25,9 +25,6 @@ public interface FarmService {
 	// 상품 등록
 	Long productEnter(Product product, MultipartFile thmbnail, List<MultipartFile> file) throws Exception;
 
-	// 파머 등록
-	void regFarmer(Farmer farmer) throws Exception;
-
 	// 모든 파머 가져오기
 	List<Farmer> findAllFarmers() throws Exception;
 

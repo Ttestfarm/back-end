@@ -298,12 +298,13 @@ public class FarmerServiceImpl implements FarmerService {
 		Farmer savedFarmer = farmerRepository.save(farmer);
 		
 		if (profileImage != null && !profileImage.isEmpty()) {
-			String dir = "C:\\Users\\USER\\upload";
+			String dir = "C:/Users/USER/upload";
+			System.out.println("dir : " + dir);
 
 			// 파일명 설정
 			String fileName = "profile_image_" + savedFarmer.getFarmerId() + "."
 					+ StringUtils.getFilenameExtension(profileImage.getOriginalFilename());
-
+			System.out.println("fileName : " + fileName);
 			// 파일 저장 경로 설정
 			String filePath = Paths.get(dir, fileName).toString();
 

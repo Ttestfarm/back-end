@@ -38,7 +38,7 @@ public class Farmer {
 	// private Long userId;
 	@Column
 	private String farmName; // 팜 이름
-	@Column
+	@Column(nullable = true)
 	private String farmPixurl; // 팜 사진 파일경로
 	@Column
 	private String farmTel; // 팜 전화번호

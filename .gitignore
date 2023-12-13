@@ -16,7 +16,6 @@ local.properties
 *.bin
 *.lock
 .gradle
-application.properties
 Servers/
 
 # External tool builders

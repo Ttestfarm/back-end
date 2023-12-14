@@ -46,4 +46,10 @@ public interface FarmerService {
 	
 	// 파머등록
 	Farmer registerFarmer(RegFarmerDto request, MultipartFile profileImage) throws Exception;
+	
+	// 파머아이디로 파머 가져오기
+  Farmer getFarmerById(Long farmerId) throws Exception;
+
+  // 파머 정보 저장
+  Farmer saveFarmer(Farmer farmer) throws Exception;
 }

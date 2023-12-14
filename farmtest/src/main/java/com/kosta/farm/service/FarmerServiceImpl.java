@@ -297,7 +297,7 @@ public class FarmerServiceImpl implements FarmerService {
 				.build();
 		
 		// 관심품목 입력받아서 # 기준으로 파싱하여 각각 저장
-		String[] interests = request.getFarmInterests().replaceAll("^\\s*#*", "").split("#");
+		String[] interests = request.getFarmInterest().replaceAll("^\\s*#*", "").split("#");
     int numInterests = Math.min(interests.length, 5); // 최대 5개의 관심사로 제한
 
     farmer.setFarmInterest1(numInterests > 0 ? interests[0].trim() : null);
@@ -310,12 +310,11 @@ public class FarmerServiceImpl implements FarmerService {
 		
 		if (profileImage != null && !profileImage.isEmpty()) {
 			String dir = "C:/Users/USER/upload";
-			System.out.println("dir : " + dir);
 
 			// 파일명 설정
 			String fileName = "profile_image_" + savedFarmer.getFarmerId() + "."
 					+ StringUtils.getFilenameExtension(profileImage.getOriginalFilename());
-			System.out.println("fileName : " + fileName);
+			
 			// 파일 저장 경로 설정
 			String filePath = Paths.get(dir, fileName).toString();
 
@@ -326,6 +325,20 @@ public class FarmerServiceImpl implements FarmerService {
 		}
 		
 		return savedFarmer;
+	}
+
+	// 파머아이디로 파머 가져오기
+	@Override
+	public Farmer getFarmerById(Long farmerId) throws Exception {
+    Optional<Farmer> farmerOptional = farmerRepository.findById(farmerId);
+    return farmerOptional.orElse(null);
+	}
+
+	// 파머 정보 저장
+	@Override
+	@Transactional
+	public Farmer saveFarmer(Farmer farmer) throws Exception {
+		return farmerRepository.save(farmer);
 	}
 	
 }

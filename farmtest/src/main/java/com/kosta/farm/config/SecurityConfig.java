@@ -45,7 +45,7 @@ public class SecurityConfig {
 		http			
 			// 인가(권한) 필요한 URL 지정
 			.authorizeRequests()
-			.antMatchers("/user/**").access("hasRole('ROLE_USER') or hasRole('ROLE_FARMER') or hasRole('ROLE_ADMIN')")
+//			.antMatchers("/user/**").access("hasRole('ROLE_USER') or hasRole('ROLE_FARMER') or hasRole('ROLE_ADMIN')")
 			.antMatchers("/farmer/**").access("hasRole('ROLE_FARMER') or hasRole('ROLE_ADMIN')")
 			.antMatchers("/admin/**").access("hasRole('ROLE_ADMIN')")
 			.anyRequest().permitAll(); // 나머지는 허용

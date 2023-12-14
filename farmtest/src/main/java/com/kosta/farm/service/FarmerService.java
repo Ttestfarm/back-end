@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.kosta.farm.dto.DeliveryDto;
+import com.kosta.farm.dto.InvoiceDto;
 import com.kosta.farm.dto.OrdersDto;
 import com.kosta.farm.dto.QuotationDto;
 import com.kosta.farm.dto.RegFarmerDto;
@@ -44,6 +45,8 @@ public interface FarmerService {
 	// 배송 현황 리스트
 	public List<DeliveryDto> findDeliberyByFarmerIdAndDeliveryState(Long farmerId, String deliveryState, PageInfo pageInfo) throws Exception;
 	
+	// 정산 내역
+	public List<InvoiceDto> findInvoicesByFarmerIdAndDateAndPage(Long farmerId, String date, PageInfo pageInfo) throws Exception;
 	// 파머등록
 	Farmer registerFarmer(RegFarmerDto request, MultipartFile profileImage) throws Exception;
 	

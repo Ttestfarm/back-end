@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.kosta.farm.dto.DeliveryDto;
 import com.kosta.farm.dto.ErrorResponseDto;
 import com.kosta.farm.dto.FarmerDto;
+import com.kosta.farm.dto.InvoiceDto;
 import com.kosta.farm.dto.OrdersDto;
 import com.kosta.farm.dto.QuotDelDto;
 import com.kosta.farm.dto.QuotationDto;
@@ -132,9 +133,11 @@ public class FarmerController {
 	}
 
 	// 결제 완료 페이지
-	@GetMapping("/orderlist/{farmerId}/{type}/{page}")
-	public ResponseEntity<Map<String, Object>> orderList(@PathVariable Long farmerId,
+	@GetMapping("/orderlist/{type}/{page}")
+	public ResponseEntity<Map<String, Object>> orderList(Authentication authentication,
 			@PathVariable String type, @PathVariable Integer page) {
+		User user = (User) authentication.getPrincipal();
+		Long farmerId= user.getFarmerId();
 		try {
 			PageInfo pageInfo = new PageInfo(page);
 			List<OrdersDto> ordersList = farmerService.findOrdersByFarmerIdAndPage(farmerId, type, pageInfo);
@@ -149,9 +152,11 @@ public class FarmerController {
 	}
 
 	// 결제 완료(매칭, 주문) 상세 보기
-	@GetMapping("/orderdetail/{farmerId}/{ordersId}/{type}")
-	public ResponseEntity<OrdersDto> orderDetail(@PathVariable Long farmerId,
+	@GetMapping("/orderdetail/{ordersId}/{type}")
+	public ResponseEntity<OrdersDto> orderDetail(Authentication authentication,
 			@PathVariable Long ordersId, @PathVariable String type) {
+		User user = (User) authentication.getPrincipal();
+		Long farmerId= user.getFarmerId();
 		try {
 			System.out.println(type);
 			OrdersDto orders = farmerService.OrdersDetailQuotationId(farmerId, ordersId, type);
@@ -164,8 +169,11 @@ public class FarmerController {
 
 	// 발송 완료(delivery 생성, 택배사 코드, 운송장번호)
 	@GetMapping("/sendparcel/{ordersId}/{code}/{invoice}")
-	public ResponseEntity<String> delivery(@PathVariable Long ordersId, @PathVariable String code,
+	public ResponseEntity<String> delivery(Authentication authentication,
+			@PathVariable Long ordersId, @PathVariable String code,
 			@PathVariable String invoice) {
+		User user = (User) authentication.getPrincipal();
+		Long farmerId= user.getFarmerId();
 		try {
 			System.out.println("1");
 			System.out.println("id " + ordersId);
@@ -181,9 +189,11 @@ public class FarmerController {
 
 	// 판매 취소
 	@PostMapping("/ordercancel")
-	public ResponseEntity<String> delivery(@RequestBody OrdersDto ordDto) {
+	public ResponseEntity<String> delivery(Authentication authentication,
+			@RequestBody OrdersDto ordDto) {
+		User user = (User) authentication.getPrincipal();
+		Long farmerId= user.getFarmerId();
 		try {
-			Long farmerId = ordDto.getFarmerId();
 			Long ordersId = ordDto.getOrdersId();
 			String cancelText = ordDto.getCancelText();
 			
@@ -197,12 +207,12 @@ public class FarmerController {
 
 	// 배송 현황(0: 오류, 1: 배송중, 2: 배송 완료)
 	@GetMapping("/deliverylist/{state}/{page}")
-	public ResponseEntity<Map<String, Object>> deliveryList(@PathVariable Integer page,
-			@PathVariable String state, Authentication authentication) {
+	public ResponseEntity<Map<String, Object>> deliveryList(Authentication authentication, 
+			@PathVariable Integer page, @PathVariable String state) {
 		User user = (User) authentication.getPrincipal();
 		Long farmerId= user.getFarmerId();
-		System.out.println("here");
 		try {
+			if(page == 0) page = 1;
 			PageInfo pageInfo = new PageInfo(page);
 			List<DeliveryDto> deliveryList = farmerService.findDeliberyByFarmerIdAndDeliveryState(farmerId, state, pageInfo);
 			Map<String, Object> res = new HashMap<>();
@@ -214,6 +224,24 @@ public class FarmerController {
 			return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
 		}
 	}
+	
 	// 정산 내역
-
+	@GetMapping("/invoice/{date}/{page}")
+	public ResponseEntity<Map<String, Object>> InvoiceList(Authentication authentication,
+			@PathVariable String date, @PathVariable Integer page) {
+		User user = (User) authentication.getPrincipal();
+		Long farmerId= user.getFarmerId();
+		
+		try {
+			if(page == 0) page = 1;
+			PageInfo pageInfo = new PageInfo(page);
+			
+			Map<String,Object> res = new HashMap<>();
+			List<InvoiceDto> invoiceList =  farmerService.findInvoicesByFarmerIdAndDateAndPage(farmerId, date, pageInfo);
+			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
+		}
+	}
 }

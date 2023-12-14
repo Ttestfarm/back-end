@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kosta.farm.dto.DeliveryDto;
+import com.kosta.farm.dto.InvoiceDto;
 import com.kosta.farm.dto.OrdersDto;
 import com.kosta.farm.dto.QuotationDto;
 import com.kosta.farm.entity.Delivery;
@@ -257,11 +258,12 @@ public class FarmerServiceImpl implements FarmerService {
 		for(Tuple t : tuples) {
 				DeliveryDto dto = new DeliveryDto();
 				Long deliveryId = t.get(0, Long.class);
+				System.out.println(deliveryState);
 				Long ordersId = t.get(1, Long.class);
 				String tCode = t.get(2, String.class);
 				String tName = t.get(3, String.class);
 				String tInvoice = t.get(4, String.class);
-//				String state = t.get(5, String.class);
+				String state = t.get(5, String.class);
 				String product = t.get(6, String.class);
 				String quantity = t.get(7, String.class);
 				Integer price = t.get(8, Integer.class);
@@ -272,16 +274,16 @@ public class FarmerServiceImpl implements FarmerService {
 				dto.setTCode(tCode);
 				dto.setTName(tName);
 				dto.setTInvoice(tInvoice);
-				dto.setDeliveryState(deliveryState);
+				dto.setDeliveryState(state);
 				dto.setProduct(product);
 				dto.setQuantity(quantity);
 				dto.setPrice(price);
 				dto.setAddress(address);
-				
+				System.out.println(dto);
 				deliveryList.add(dto);
 		}
-		
 		allCount = farmerDslRepository.findDeliveryCountByFarmerIdAndDeliveryState(farmerId, deliveryState);
+		System.out.println("allCount " + allCount);
 		
 		Integer allPage = (int)(Math.ceil(allCount.doubleValue()/pageRequest.getPageSize()));
 		Integer startPage = (pageInfo.getCurPage()-1)/10*10+1;
@@ -292,6 +294,30 @@ public class FarmerServiceImpl implements FarmerService {
 		pageInfo.setEndPage(endPage);
 		
 		return deliveryList;
+	}
+	
+	// 정산내역
+	public List<InvoiceDto> findInvoicesByFarmerIdAndDateAndPage(Long farmerId, String date, PageInfo pageInfo) throws Exception{
+		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 10); // 첫번째 값 : 페이지 번호, 두 번째 값 : 페이지 크기
+		List<Tuple> tuples = null;
+		List<InvoiceDto> invoiceList = new ArrayList<>();
+		Long allCount = null;
+		
+//		tuples = farmerDslRepository.findOrdersIdAndDeliveryAndProductAndByDeliveryState(farmerId, , pageRequest);
+//		for(Tuple t : tuples) {
+//				
+//		}
+//		allCount = farmerDslRepository.findDeliveryCountByFarmerIdAndDeliveryState(farmerId, deliveryState);
+//		
+//		Integer allPage = (int)(Math.ceil(allCount.doubleValue()/pageRequest.getPageSize()));
+//		Integer startPage = (pageInfo.getCurPage()-1)/10*10+1;
+//		Integer endPage = Math.min(startPage+10-1, allPage);
+//		
+//		pageInfo.setAllPage(allPage);
+//		pageInfo.setStartPage(startPage);
+//		pageInfo.setEndPage(endPage);
+//		
+		return invoiceList;
 	}
 	
 	// 파머등록

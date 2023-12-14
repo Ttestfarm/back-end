@@ -246,7 +246,7 @@ public class FarmerDslRepository {
 		QDeliveryInfo info = QDeliveryInfo.deliveryInfo;
 		
 		return jpaQueryFactory.select(
-						deli.deliveryId, 
+						deli.deliveryId,
 						deli.ordersId,
 						deli.tCode,
 						deli.tName,
@@ -263,14 +263,15 @@ public class FarmerDslRepository {
 						.when(ord.quotationId.isNotNull()).then(req.address)
 						.otherwise(info.infoAddress)
 					)
-				.from(deli)
-				.join(ord).on(deli.ordersId.eq(ord.ordersId))
-				.join(quot).on(ord.quotationId.eq(quot.quotationId))
-				.join(prod).on(ord.productId.eq(prod.productId))
-				.join(req).on(quot.requestId.eq(req.requestId))
+				.from(ord)
+				.join(deli).on(ord.ordersId.eq(deli.ordersId))
+				.leftJoin(quot).on(ord.quotationId.eq(quot.quotationId))
+				.leftJoin(prod).on(ord.productId.eq(prod.productId))
+				.leftJoin(req).on(quot.requestId.eq(req.requestId))
 				.join(pay).on(ord.paymentId.eq(pay.paymentId))
-				.join(info).on(ord.paymentId.eq(info.paymentId))
-				.where(ord.farmerId.eq(farmerId).and(deli.deliveryState.eq(deliveryState)))
+				.leftJoin(info).on(deli.deliveryInfoId.eq(info.deliveryInfoId))
+				.where(ord.farmerId.eq(farmerId)
+						.and(deli.deliveryState.eq(deliveryState)))
 				.orderBy(ord.ordersId.desc())
 				.offset(pageRequest.getOffset())
 				.limit(pageRequest.getPageSize())
@@ -281,11 +282,28 @@ public class FarmerDslRepository {
 	public Long findDeliveryCountByFarmerIdAndDeliveryState(Long farmerId, String deliveryState) {
 		QOrders ord = QOrders.orders;
 		QDelivery deli = QDelivery.delivery;
-		return jpaQueryFactory.select(deli.count()).distinct()
+		return jpaQueryFactory.select(ord.count())
+				.from(ord)
 				.join(deli).on(ord.ordersId.eq(deli.ordersId))
 				.where(ord.farmerId.eq(farmerId)
 						.and(deli.deliveryState.eq(deliveryState)))
 				.fetchOne();
 	}
 	
+	// 정산 내역 리스트
+//		public List<Tuple> findOrdersIdAndDeliveryAndProductAndByDeliveryState(Long farmerId, String deliveryState, PageRequest pageRequest) {
+//			
+//		}
+	
+	// 정산 내역 리스트 수 
+//		public Long findDeliveryCountByFarmerIdAndDeliveryState(Long farmerId, String deliveryState) {
+//			QOrders ord = QOrders.orders;
+//			QDelivery deli = QDelivery.delivery;
+//			return jpaQueryFactory.select(ord.count())
+//					.from(ord)
+//					.join(deli).on(ord.ordersId.eq(deli.ordersId))
+//					.where(ord.farmerId.eq(farmerId)
+//							.and(deli.deliveryState.eq(deliveryState)))
+//					.fetchOne();
+//		}
 }

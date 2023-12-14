@@ -11,6 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -18,9 +19,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.kosta.farm.dto.DeliveryDto;
+import com.kosta.farm.dto.ErrorResponseDto;
+import com.kosta.farm.dto.FarmerDto;
 import com.kosta.farm.dto.OrdersDto;
 import com.kosta.farm.dto.QuotDelDto;
 import com.kosta.farm.dto.QuotationDto;
+import com.kosta.farm.entity.Farmer;
 import com.kosta.farm.entity.Quotation;
 import com.kosta.farm.entity.Request;
 import com.kosta.farm.entity.User;
@@ -33,9 +37,8 @@ import com.kosta.farm.unti.PageInfo;
 public class FarmerController {
 	@Autowired
 	private FarmerService farmerService;
-
-	// 팜 정보 관리
-
+	
+	
 	// 매칭 주문 요청서 보기
 	// farmerId를 받고 farmInterest return
 	@GetMapping("/farmInterest")

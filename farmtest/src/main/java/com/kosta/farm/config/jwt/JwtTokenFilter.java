@@ -49,7 +49,6 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
 		// 전송받은 값에서 Bearer 뒷부분(token) 추출
 		String token = authorizationHeader.split(" ")[1];
-		// System.out.println(token);
 		// 전송받은 token이 만료되었으면 다음 필터 진행(인증 X)
 		if (JwtTokenUtil.isExpired(token, secretKey)) {
 			filterChain.doFilter(request, response);
@@ -72,9 +71,10 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 				loginUser.getUserEmail(), null, List.of(new SimpleGrantedAuthority(loginUser.getUserRole().name())));
 
 		authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-		Authentication authentication = new UsernamePasswordAuthenticationToken(loginUser, "", List.of(new SimpleGrantedAuthority(loginUser.getUserRole().name())));
-		// 권한 부여
+		
+		// 인증 객체 생성
+		Authentication authentication = new UsernamePasswordAuthenticationToken(
+				loginUser, "", List.of(new SimpleGrantedAuthority(loginUser.getUserRole().name())));
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 		filterChain.doFilter(request, response);
 	}

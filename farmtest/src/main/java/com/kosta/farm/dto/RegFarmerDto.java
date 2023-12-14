@@ -16,5 +16,5 @@ public class RegFarmerDto {
 	private String registrationNum;
 	private String farmBank;
 	private String farmAccountNum;
-	private String farmInterests;
+	private String farmInterest;
 }

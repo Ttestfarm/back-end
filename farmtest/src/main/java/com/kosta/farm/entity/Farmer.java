@@ -33,12 +33,9 @@ public class Farmer {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long farmerId;
-	// FK
-	// @Column
-	// private Long userId;
 	@Column
 	private String farmName; // 팜 이름
-	@Column(nullable = true)
+	@Column
 	private String farmPixurl; // 팜 사진 파일경로
 	@Column
 	private String farmTel; // 팜 전화번호
@@ -87,11 +84,21 @@ public class Farmer {
 		}
 		this.rating = totalRating / reviews.size();
 	}
-
+	
 	public FarmerDto toDto() {
-		return FarmerDto.builder().farmerId(farmerId).farmName(farmName).farmPixurl(farmPixurl).farmAddress(farmAddress)
-				.farmInterest(farmInterest1 + "," + farmInterest2 + "," + farmInterest3 + "," + farmInterest4 + ","
-						+ farmInterest5)
-				.followCount(followCount).reviewCount(reviewCount).rating(rating).build();
+    return FarmerDto.builder()
+    		.farmerId(farmerId)
+    		.farmName(farmName)
+    		.farmPixurl(farmPixurl)
+    		.farmAddress(farmAddress)
+        .farmInterest1(farmInterest1)
+        .farmInterest2(farmInterest2)
+        .farmInterest3(farmInterest3)
+        .farmInterest4(farmInterest4)
+        .farmInterest5(farmInterest5)
+        .followCount(followCount)
+        .reviewCount(reviewCount)
+        .rating(rating)
+        .build();
 	}
 }

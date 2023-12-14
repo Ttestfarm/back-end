@@ -56,7 +56,7 @@ public class User {
 	private String providerId;
 	@Column
 	@Enumerated(EnumType.STRING)
-	private UserRole userRole; // USER, FARMER, ADMIN
+	private UserRole userRole; // ROLE_USER, ROLE_FARMER, ROLE_ADMIN
 	@CreationTimestamp
 	@Column
 	private Timestamp createDate;

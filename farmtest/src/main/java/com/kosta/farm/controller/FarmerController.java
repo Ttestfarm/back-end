@@ -7,6 +7,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,6 +23,7 @@ import com.kosta.farm.dto.QuotDelDto;
 import com.kosta.farm.dto.QuotationDto;
 import com.kosta.farm.entity.Quotation;
 import com.kosta.farm.entity.Request;
+import com.kosta.farm.entity.User;
 import com.kosta.farm.repository.OrdersRepository;
 import com.kosta.farm.service.FarmerService;
 import com.kosta.farm.unti.PageInfo;
@@ -53,8 +55,10 @@ public class FarmerController {
 
 	// 관심 농산물인 요청서 리스트 보기
 	@GetMapping("/requestlist")
-	public ResponseEntity<List<Request>> requestList(@RequestParam Long farmerId,
-			@RequestParam String farmInterest) {
+	public ResponseEntity<List<Request>> requestList(
+			@RequestParam String farmInterest,Authentication authentication) {
+		User user = (User) authentication.getPrincipal();
+		Long farmerId= user.getFarmerId();
 		try {
 			List<Request> reqList = farmerService.findRequestsByFarmInterest(farmerId, farmInterest);
 			return new ResponseEntity<List<Request>>(reqList, HttpStatus.OK);
@@ -184,12 +188,17 @@ public class FarmerController {
 	}
 
 	// 배송 현황(0: 오류, 1: 배송중, 2: 배송 완료)
-	@GetMapping("/deliverylist/{farmerId}/{deliveryState}/{page}")
+	@GetMapping("/deliverylist/{state}/{page}")
 	public ResponseEntity<Map<String, Object>> deliveryList(@PathVariable Integer page,
-			@PathVariable String deliveryState, @PathVariable Long farmerId) {
+			@PathVariable String state, Authentication authentication) {
 		try {
+			User user = (User) authentication.getPrincipal();
+			Long farmerId= user.getFarmerId();
+			System.out.println(farmerId);
+			System.out.println("here");
+			
 			PageInfo pageInfo = new PageInfo(page);
-			List<OrdersDto> deliveryList = farmerService.findOrdersByFarmerIdAndPage(farmerId, deliveryState, pageInfo);
+			List<OrdersDto> deliveryList = farmerService.findOrdersByFarmerIdAndPage(farmerId, state, pageInfo);
 			Map<String, Object> res = new HashMap<>();
 			res.put("pageInfo", pageInfo);
 			res.put("deliveryList", deliveryList);

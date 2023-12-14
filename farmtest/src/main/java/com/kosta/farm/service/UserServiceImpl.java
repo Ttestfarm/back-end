@@ -35,7 +35,7 @@ public class UserServiceImpl implements UserService {
 				.userName(request.getUserName())
 				.userEmail(request.getUserEmail())
 				.userPassword(encoder.encode(request.getUserPassword()))
-				.userRole(UserRole.USER)
+				.userRole(UserRole.ROLE_USER)
 				.build());
 	}
 
@@ -159,7 +159,7 @@ public class UserServiceImpl implements UserService {
 		}
 
 		user.setFarmerId(farmerId);
-		user.setUserRole(UserRole.FARMER);
+		user.setUserRole(UserRole.ROLE_FARMER);
 
 		saveUser(user);
 	}

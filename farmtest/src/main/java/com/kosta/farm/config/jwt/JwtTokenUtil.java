@@ -9,7 +9,7 @@ import java.util.Date;
 public class JwtTokenUtil {
 
 	// token 발급
-	public static String createToken(String userEmail, String key, long expireTime) {
+	public static String createToken(String userEmail, String secretKey, long expireTime) {
 		// Claim = token에 들어갈 정보
 		// Claim에 userEmail를 넣어 줌으로써 나중에 userEmail를 꺼낼 수 있음
 		Claims claims = Jwts.claims();
@@ -19,7 +19,7 @@ public class JwtTokenUtil {
 				.setClaims(claims)
 				.setIssuedAt(new Date(System.currentTimeMillis()))
 				.setExpiration(new Date(System.currentTimeMillis() + expireTime))
-				.signWith(SignatureAlgorithm.HS256, key)
+				.signWith(SignatureAlgorithm.HS256, secretKey)
 				.compact();
 	}
 
@@ -37,8 +37,6 @@ public class JwtTokenUtil {
 
 	// SecretKey를 사용해 Token Parsing
 	private static Claims extractClaims(String token, String secretKey) {
-//		Claims test = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
-//		System.out.println(test);
 		return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
 	}
 }

@@ -39,7 +39,7 @@ public class Orders { // order> orders로 대체 entity 생성 오류 때문에
 	@Column
 	private Long userId; // 주문 회원
 	@Column
-	private Long farmerId;
+	private Long farmerId; 
 	@Column
 	private Long requestId;
 	@Column

@@ -38,11 +38,12 @@ public class FarmerController {
 	@Autowired
 	private FarmerService farmerService;
 	
-	
 	// 매칭 주문 요청서 보기
 	// farmerId를 받고 farmInterest return
 	@GetMapping("/farmInterest")
-	public ResponseEntity<Map<String, Object>> farmInterest(@RequestParam Long farmerId) {
+	public ResponseEntity<Map<String, Object>> farmInterest(Authentication authentication) {
+		User user = (User) authentication.getPrincipal();
+		Long farmerId= user.getFarmerId();
 		try {
 			Map<String, Object> res = new HashMap<>();
 			List<String> interestList = farmerService.findFarmInterestByFarmerId(farmerId);
@@ -58,8 +59,7 @@ public class FarmerController {
 
 	// 관심 농산물인 요청서 리스트 보기
 	@GetMapping("/requestlist")
-	public ResponseEntity<List<Request>> requestList(
-			@RequestParam String farmInterest,Authentication authentication) {
+	public ResponseEntity<List<Request>> requestList(@RequestParam String farmInterest, Authentication authentication) {
 		User user = (User) authentication.getPrincipal();
 		Long farmerId= user.getFarmerId();
 		try {
@@ -73,8 +73,11 @@ public class FarmerController {
 
 	// 견적서 보내기
 	@PostMapping("/regquot")
-	public ResponseEntity<String> regQuotation(@RequestBody Quotation quot) {
+	public ResponseEntity<String> regQuotation(@RequestBody Quotation quot, Authentication authentication) {
+		User user = (User) authentication.getPrincipal();
+		Long farmerId= user.getFarmerId();
 		try {
+			quot.setFarmerId(farmerId);
 			farmerService.saveQuotation(quot);
 			return new ResponseEntity<String>("성공", HttpStatus.OK);
 		} catch (Exception e) {
@@ -85,9 +88,11 @@ public class FarmerController {
 
 	// 견적 현황 페이지
 	// 견적서 상태로(0 : 견적서 취소, 1 : 대기중, 2 : 기간 만료, 3 : 결제완료) 견적서 리스트 보여주기
-	@GetMapping("/quotlist/{farmerId}/{state}/{page}")
-	public ResponseEntity<Map<String, Object>> quotList(@PathVariable Integer page,
-			@PathVariable Long farmerId, @PathVariable String state) {
+	@GetMapping("/quotlist/{state}/{page}")
+	public ResponseEntity<Map<String, Object>> quotList(@PathVariable String state, 
+			@PathVariable Integer page, Authentication authentication) {
+		User user = (User) authentication.getPrincipal();
+		Long farmerId= user.getFarmerId();
 		try {
 			PageInfo pageInfo = new PageInfo(page);
 			List<QuotationDto> quotList = farmerService.findQuotationByFarmerIdAndStateAndPage(farmerId, state, pageInfo);
@@ -194,14 +199,12 @@ public class FarmerController {
 	@GetMapping("/deliverylist/{state}/{page}")
 	public ResponseEntity<Map<String, Object>> deliveryList(@PathVariable Integer page,
 			@PathVariable String state, Authentication authentication) {
+		User user = (User) authentication.getPrincipal();
+		Long farmerId= user.getFarmerId();
+		System.out.println("here");
 		try {
-			User user = (User) authentication.getPrincipal();
-			Long farmerId= user.getFarmerId();
-			System.out.println(farmerId);
-			System.out.println("here");
-			
 			PageInfo pageInfo = new PageInfo(page);
-			List<OrdersDto> deliveryList = farmerService.findOrdersByFarmerIdAndPage(farmerId, state, pageInfo);
+			List<DeliveryDto> deliveryList = farmerService.findDeliberyByFarmerIdAndDeliveryState(farmerId, state, pageInfo);
 			Map<String, Object> res = new HashMap<>();
 			res.put("pageInfo", pageInfo);
 			res.put("deliveryList", deliveryList);

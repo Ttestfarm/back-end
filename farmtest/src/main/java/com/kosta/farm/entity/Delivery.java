@@ -30,8 +30,13 @@ public class Delivery {
 	// FK
 	@Column(unique = true)
 	private Long ordersId;
+	@Column(unique = true)
+	private Long deliveryInfoId;
+	
 	@Column 
 	private String tCode; // 택배사 코드
+	@Column
+	private String tName; // 택배사 이름
 	@Column
 	private String tInvoice; // 송장번호
 	@Column

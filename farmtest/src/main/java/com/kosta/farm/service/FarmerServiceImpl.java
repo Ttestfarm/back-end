@@ -252,22 +252,34 @@ public class FarmerServiceImpl implements FarmerService {
 		List<Tuple> tuples = null;
 		List<DeliveryDto> deliveryList = new ArrayList<>();
 		Long allCount = null;
-			tuples = farmerDslRepository.findOrdersIdAndDeliveryAndProductAndByDeliveryState(farmerId, deliveryState, pageRequest);
-			for(Tuple t : tuples) {
+		
+		tuples = farmerDslRepository.findOrdersIdAndDeliveryAndProductAndByDeliveryState(farmerId, deliveryState, pageRequest);
+		for(Tuple t : tuples) {
 				DeliveryDto dto = new DeliveryDto();
-				Long ordersId = t.get(0, Long.class);
-				String tCode = t.get(1, String.class);
-				String tInvoice = t.get(2, String.class);
-				String product = t.get(3, String.class);
-				String state = t.get(4, String.class);
+				Long deliveryId = t.get(0, Long.class);
+				Long ordersId = t.get(1, Long.class);
+				String tCode = t.get(2, String.class);
+				String tName = t.get(3, String.class);
+				String tInvoice = t.get(4, String.class);
+//				String state = t.get(5, String.class);
+				String product = t.get(6, String.class);
+				String quantity = t.get(7, String.class);
+				Integer price = t.get(8, Integer.class);
+				String address = t.get(9, String.class);
 				
+				dto.setDeliveryId(deliveryId);
 				dto.setOrdersId(ordersId);
 				dto.setTCode(tCode);
+				dto.setTName(tName);
 				dto.setTInvoice(tInvoice);
-				dto.setProduct(product);
 				dto.setDeliveryState(deliveryState);
+				dto.setProduct(product);
+				dto.setQuantity(quantity);
+				dto.setPrice(price);
+				dto.setAddress(address);
+				
 				deliveryList.add(dto);
-			}	
+		}
 		
 		allCount = farmerDslRepository.findDeliveryCountByFarmerIdAndDeliveryState(farmerId, deliveryState);
 		

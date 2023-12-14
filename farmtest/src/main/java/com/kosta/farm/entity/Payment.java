@@ -30,6 +30,7 @@ public class Payment {
 	private Integer paymentDelivery; // 배송비
 	@Column
 	private Integer paymentPrice; // 상품금액
+	// private Integer totalPrice // 배송비 + 상품금액
 	@Column
 	@CreationTimestamp
 	private Timestamp createDate; // 결제 완료 날짜
@@ -37,7 +38,7 @@ public class Payment {
 	@ColumnDefault("1")
 	private String state; // 결제취소 0, 결제완료 1
 	@Column
-	private Long userId; //userid 참조
+	private Long userId; // userid 참조
 	@Column
 	private Integer productPrice; //상품가격
 	@Column

@@ -14,6 +14,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.ColumnDefault;
@@ -33,13 +34,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Orders { // order> orders로 대체 entity 생성 오류 때문에
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@SequenceGenerator(name = "ordersId")
 	private Long ordersId;
 	// FK
 	@Column
 	private Long userId; // 주문 회원
 	@Column
-	private Long farmerId;
+	private Long farmerId; 
 	@Column
 	private Long requestId;
 	@Column
@@ -62,8 +63,5 @@ public class Orders { // order> orders로 대체 entity 생성 오류 때문에
 	@ColumnDefault("1")
 	private String ordersState; // 0: 판매취소, 1: 결제완료
 	
-//	@OneToMany(mappedBy = "orders", cascade = CascadeType.ALL)
-//	private List<OrderReg> orderReg=new ArrayList<>();
-//	}
 
 }

@@ -23,6 +23,8 @@ public class QDelivery extends EntityPathBase<Delivery> {
 
     public final NumberPath<Long> deliveryId = createNumber("deliveryId", Long.class);
 
+    public final NumberPath<Long> deliveryInfoId = createNumber("deliveryInfoId", Long.class);
+
     public final StringPath deliveryState = createString("deliveryState");
 
     public final NumberPath<Long> ordersId = createNumber("ordersId", Long.class);
@@ -30,6 +32,8 @@ public class QDelivery extends EntityPathBase<Delivery> {
     public final StringPath tCode = createString("tCode");
 
     public final StringPath tInvoice = createString("tInvoice");
+
+    public final StringPath tName = createString("tName");
 
     public QDelivery(String variable) {
         super(Delivery.class, forVariable(variable));

@@ -13,13 +13,13 @@ public class CorsConfig {
 	public CorsFilter corsFilter() {
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		CorsConfiguration config = new CorsConfiguration();
-		config.setAllowCredentials(true);
+		config.setAllowCredentials(true); // 인증 정보 허용
 		config.addAllowedOriginPattern("*"); // Access-Control-Allow-Origin (Response에 자동으로 추가해줌)
 		config.addAllowedHeader("*"); // Access-Control-Allow-Headers
 		config.addAllowedMethod("*"); // Access-Control-Allow-Method
-		config.addExposedHeader("Authorization"); // Spring Security 설정에서 토큰을 전송 권한? 허용. Spring Security의 CORS 설정에서 exposedHeaders를 사용하여 헤더에 포함될 수 있도록 설정.
+		config.addExposedHeader("Authorization"); // 클라이언트에게 노출할 헤더를 설정 (JWT 토큰 브라우저 접근 허용)
 
-		source.registerCorsConfiguration("/**", config); // config등록
-		return new CorsFilter(source); // security에 등록해주려고
+		source.registerCorsConfiguration("/**", config); // 모든 경로에 config등록
+		return new CorsFilter(source); // security 필터 체인에 추가
 	}
 }

@@ -7,7 +7,8 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public class RegFarmerDto {
+public class ModifyFarmDto {
+	private Long farmerId;
 	private String farmName;
 	private MultipartFile farmPixurl;
 	private String farmTel;

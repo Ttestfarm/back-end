@@ -1,11 +1,11 @@
 package com.kosta.farm.service;
 
+import java.io.File;
+import java.nio.file.Paths;
+import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -21,15 +21,17 @@ import com.kosta.farm.dto.DeliveryDto;
 import com.kosta.farm.dto.InvoiceDto;
 import com.kosta.farm.dto.OrdersDto;
 import com.kosta.farm.dto.QuotationDto;
-import com.kosta.farm.entity.Delivery;
 import com.kosta.farm.dto.RegFarmerDto;
+import com.kosta.farm.entity.Delivery;
 import com.kosta.farm.entity.Farmer;
+import com.kosta.farm.entity.Invoice;
 import com.kosta.farm.entity.Orders;
 import com.kosta.farm.entity.Quotation;
 import com.kosta.farm.entity.Request;
 import com.kosta.farm.repository.DeliveryRepository;
 import com.kosta.farm.repository.FarmerDslRepository;
 import com.kosta.farm.repository.FarmerRepository;
+import com.kosta.farm.repository.InvoiceRepository;
 import com.kosta.farm.repository.OrdersRepository;
 import com.kosta.farm.repository.QuotationRepository;
 import com.kosta.farm.repository.RequestRepository;
@@ -48,6 +50,7 @@ public class FarmerServiceImpl implements FarmerService {
 	private final DeliveryRepository deliveryRepository;
 	private final OrdersRepository ordersRepository;
 	private final QuotationRepository quotationRepository;
+	private final InvoiceRepository invoiceRepository;
 	// DSL
 	private final FarmerDslRepository farmerDslRepository;
 	private final ObjectMapper objectMapper;
@@ -88,7 +91,7 @@ public class FarmerServiceImpl implements FarmerService {
 	public List<QuotationDto> findQuotationByFarmerIdAndStateAndPage(Long farmerId, String state, PageInfo pageInfo) throws Exception {
 		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 10); // 첫번째 값 : 페이지 번호, 두 번째 값 : 페이지 크기
 		List<Tuple> tuples = farmerDslRepository.findQuotationByFarmerIdAndStateAndPaging(farmerId, state, pageRequest);
-		List<QuotationDto> resList = new ArrayList<>();
+		List<QuotationDto> quotList = new ArrayList<>();
 		
 		for(Tuple t : tuples) {
 			QuotationDto dto = new QuotationDto();
@@ -101,10 +104,11 @@ public class FarmerServiceImpl implements FarmerService {
 			dto.setPrice(quot.getQuotationPrice());
 			dto.setAddress(address);
 			dto.setState(quot.getQuotationState());
-			resList.add(dto);
+			quotList.add(dto);
 		}
 		
 		Long allCount = farmerDslRepository.findQuotationCountByFarmerId(farmerId, state);
+		System.out.println(allCount);
 		Integer allPage = (int)(Math.ceil(allCount.doubleValue()/pageRequest.getPageSize()));
 		Integer startPage = (pageInfo.getCurPage()-1)/10*10+1;
 		Integer endPage = Math.min(startPage+10-1, allPage);
@@ -113,7 +117,7 @@ public class FarmerServiceImpl implements FarmerService {
 		pageInfo.setStartPage(startPage);
 		pageInfo.setEndPage(endPage);
 		
-		return resList;
+		return quotList;
 	}
 
 	// 견적서 취소
@@ -223,13 +227,43 @@ public class FarmerServiceImpl implements FarmerService {
 
 	// 발송 완료 처리
 	@Transactional
-	public void insertDelivery(Long ordersId, String tCode, String tInvoice) throws Exception {
-		System.out.println("2");
-		System.out.println("id " + ordersId);
-		System.err.println("tCode " + tCode);
-		System.out.println("tInvoice " + tInvoice);
-		Delivery delivery = new Delivery(ordersId, tCode, tInvoice);
-		deliveryRepository.save(delivery);
+	public void insertDeliveryAndInvoice(Long farmerId, Long ordersId, String tCode, String tName, String tInvoice) throws Exception {
+//		System.out.println("2");
+//		System.out.println("id " + ordersId);
+//		System.err.println("tCode " + tCode);
+//		System.out.println("tInvoice " + tInvoice);
+		deliveryRepository.save(Delivery.builder()
+				.ordersId(ordersId)
+				.tCode(tCode)
+				.tName(tName)
+				.tInvoice(tInvoice)
+				.build()
+				);
+		
+		LocalDate currentDate = LocalDate.now();
+
+        int year = currentDate.getYear();
+        int month = currentDate.getMonthValue();
+        int day = currentDate.getDayOfMonth();
+
+        // 20일 전이면 현재 월의 25일로 설정
+        // 19일 이후면 다음 달의 25일로 설정
+         if (day < 20) {
+            currentDate = currentDate.withDayOfMonth(25);
+        } else {
+            currentDate = currentDate.plusMonths(1).withDayOfMonth(25);
+        }
+        String temp = currentDate+"";
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date date = (Date) dateFormat.parse(temp);
+        
+//        invoiceRepository.save(Invoice.builder()
+//        		 .farmerId(farmerId)
+//        		 .orderId(ordersId)
+//        		 .invoiceDate(date)
+//        		 .invoiceCommission(3) // 매칭 3, 주문 5 구분
+//        		 .invoicePrice(null) // payment id
+//        		 );
 //		farmerDslRepository.insertDeliveryWithOrdersIdAndTCodeAndTInvoice(ordersId, tCode, tInvoice);
 	}
 	

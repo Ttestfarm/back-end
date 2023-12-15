@@ -46,11 +46,4 @@ public class Delivery {
 	@Builder.Default
 	@ColumnDefault("1")
 	private String deliveryState; // 0: 오류, 1: 배송중, 2: 배송 완료
-	
-	public Delivery() {};
-	public Delivery(Long ordersId, String tCode, String tInvoice) {
-		this.ordersId = ordersId;
-		this.tCode = tCode;
-		this.tInvoice = tInvoice;
-	}
 }

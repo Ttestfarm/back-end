@@ -38,7 +38,7 @@ public interface FarmerService {
 	// 결제 완료(매칭, 주문) 상세보기
 	public OrdersDto OrdersDetailQuotationId(Long farmerId, Long ordersId, String type) throws Exception;
 	// 발송 완료 처리
-	public void insertDelivery(Long ordersId, String tCode, String tInvoice) throws Exception;
+	public void insertDeliveryAndInvoice(Long farmerId, Long ordersId, String tCode, String tName, String tInvoice) throws Exception;
 	// 판매 취소 처리
 	public void deleteOrderState(Long farmerId, Long orderId, String cancelText) throws Exception;
 	

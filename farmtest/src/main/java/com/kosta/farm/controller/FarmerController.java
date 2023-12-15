@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.kosta.farm.dto.CompanyDto;
 import com.kosta.farm.dto.DeliveryDto;
 import com.kosta.farm.dto.ErrorResponseDto;
 import com.kosta.farm.dto.FarmerDto;
@@ -30,6 +31,7 @@ import com.kosta.farm.entity.Quotation;
 import com.kosta.farm.entity.Request;
 import com.kosta.farm.entity.User;
 import com.kosta.farm.repository.OrdersRepository;
+import com.kosta.farm.service.APIService;
 import com.kosta.farm.service.FarmerService;
 import com.kosta.farm.unti.PageInfo;
 
@@ -38,7 +40,9 @@ import com.kosta.farm.unti.PageInfo;
 public class FarmerController {
 	@Autowired
 	private FarmerService farmerService;
-	
+	@Autowired
+	private APIService apiService;
+
 	// 매칭 주문 요청서 보기
 	// farmerId를 받고 farmInterest return
 	@GetMapping("/farmInterest")
@@ -167,19 +171,33 @@ public class FarmerController {
 		}
 	}
 
+	// 택배사 정보 제공
+	@GetMapping("companylist")
+	public ResponseEntity<List<CompanyDto>> companyList(Authentication authentication) {
+		User user = (User) authentication.getPrincipal();
+		Long farmerId= user.getFarmerId();
+		try {
+			List<CompanyDto> comList = apiService.requestCompanyList();
+			return new ResponseEntity<List<CompanyDto>>(comList, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<List<CompanyDto>>(HttpStatus.BAD_REQUEST);
+		}
+	}
+	
 	// 발송 완료(delivery 생성, 택배사 코드, 운송장번호)
-	@GetMapping("/sendparcel/{ordersId}/{code}/{invoice}")
+	@GetMapping("/sendparcel/{ordersId}/{code}/{name}/{invoice}")
 	public ResponseEntity<String> delivery(Authentication authentication,
-			@PathVariable Long ordersId, @PathVariable String code,
+			@PathVariable Long ordersId, @PathVariable String code, @PathVariable String name,
 			@PathVariable String invoice) {
 		User user = (User) authentication.getPrincipal();
 		Long farmerId= user.getFarmerId();
 		try {
-			System.out.println("1");
-			System.out.println("id " + ordersId);
-			System.err.println("code " + code);
-			System.out.println("invoice " + invoice);
-			farmerService.insertDelivery(ordersId, code, invoice);
+//			System.out.println("1");
+//			System.out.println("id " + ordersId);
+//			System.err.println("code " + code);
+//			System.out.println("invoice " + invoice);
+			farmerService.insertDeliveryAndInvoice(farmerId, ordersId, code, name, invoice);
 			return new ResponseEntity<String>("성공", HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -231,6 +249,10 @@ public class FarmerController {
 			@PathVariable String date, @PathVariable Integer page) {
 		User user = (User) authentication.getPrincipal();
 		Long farmerId= user.getFarmerId();
+
+		String[] dates = date.split("~");
+		String sDate = dates[0];
+		String eDate = dates[1];
 		
 		try {
 			if(page == 0) page = 1;

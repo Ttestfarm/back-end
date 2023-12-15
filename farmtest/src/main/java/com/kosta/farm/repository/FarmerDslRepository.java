@@ -1,5 +1,6 @@
 package com.kosta.farm.repository;
 
+import java.sql.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +9,7 @@ import org.springframework.stereotype.Repository;
 
 import com.kosta.farm.entity.QDelivery;
 import com.kosta.farm.entity.QDeliveryInfo;
+import com.kosta.farm.entity.QInvoice;
 import com.kosta.farm.entity.QOrders;
 import com.kosta.farm.entity.QPayment;
 import com.kosta.farm.entity.QProduct;
@@ -54,14 +56,14 @@ public class FarmerDslRepository {
 	// 파머페이지 견적현황 state : 0 (대기중), 1(기간만료), 2(결제완료) , 페이지 정보
 	public List<Tuple> findQuotationByFarmerIdAndStateAndPaging(Long farmerId, String state, PageRequest pageRequest) {
 		QQuotation quotation = QQuotation.quotation;
-		QRequest request = QRequest.request;
-		return jpaQueryFactory.select(quotation, request.address).distinct()
+		QRequest req = QRequest.request;
+		return jpaQueryFactory.select(quotation, req.address).distinct()
 				.from(quotation)
-				.join(request)
-				.on(quotation.requestId.eq(request.requestId))
+				.join(req)
+				.on(quotation.requestId.eq(req.requestId))
 				.where(quotation.farmerId.eq(farmerId)
 						.and(quotation.quotationState.eq(state))
-						.and(request.requestState.eq("1"))
+						.and(req.requestState.eq("1"))
 						)
 				.orderBy(quotation.quotationId.desc())
 				.offset(pageRequest.getOffset())
@@ -290,20 +292,47 @@ public class FarmerDslRepository {
 				.fetchOne();
 	}
 	
-	// 정산 내역 리스트
-//		public List<Tuple> findOrdersIdAndDeliveryAndProductAndByDeliveryState(Long farmerId, String deliveryState, PageRequest pageRequest) {
-//			
-//		}
+	// 정산 테이블 생성
+	public void insertInvoice(Long farmerId, Long ordersId, Date date) {
+		QInvoice in = QInvoice.invoice;
+		QPayment pay = QPayment.payment;
+		QOrders ord = QOrders.orders;
+		
+		Tuple result = jpaQueryFactory
+			    .select(new CaseBuilder()
+						.when(ord.quotationId.isNotNull()).then(3)
+						.otherwise(5),
+						pay.paymentPrice)
+			    .from(ord)
+			    .join(pay).on(ord.paymentId.eq(pay.paymentId))
+			    .where(ord.farmerId.eq(farmerId).and(ord.ordersId.eq(ordersId)))
+			    .fetchOne();
+		
+		jpaQueryFactory.insert(in)
+			.set(in.farmerId, farmerId)
+			.set(in.orderId, ordersId)
+			.set(in.invoiceDate1, date)
+			.set(in.invoiceCommission, result.get(0, Long.class))
+			.set(in.invoicePrice, result.get(1, Long.class))
+			.execute();
+	}
+	
+//	정산 내역 리스트
+//	public List<Tuple> findOrdersIdAndDeliveryAndProductAndByDeliveryState(Long farmerId, String deliveryState, PageRequest pageRequest) {
+//		QDelivery deli = QDelivery.delivery;
+//		return jpaQueryFactory.select(deli)
+//
+//	}
 	
 	// 정산 내역 리스트 수 
-//		public Long findDeliveryCountByFarmerIdAndDeliveryState(Long farmerId, String deliveryState) {
-//			QOrders ord = QOrders.orders;
-//			QDelivery deli = QDelivery.delivery;
-//			return jpaQueryFactory.select(ord.count())
-//					.from(ord)
-//					.join(deli).on(ord.ordersId.eq(deli.ordersId))
-//					.where(ord.farmerId.eq(farmerId)
-//							.and(deli.deliveryState.eq(deliveryState)))
-//					.fetchOne();
-//		}
+	public Long invoiceCountByState(Long farmerId, String deliveryState) {
+		QOrders ord = QOrders.orders;
+		QDelivery deli = QDelivery.delivery;
+		return jpaQueryFactory.select(ord.count())
+				.from(ord)
+				.join(deli).on(ord.ordersId.eq(deli.ordersId))
+				.where(ord.farmerId.eq(farmerId)
+						.and(deli.deliveryState.eq(deliveryState)))
+				.fetchOne();
+	}
 }

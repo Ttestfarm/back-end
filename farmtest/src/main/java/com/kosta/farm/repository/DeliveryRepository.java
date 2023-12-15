@@ -4,6 +4,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.kosta.farm.entity.Delivery;
 
-public interface DeliveryRepository extends JpaRepository<Delivery, Integer>{
+public interface DeliveryRepository extends JpaRepository<Delivery, Long>{
 
 }

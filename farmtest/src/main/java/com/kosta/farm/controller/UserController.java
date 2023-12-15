@@ -1,6 +1,7 @@
 package com.kosta.farm.controller;
 
 import java.util.Map;
+import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -119,7 +121,7 @@ public class UserController {
 		}
 	}
 	
-	@PutMapping("/mypage/modify-user")
+	@PutMapping("/user/modify-user")
 	public ResponseEntity<?> modifyUser(@RequestBody ModifyUserDto modifyUserRequest, Authentication auth) {
     try {
       // 로그인한 사용자 정보 가져오기
@@ -155,6 +157,26 @@ public class UserController {
       ErrorResponseDto errorResponse = new ErrorResponseDto("회원 정보 수정 실패", e.getMessage());
       return ResponseEntity.badRequest().body(errorResponse);
     }
+	}
+	
+	@GetMapping("/user/modify-user/check-sms/{telNum}")
+	public @ResponseBody String sendSMS(@PathVariable String telNum) {
+		try {
+			Random rand = new Random();
+			String numStr = "";
+			for (int i = 0; i < 6; i++) {
+				String ran = Integer.toString(rand.nextInt(10));
+				numStr += ran;
+			}
+
+			System.out.println("수신자 번호: " + telNum);
+			System.out.println("인증번호: " + numStr);
+			userService.certifiedTelNumber(telNum, numStr);
+			return numStr;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return "인증번호 전송 오류가 발생했습니다.";
+		}
 	}
 	
 	@GetMapping("/find-email/{userName}/{userTel}")

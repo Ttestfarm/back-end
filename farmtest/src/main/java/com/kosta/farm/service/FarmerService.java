@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.kosta.farm.dto.DeliveryDto;
+import com.kosta.farm.dto.ModifyFarmDto;
 import com.kosta.farm.dto.OrdersDto;
 import com.kosta.farm.dto.QuotationDto;
 import com.kosta.farm.dto.RegFarmerDto;
@@ -46,4 +47,7 @@ public interface FarmerService {
 	
 	// 파머등록
 	Farmer registerFarmer(RegFarmerDto request, MultipartFile profileImage) throws Exception;
+	
+	// 파머정보수정
+	Farmer modifyFarmer(ModifyFarmDto request, MultipartFile profileImage) throws Exception;
 }

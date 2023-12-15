@@ -23,4 +23,6 @@ public interface UserService {
   void sendTempPasswordEmail(String userEmail, String tempPassword) throws Exception;
   
   void updateUserInfoAfterRegFarmer(User user, Long farmerId) throws Exception;
+  
+  void certifiedTelNumber(String telNumber, String certifyNumber) throws Exception;
 }

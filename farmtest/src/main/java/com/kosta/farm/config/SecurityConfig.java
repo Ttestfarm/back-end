@@ -13,6 +13,8 @@ import org.springframework.web.filter.CorsFilter;
 
 import com.kosta.farm.config.jwt.JwtTokenFilter;
 import com.kosta.farm.config.oauth2.OAuth2LoginSuccessHandler;
+import com.kosta.farm.config.oauth2.PrincipalOAuth2UserService;
+//import com.kosta.farm.config.oauth2.OAuth2LoginSuccessHandler;
 //import com.kosta.farm.config.oauth2.PrincipalOauth2UserService;
 import com.kosta.farm.service.UserService;
 
@@ -22,11 +24,15 @@ import lombok.RequiredArgsConstructor;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-
+	
+	@Autowired
 	private final UserService userService;
-//	private final PrincipalOauth2UserService principalOauth2UserService;
-  private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
-
+	
+	@Autowired
+	private PrincipalOAuth2UserService principalOauth2UserService;
+	
+	@Autowired
+	private OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
 	@Value("${jwt.secretKey}")
 	private String secretKey;

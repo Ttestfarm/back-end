@@ -35,7 +35,7 @@ public class User {
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Long userId; // 서버에서 사용하는 userId
 	@Column
-  private Long farmerId;
+	private Long farmerId;
 	@Column
 	private String userName; // 서비스에서 사용할 이름 (소셜로그인의 경우 닉네임 전달받음)
 	@Column

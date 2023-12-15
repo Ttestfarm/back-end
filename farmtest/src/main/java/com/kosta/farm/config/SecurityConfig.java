@@ -51,15 +51,15 @@ public class SecurityConfig {
 			.and()
 			.addFilterBefore(new JwtTokenFilter(userService, secretKey), UsernamePasswordAuthenticationFilter.class);
 		
-		http
-			.oauth2Login()
-			.authorizationEndpoint().baseUri("/oauth2/authorization") // 소셜 로그인 url
-			.and()
-			.redirectionEndpoint().baseUri("/oauth2/callback/*") // 소셜 인증 후 redirect url
-			.and()
-			.userInfoEndpoint().userService(principalOauth2UserService) // 회원 정보 처리
-			.and()
-			.successHandler(oAuth2LoginSuccessHandler);
+//		http
+//			.oauth2Login()
+//			.authorizationEndpoint().baseUri("/oauth2/authorization") // 소셜 로그인 url
+//			.and()
+//			.redirectionEndpoint().baseUri("/oauth2/callback/*") // 소셜 인증 후 redirect url
+//			.and()
+//			.userInfoEndpoint().userService(principalOauth2UserService) // 회원 정보 처리
+//			.and()
+//			.successHandler(oAuth2LoginSuccessHandler);
 		
 		http			
 			// 인가(권한) 필요한 URL 지정

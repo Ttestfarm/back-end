@@ -13,7 +13,7 @@ import org.springframework.web.filter.CorsFilter;
 
 import com.kosta.farm.config.jwt.JwtTokenFilter;
 import com.kosta.farm.config.oauth2.OAuth2LoginSuccessHandler;
-import com.kosta.farm.config.oauth2.PrincipalOauth2UserService;
+//import com.kosta.farm.config.oauth2.PrincipalOauth2UserService;
 import com.kosta.farm.service.UserService;
 
 import lombok.RequiredArgsConstructor;
@@ -24,7 +24,7 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfig {
 
 	private final UserService userService;
-	private final PrincipalOauth2UserService principalOauth2UserService;
+//	private final PrincipalOauth2UserService principalOauth2UserService;
   private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
 
@@ -45,15 +45,15 @@ public class SecurityConfig {
 			.and()
 			.addFilterBefore(new JwtTokenFilter(userService, secretKey), UsernamePasswordAuthenticationFilter.class);
 		
-		http
-			.oauth2Login()
-			.authorizationEndpoint().baseUri("/oauth2/authorization") // 소셜 로그인 url
-			.and()
-			.redirectionEndpoint().baseUri("/oauth2/callback/*") // 소셜 인증 후 redirect url
-			.and()
-			.userInfoEndpoint().userService(principalOauth2UserService) // 회원 정보 처리
-			.and()
-			.successHandler(oAuth2LoginSuccessHandler);
+//		http
+//			.oauth2Login()
+//			.authorizationEndpoint().baseUri("/oauth2/authorization") // 소셜 로그인 url
+//			.and()
+//			.redirectionEndpoint().baseUri("/oauth2/callback/*") // 소셜 인증 후 redirect url
+//			.and()
+//			.userInfoEndpoint().userService(principalOauth2UserService) // 회원 정보 처리
+//			.and()
+//			.successHandler(oAuth2LoginSuccessHandler);
 		
 		http			
 			// 인가(권한) 필요한 URL 지정

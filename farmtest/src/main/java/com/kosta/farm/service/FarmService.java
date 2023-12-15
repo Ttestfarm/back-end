@@ -60,6 +60,7 @@ public interface FarmService {
 	// 소트별로
 	List<FarmerDto> findFarmersWithSorting(String sortType, PageInfo pageInfo) throws Exception;
 
+	List<FarmerDto> findfarmerDetail(Long farmerId) throws Exception;
 	// 파머리스트 페이지 (무한스크롤)
 
 	Long farmerCount() throws Exception;
@@ -103,10 +104,12 @@ public interface FarmService {
 	Long quoteCount(Long requestId) throws Exception;
 
 	// 모든 농부들의 별점 평균
-	Double avgRating() throws Exception;
+	Double avgTotalRating() throws Exception;
 
 	// 모든 requestcount state이 1인거
-	Integer requestCount() throws Exception;
+	Long requestCountByState(String requestState) throws Exception;
 	// requestCount state이 2인거?
+
+	Map<String, Object> quoteWithFarmerByRequestId(Long requestId) throws Exception;
 
 }

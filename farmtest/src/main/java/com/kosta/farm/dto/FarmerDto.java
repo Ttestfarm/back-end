@@ -26,7 +26,6 @@ public class FarmerDto {
     private Integer reviewCount;
     private Double rating;
 
-
     public Farmer toEntity() {
         return Farmer.builder()
         	.farmerId(farmerId)

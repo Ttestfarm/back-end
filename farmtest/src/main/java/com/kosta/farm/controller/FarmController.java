@@ -4,11 +4,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.kosta.farm.config.auth.PrincipalDetails;
 import com.kosta.farm.dto.FarmerDto;
 import com.kosta.farm.dto.OrderHistoryDto;
 import com.kosta.farm.dto.RequestDto;
@@ -32,17 +33,19 @@ import com.kosta.farm.entity.Quotation;
 import com.kosta.farm.entity.Request;
 import com.kosta.farm.entity.Review;
 import com.kosta.farm.entity.User;
+import com.kosta.farm.repository.ProductRepository;
 import com.kosta.farm.service.FarmService;
-import com.kosta.farm.service.UserService;
 import com.kosta.farm.util.PageInfo;
 
 @RestController
 public class FarmController {
 	@Autowired
 	private FarmService farmService;
+	@Autowired
+	private ProductRepository productRepository;
 
 	// 리뷰 작성하기 완성? 다시 확인해보기
-	@PostMapping("/mypage/buylist")
+	@PostMapping("/user/buylist")
 	public ResponseEntity<String> insertReview(@ModelAttribute ReviewDto review, List<MultipartFile> files) {
 		try {
 			farmService.addReview(review.getOrdersId(), files, review.getRating(), review.getContent());
@@ -68,17 +71,14 @@ public class FarmController {
 		}
 	}
 
-	// 거의 완성
-	@PostMapping("/matching/{userId}") // 요청서 작성하기
-	public ResponseEntity<String> writeRequest(@RequestBody RequestDto request,
-//			@ModelAttribute RequestDto request,
-			Authentication authentication
+	// 거의 완성 이거 한번 붙여보기
+	@PostMapping("/matching") // 요청서 작성하기
+	public ResponseEntity<String> writeRequest(@RequestBody RequestDto request, Authentication authentication
 //			@PathVariable Long userId
 	) {
+		User user = (User) authentication.getPrincipal();
+		Long userId = user.getUserId();
 		try {
-			PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
-			User user = principalDetails.getUser();
-			Long userId = user.getUserId();
 			String tel = user.getUserTel();
 			String address = user.getAddress1() + user.getAddress2() + user.getAddress3();
 			// 만약 저기서 adderss를 입력 안햇으면 불러와야함
@@ -100,7 +100,6 @@ public class FarmController {
 			@RequestParam(required = false, name = "page", defaultValue = "1") Integer page) {
 
 		try {
-
 			if (sortType == null || sortType.equals("") || sortType.equals("latest")) {
 				sortType = "farmerId";
 			}
@@ -126,22 +125,40 @@ public class FarmController {
 	}
 
 //    User loginUser = userService.getLoginUserByUserEmail(auth.getName());
-//이게 안됨 ㅜㅜ
 	@GetMapping("/findfarmer/{farmerId}") // default 기본페이지 디테일
 	public ResponseEntity<Map<String, Object>> farmerDetail(@PathVariable(name = "farmerId") Long farmerId,
 //			@PathVariable(name="userId") Long userId,
 			Authentication authentication) {
-
-		System.out.println(authentication);
+		System.out.println(farmerId);
 		User user = (User) authentication.getPrincipal();
 		Long userId = user.getUserId();
 		try {
-			System.out.println(userId);
+			System.out.println("유저" + userId);
 			Map<String, Object> res = new HashMap<>();
 			Farmer farmer = farmService.farmerDetail(farmerId);
 			res.put("farmer", farmer);
+			// 왜 여기서 에러가 뜰까 이거 다시보기
 			Boolean farmerfollow = farmService.selectedFarmerfollow(userId, farmerId); // 이걸 모르겠음
 			res.put("farmerfollow", farmerfollow); // true면 follow 눌림
+			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	// 파머 follow 했는지 여부 안되었으면 follow가 된다
+	@GetMapping("/findfarmer/{farmerId}/follow")
+	public ResponseEntity<Map<String, Object>> farmerFollow(Authentication authentication,
+			@PathVariable Long farmerId) {
+		User user = (User) authentication.getPrincipal();
+		Long userId = user.getUserId();
+		try {
+			Map<String, Object> res = new HashMap<>();
+			Boolean selectFarmer = farmService.farmerfollow(userId, farmerId); // authentication 부터 아이디 가져옴
+			res.put("isSelect", selectFarmer);
+			Integer followCount = farmService.farmerInfo(farmerId).getFollowCount();
+			res.put("followCount", followCount);
 			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -155,7 +172,8 @@ public class FarmController {
 			@PathVariable(required = false) Long farmerId) {
 		try {
 			Map<String, Object> res = new HashMap<>();
-			PageInfo pageInfo = PageInfo.builder().curPage(1).build();
+//			PageInfo pageInfo = PageInfo.builder().curPage(1).build();
+			PageInfo pageInfo = PageInfo.builder().curPage(page).build();
 			List<Review> reviewList = farmService.getReviewListByFarmer(farmerId, pageInfo);
 			res.put("reviewList", reviewList);
 			res.put("pageInfo", pageInfo);
@@ -172,8 +190,7 @@ public class FarmController {
 			@PathVariable(required = false) Long farmerId) {
 		try {
 			Map<String, Object> res = new HashMap<>();
-
-			PageInfo pageInfo = PageInfo.builder().curPage(1).build();
+			PageInfo pageInfo = PageInfo.builder().curPage(page).build();
 			List<Product> productList = farmService.getProductListByFarmer(farmerId, pageInfo);
 			res.put("productList", productList);
 			res.put("pageInfo", pageInfo);
@@ -192,8 +209,17 @@ public class FarmController {
 		try {
 			PageInfo pageInfo = PageInfo.builder().curPage(page).build();
 			List<Request> matchingList = farmService.requestListByPage(pageInfo);
+			Double average = farmService.avgTotalRating();
+			Long matchingProgress = farmService.requestCountByState("1");
+			// 매칭중 requeststate1
+			Long foundMatching = farmService.requestCountByState("2");
+			// 매칭완료 requeststate2
+
 			Map<String, Object> res = new HashMap<>();
 			res.put("matchingList", matchingList);
+			res.put("average", average);
+			res.put("matchingProgress", matchingProgress);
+			res.put("foundMatching", foundMatching);
 			res.put("pageInfo", pageInfo);
 			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
 
@@ -204,15 +230,28 @@ public class FarmController {
 	}
 
 	// 유저의 파머찜리스트
-	@GetMapping("/mypage/followlist")
-	public ResponseEntity<Map<String, Object>> getFollowingFarmersByUserId(Authentication authentication) {
-		PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
-		Long userId = principalDetails.getUser().getUserId();
+	@GetMapping("/user/followlist")
+	public ResponseEntity<Map<String, Object>> getFollowingFarmersByUserId(
+//			@PathVariable(required = false) Integer page,
+			@RequestParam Long userId
+
+//			Authentication authentication
+//			,
+	) {
+//		User user = (User) authentication.getPrincipal();
+//		Long userId = user.getUserId();
 		try {
+//			PageInfo pageInfo = PageInfo.builder().curPage(page).build();
 			List<Farmerfollow> followingFarmers = farmService.getFollowingFarmersByUserId(userId);
+			List<FarmerDto> followingFarmersDetails = new ArrayList<>();
+			for (Farmerfollow farmerfollow : followingFarmers) {
+				List<FarmerDto> farmerDetail = farmService.findfarmerDetail(farmerfollow.getFarmerId());
+				followingFarmersDetails.addAll(farmerDetail);
+			}
 			Map<String, Object> res = new HashMap<>();
-			res.put("success", true);
-			res.put("followingFarmers", followingFarmers);
+			res.put("isFollow", true);
+			res.put("followingFarmers", followingFarmersDetails);
+//			res.put("pageInfo", pageInfo);
 			System.out.println(res);
 			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
 		} catch (Exception e) {
@@ -221,32 +260,12 @@ public class FarmController {
 		}
 	}
 
-	// 파머 follow 했는지 여부 안되었으면 follow가 된다
-	@GetMapping("/findfarmer/{farmerId}/follow/{userId}")
-	public ResponseEntity<Map<String, Object>> farmerFollow(Authentication authentication,
-			@PathVariable Long farmerId) {
-		PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
-		Long userId = principalDetails.getUser().getUserId();
-		try {
-			Map<String, Object> res = new HashMap<>();
-			Boolean selectFarmer = farmService.farmerfollow(userId, farmerId); // authentication 부터 아이디 가져옴
-			res.put("isSelect", selectFarmer);
-			Integer followCount = farmService.farmerInfo(farmerId).getFollowCount();
-			res.put("followCount", followCount);
-			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
-		} catch (Exception e) {
-			e.printStackTrace();
-			return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
-		}
-	}
-
-	@GetMapping("/mypage") // 받은 매칭 견적 list
+	@GetMapping("/user") // 받은 매칭 견적 list
 	public ResponseEntity<Map<String, Object>> matchingList(
 //			@RequestParam Long userId
 			Authentication authentication) {
-		PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
-		Long userId = principalDetails.getUser().getUserId();
-
+		User user = (User) authentication.getPrincipal();
+		Long userId = user.getUserId();
 		try {
 			Map<String, Object> res = new HashMap<>();
 			List<Request> requestList = farmService.requestListByUser(userId);
@@ -270,12 +289,12 @@ public class FarmController {
 	}
 
 	// 구매내역 불러오기 하기 후기도 같이 불러옴
-	@GetMapping("/mypage/buylist")
+	@GetMapping("/user/buylist")
 	public ResponseEntity<Map<String, Object>> buyList(
 //			@PathVariable Long userId,
 			Authentication authentication) {
-		PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
-		Long userId = principalDetails.getUser().getUserId();
+		User user = (User) authentication.getPrincipal();
+		Long userId = user.getUserId();
 		try {
 			Map<String, Object> res = new HashMap<>();
 			List<Orders> buyList = farmService.getOrdersListByUser(userId);
@@ -300,7 +319,6 @@ public class FarmController {
 			return ResponseEntity.badRequest().build();
 
 		}
-
 	}
 
 	private Review findReviewForOrder(List<Review> reviewList, Long ordersId) {
@@ -312,13 +330,10 @@ public class FarmController {
 		return null; // 리뷰가 없으면 null로 반환
 	}
 
-	@GetMapping("/mypage/{requestId}") // 받은 매칭 견적에서 견적서 자세히 보기
+	@GetMapping("/user/{requestId}") // 받은 매칭 견적에서 견적서 자세히 보기
 	public ResponseEntity<Map<String, Object>> matchingListDetail(@PathVariable Long requestId) {
-
 		try {
-			Map<String, Object> res = new HashMap<>();
-			List<Quotation> quote = farmService.quoteListByRequest(requestId);
-			res.put("quote", quote);
+			Map<String, Object> res = farmService.quoteWithFarmerByRequestId(requestId);
 			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -357,6 +372,25 @@ public class FarmController {
 			e.printStackTrace();
 			return new ResponseEntity<String>(HttpStatus.BAD_REQUEST);
 		}
+
+	}
+	
+	//이거 무시
+	@GetMapping("/order/{productId}")
+	public String order(@PathVariable(value = "productId") Long productId, Model model) {
+		try {
+			System.out.println("productId: " + productId);
+			Optional<Product> product = productRepository.findById(productId);
+			if (product == null) {
+				System.out.println("상품을 찾을 수 없습니다");
+				model.addAttribute("error_msg", "상품을 찾을 수 없습니다");
+				return "error";
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+
+		}
+		return null;
 
 	}
 

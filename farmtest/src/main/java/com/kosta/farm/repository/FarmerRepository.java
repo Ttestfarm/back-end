@@ -28,7 +28,6 @@ public interface FarmerRepository extends JpaRepository<Farmer, Long> {
 	// 매개변수를 활용한 정렬
 	Page<Farmer> findByfarmNameContaining(String searchKeyword, Pageable pageable);
 
-	// 파머이름 포함한
 
 	// 파머 팜 인터레스트 12345 포함한
 
@@ -39,5 +38,7 @@ public interface FarmerRepository extends JpaRepository<Farmer, Long> {
 	List<Farmer> findByfollowCount(Integer followCount, Sort sort);
 
 	Page<Farmer> findPageBy(Pageable pageable);
+	
+	List<Farmer> findListByFarmerId(Long farmerId);
 
 }

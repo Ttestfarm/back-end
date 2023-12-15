@@ -1,18 +1,19 @@
 package com.kosta.farm.repository;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.transaction.Transactional;
 
+import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
 import com.kosta.farm.entity.Farmer;
 import com.kosta.farm.entity.Farmerfollow;
 import com.kosta.farm.entity.Orders;
-import com.kosta.farm.entity.Payment;
 import com.kosta.farm.entity.Product;
 import com.kosta.farm.entity.QCategory;
 import com.kosta.farm.entity.QFarmer;
@@ -22,11 +23,9 @@ import com.kosta.farm.entity.QProduct;
 import com.kosta.farm.entity.QQuotation;
 import com.kosta.farm.entity.QRequest;
 import com.kosta.farm.entity.QReview;
+import com.kosta.farm.entity.Quotation;
 import com.kosta.farm.entity.Review;
-import com.kosta.farm.util.PageInfo;
-import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.Tuple;
-import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
@@ -50,6 +49,8 @@ public class FarmDslRepository {
 		QFarmer farmer = QFarmer.farmer;
 		return jpaQueryFactory.select(farmer.count()).from(farmer).fetchOne();
 	}
+
+	//
 
 	// farmerfollow에서 데이터 조회하기
 	public Farmerfollow findFarmerfollow(Long userId, Long farmerId) throws Exception {
@@ -89,6 +90,45 @@ public class FarmDslRepository {
 	public List<Review> findByUserId(Long userId) throws Exception {
 		QReview review = QReview.review;
 		return jpaQueryFactory.selectFrom(review).where(review.userId.eq(userId)).fetch();
+	}
+
+	public Map<String, Object> findQuotationsWithFarmerByRequestId(Long requestId) {
+		QQuotation quotation = QQuotation.quotation;
+		QFarmer farmer = QFarmer.farmer;
+
+		List<Tuple> quotesWithFarmer = jpaQueryFactory
+				.select(quotation, farmer.farmName, 
+						farmer.farmAddress, farmer.farmPixurl, farmer.rating,
+						farmer.reviewCount, farmer.followCount)
+				.from(quotation).leftJoin(farmer).on(quotation.farmerId.eq(farmer.farmerId))
+				.where(quotation.requestId.eq(requestId)).fetch();
+		System.out.println(quotesWithFarmer);
+		Map<String, Object> res = new HashMap<>();
+		List<Map<String, Object>> quotesWithFarmerList = new ArrayList<>();
+
+		for (Tuple tuple : quotesWithFarmer) {
+			Quotation quote = tuple.get(quotation);
+			String farmName = tuple.get(farmer.farmName);
+			String farmAddress = tuple.get(farmer.farmAddress);
+			String farmPix = tuple.get(farmer.farmPixurl);
+			Double rating = tuple.get(farmer.rating);
+			Integer reviewCount = tuple.get(farmer.reviewCount);
+			Integer followCount = tuple.get(farmer.followCount);
+
+			Map<String, Object> quoteFarmerMap = new HashMap<>();
+			quoteFarmerMap.put("quote", quote);
+			quoteFarmerMap.put("farmName", farmName);
+			quoteFarmerMap.put("farmAddress", farmAddress);
+			quoteFarmerMap.put("farmPix", farmPix);
+			quoteFarmerMap.put("rating", rating);
+			quoteFarmerMap.put("reviewCount", reviewCount);
+			quoteFarmerMap.put("followCount", followCount);
+
+			quotesWithFarmerList.add(quoteFarmerMap);
+		}
+
+		res.put("quotesWithFarmer", quotesWithFarmerList);
+		return res;
 	}
 
 	public List<Tuple> getReqandQuoteByRequestId(Long requestId) {

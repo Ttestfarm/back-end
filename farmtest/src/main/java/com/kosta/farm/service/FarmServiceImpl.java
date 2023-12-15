@@ -2,9 +2,7 @@ package com.kosta.farm.service;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -16,7 +14,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,7 +21,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kosta.farm.dto.FarmerDto;
 import com.kosta.farm.dto.RequestDto;
 import com.kosta.farm.dto.ReviewDto;
-import com.kosta.farm.entity.Delivery;
 import com.kosta.farm.entity.Farmer;
 import com.kosta.farm.entity.Farmerfollow;
 import com.kosta.farm.entity.Orders;
@@ -34,7 +30,6 @@ import com.kosta.farm.entity.ProductFile;
 import com.kosta.farm.entity.Quotation;
 import com.kosta.farm.entity.Request;
 import com.kosta.farm.entity.Review;
-import com.kosta.farm.entity.User;
 import com.kosta.farm.repository.FarmDslRepository;
 import com.kosta.farm.repository.FarmerDslRepository;
 import com.kosta.farm.repository.FarmerRepository;
@@ -68,6 +63,7 @@ public class FarmServiceImpl implements FarmService {
 	private final PaymentRepository paymentRepository;
 	private final RequestRepository requestRepository;
 	private final QuotationRepository quoteRepository;
+	private final UserService userService;
 
 	@Override // 이건 페이지네이션을 지원
 	public List<Farmer> farmerListByPage(PageInfo pageInfo) throws Exception {
@@ -106,12 +102,24 @@ public class FarmServiceImpl implements FarmService {
 		return farmerDtoList;
 	}
 
+	@Override
+	public List<FarmerDto> findfarmerDetail(Long farmerId) throws Exception {
+		List<Farmer> detail = farmerRepository.findListByFarmerId(farmerId);
+		List<FarmerDto> farmerDtoList = new ArrayList<>();
+		for (Farmer farmer : detail) {
+			farmerDtoList.add(farmer.toDto());
+
+		}
+		return farmerDtoList;
+	}
+
 	@Override // 파머리스트 sorting으로
 	public List<FarmerDto> findFarmersWithSorting(String sortType, PageInfo pageInfo) throws Exception {
-		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 8, Sort.by(Sort.Direction.DESC, sortType));
+		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 16,
+				Sort.by(Sort.Direction.DESC, sortType).and(Sort.by(Sort.Direction.DESC, "farmerId")));
 		Page<Farmer> pages = farmerRepository.findAll(pageRequest);
-		pageInfo.setAllPage(pages.getTotalPages()); // 나머지가 필요 없다 b/c 무한 스크롤 현재 페이지랑 마지막 페이지만 필요하단
-
+		pageInfo.setAllPage(pages.getTotalPages());
+		// 나머지가 필요 없다 b/c 무한 스크롤 현재 페이지랑 마지막 페이지만 필요하다
 		List<FarmerDto> farmerDtoList = new ArrayList<>();
 		for (Farmer farmer : pages.getContent()) {
 			farmerDtoList.add(farmer.toDto());
@@ -121,8 +129,21 @@ public class FarmServiceImpl implements FarmService {
 
 	@Override
 	public List<Farmerfollow> getFollowingFarmersByUserId(Long userId) throws Exception {
+//		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 9,
+//				Sort.by(Sort.Direction.DESC, "farmerfollowId").and(Sort.by(Sort.Direction.DESC, "farmerId")));
 		return farmerfollowRepository.findByUserId(userId);
 	}
+//	@Override
+//	public List<Farmerfollow> getFollowingFarmersByUserId(Long userId, PageInfo pageInfo) throws Exception {
+//		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 8,
+//				Sort.by(Sort.Direction.DESC, "farmerId"));
+//		Page<Farmerfollow> pages = farmerfollowRepository.findByUserId(userId);
+//		pageInfo.setAllPage(pages.getTotalPages());
+//		List<FarmerDto> farmerDtoList= new ArrayList<>() {
+//			
+//		}
+//		return null;
+//	}
 
 	// 요청서 쓰기
 	@Override
@@ -249,7 +270,7 @@ public class FarmServiceImpl implements FarmService {
 
 	@Override // 파머별로 리뷰리스트 가져오기 페이징처리도
 	public List<Review> getReviewListByFarmer(Long farmerId, PageInfo pageInfo) throws Exception {
-		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 6,
+		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 3,
 				Sort.by(Sort.Direction.DESC, "reviewId"));
 		Page<Review> pages = reviewRepository.findByFarmerId(farmerId, pageRequest);
 		pageInfo.setAllPage(pages.getTotalPages());
@@ -259,6 +280,8 @@ public class FarmServiceImpl implements FarmService {
 		pageInfo.setEndPage(endPage);
 		List<Review> reviewList = new ArrayList<>();
 		for (Review review : pages.getContent()) {
+//			String userName=userRepository.findUserNameByUserId(review.getUserId());
+
 			reviewList.add(review);
 		}
 		return reviewList;
@@ -293,14 +316,6 @@ public class FarmServiceImpl implements FarmService {
 		return farmerRepository.findAll();
 	}
 
-	@Override // 파머 디테일페이지 가져오기
-	public Farmer farmerDetail(Long farmerId) throws Exception {
-		Optional<Farmer> ofarmer = farmerRepository.findById(farmerId);
-		if (ofarmer.isEmpty())
-			throw new Exception("해당 농부를 찾을 수 없습니다");
-		return ofarmer.get();
-	}
-
 	@Override // farmerfollow하기
 	public Boolean farmerfollow(Long userId, Long farmerId) throws Exception {
 		Farmer farmer = farmerRepository.findById(farmerId).get();
@@ -326,13 +341,7 @@ public class FarmServiceImpl implements FarmService {
 			return false;
 		return true;
 	}
-//	@Override // 이미 했으면 지워진다
-//	public Boolean selectedFarmerfollowByEmail(String userEmail, Long farmerId) throws Exception {
-//		Long cnt = farmDslRepository.findIsFarmerfollow(userId, farmerId);
-//		if (cnt < 1)
-//			return false;
-//		return true;
-//	}
+
 	@Override // payment상태 불러오기
 	public Boolean checkPaymentState(Long userId) throws Exception {
 		Payment payment = paymentRepository.findByUserId(userId);
@@ -380,11 +389,14 @@ public class FarmServiceImpl implements FarmService {
 				product.removeStock(payment.getCount());
 				productRepository.save(product);
 			}
-			//order가 저장되었고 quotationid가 있다면 (매칭주문)
+			// order가 저장되었고 quotationid가 있다면 (매칭주문)
 			if (orders != null && payment.getRequestId() != null) {
-				Optional<Request> oRequest= requestRepository.findById(payment.getRequestId());
-				
-				
+				Optional<Request> oRequest = requestRepository.findById(payment.getRequestId());
+				if (oRequest.isPresent()) {
+					Request request = oRequest.get();
+					request.setRequestState("2"); // 요청상태를 2로 변경
+					requestRepository.save(request);
+				}
 			}
 
 		} catch (Exception e) {
@@ -392,9 +404,12 @@ public class FarmServiceImpl implements FarmService {
 		}
 	}
 
-	@Override
-	public Long farmerCount() throws Exception {
-		return null;
+	@Override // 파머 디테일페이지 가져오기
+	public Farmer farmerDetail(Long farmerId) throws Exception {
+		Optional<Farmer> ofarmer = farmerRepository.findById(farmerId);
+		if (ofarmer.isEmpty())
+			throw new Exception("해당 농부를 찾을 수 없습니다");
+		return ofarmer.get();
 	}
 
 	@Override
@@ -404,7 +419,7 @@ public class FarmServiceImpl implements FarmService {
 
 	@Override // 매칭 메인페이지
 	public List<Request> requestListByPage(PageInfo pageInfo) throws Exception {
-		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 8,
+		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 3,
 				Sort.by(Sort.Direction.DESC, "requestId"));
 		Page<Request> pages = requestRepository.findAll(pageRequest);
 		pageInfo.setAllPage(pages.getTotalPages());
@@ -448,15 +463,30 @@ public class FarmServiceImpl implements FarmService {
 	}
 
 	@Override
-	public Double avgRating() throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+	public Long farmerCount() throws Exception {
+		return farmDslRepository.findFarmerCount();
 	}
 
 	@Override
-	public Integer requestCount() throws Exception {
-		// TODO Auto-generated method stub
-		return null;
+	public Double avgTotalRating() throws Exception {
+		List<Farmer> farmers = farmerRepository.findAll();
+		double totalRating = 0;
+		Integer numberofFarmers = farmers.size();
+		for (Farmer farmer : farmers) {
+			totalRating += farmer.getRating();
+		}
+		return numberofFarmers > 0 ? totalRating / numberofFarmers : 0;
+	}
+
+	@Override
+	public Long requestCountByState(String requestState) throws Exception {
+		List<Request> requests = requestRepository.findByRequestState(requestState);
+		return (long) requests.size();
+	}
+
+	@Override
+	public Map<String, Object> quoteWithFarmerByRequestId(Long requestId) throws Exception {
+		return farmDslRepository.findQuotationsWithFarmerByRequestId(requestId);
 	}
 
 }

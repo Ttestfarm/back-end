@@ -58,6 +58,8 @@ dependencies {
 	implementation 'org.apache.commons:commons-lang3:3.12.0'
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 	implementation group: 'net.nurigo', name: 'javaSDK', version: '2.2'
+	
+
 }
 
 tasks.named('bootBuildImage') {

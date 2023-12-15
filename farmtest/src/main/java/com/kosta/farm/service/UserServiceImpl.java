@@ -1,7 +1,10 @@
 package com.kosta.farm.service;
 
+import java.util.HashMap;
+
 import org.apache.commons.lang3.RandomStringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.json.simple.JSONObject;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -14,6 +17,10 @@ import com.kosta.farm.entity.User;
 import com.kosta.farm.repository.UserRepository;
 import com.kosta.farm.util.UserRole;
 
+import net.nurigo.java_sdk.api.Message;
+import net.nurigo.java_sdk.exceptions.CoolsmsException;
+
+
 @Service
 @Transactional
 public class UserServiceImpl implements UserService {
@@ -21,6 +28,12 @@ public class UserServiceImpl implements UserService {
 	private final UserRepository userRepository;
 	private final BCryptPasswordEncoder encoder;
 	private final JavaMailSender javaMailSender;
+	
+	 @Value("${coolsms.apiKey}")
+   private String apiKey;
+
+   @Value("${coolsms.apiSecret}")
+   private String apiSecret;
 
 	public UserServiceImpl(UserRepository userRepository, BCryptPasswordEncoder encoder, JavaMailSender javaMailSender) {
 		this.userRepository = userRepository;
@@ -164,5 +177,25 @@ public class UserServiceImpl implements UserService {
 		saveUser(user);
 	}
 
+	@Override
+	public void certifiedTelNumber(String telNumber, String certifyNumber) throws Exception {
+		Message coolsms = new Message(apiKey, apiSecret);
+
+		HashMap<String, String> params = new HashMap<>();
+		params.put("to", telNumber);
+		params.put("from", "01072822458");
+		params.put("type", "SMS");
+		params.put("text", "Unpretty Farm 휴대폰 인증번호는" + "[" + certifyNumber + "]" + "입니다.");
+		params.put("app_version", "test app 1.2");
+
+		try {
+			JSONObject obj = (JSONObject) coolsms.send(params);
+			System.out.println("SMS 전송 성공: " + obj.toString());
+		} catch (CoolsmsException e) {
+			System.out.println("SMS 전송 실패: " + e.getMessage());
+			System.out.println("에러 코드: " + e.getCode());
+		}
+
+	}
 
 }

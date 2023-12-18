@@ -51,6 +51,12 @@ public class QPayment extends EntityPathBase<Payment> {
 
     public final StringPath state = createString("state");
 
+    public final StringPath tCode = createString("tCode");
+
+    public final StringPath tInvoice = createString("tInvoice");
+
+    public final StringPath tName = createString("tName");
+
     public final NumberPath<Long> userId = createNumber("userId", Long.class);
 
     public QPayment(String variable) {

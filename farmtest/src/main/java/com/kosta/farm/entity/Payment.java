@@ -45,6 +45,13 @@ public class Payment {
 	private String buyerTel;
 	private String buyerAddress;
 	
+	@Column 
+	private String tCode; // 택배사 코드
+	@Column
+	private String tName; // 택배사 이름
+	@Column
+	private String tInvoice; // 송장번호
+	
 	@Column // 결제정보
 	private String product; // 품목
 	private String price; // 가격
@@ -57,5 +64,5 @@ public class Payment {
 	private Timestamp createDate; // 결제 완료 날짜
 	@Column
     @Enumerated(EnumType.STRING)
-	private String state = PaymentStatus.PAID.name(); // READY, PAID, FAILED, CANCELLED
+	private String state = PaymentStatus.PAID.name(); // ERROR, PAID, FAILED, READY, SHIPPING, COMPLETED
 }

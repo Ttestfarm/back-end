@@ -16,7 +16,7 @@ import lombok.Data;
 @Entity
 @Data
 @Builder
-public class ProductFile {
+public class FileVo {
 	@Id @GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Long productFileId;
 //	@Column

@@ -19,23 +19,33 @@ public class QPayment extends EntityPathBase<Payment> {
 
     public static final QPayment payment = new QPayment("payment");
 
-    public final NumberPath<Integer> count = createNumber("count", Integer.class);
+    public final StringPath amount = createString("amount");
+
+    public final StringPath buyerAddress = createString("buyerAddress");
+
+    public final StringPath buyerName = createString("buyerName");
+
+    public final StringPath buyerTel = createString("buyerTel");
 
     public final DateTimePath<java.sql.Timestamp> createDate = createDateTime("createDate", java.sql.Timestamp.class);
 
+    public final NumberPath<Long> deliveryId = createNumber("deliveryId", Long.class);
+
+    public final StringPath deliveryprice = createString("deliveryprice");
+
     public final NumberPath<Long> farmerId = createNumber("farmerId", Long.class);
 
-    public final StringPath paymentBank = createString("paymentBank");
+    public final StringPath payType = createString("payType");
 
-    public final NumberPath<Integer> paymentDelivery = createNumber("paymentDelivery", Integer.class);
+    public final StringPath price = createString("price");
 
-    public final NumberPath<Long> paymentId = createNumber("paymentId", Long.class);
+    public final StringPath product = createString("product");
 
-    public final NumberPath<Integer> paymentPrice = createNumber("paymentPrice", Integer.class);
-
-    public final NumberPath<Integer> productPrice = createNumber("productPrice", Integer.class);
+    public final NumberPath<Long> productId = createNumber("productId", Long.class);
 
     public final NumberPath<Long> quotationId = createNumber("quotationId", Long.class);
+
+    public final StringPath receiptId = createString("receiptId");
 
     public final NumberPath<Long> requestId = createNumber("requestId", Long.class);
 

@@ -23,11 +23,9 @@ public class QDelivery extends EntityPathBase<Delivery> {
 
     public final NumberPath<Long> deliveryId = createNumber("deliveryId", Long.class);
 
-    public final NumberPath<Long> deliveryInfoId = createNumber("deliveryInfoId", Long.class);
+    public final StringPath receiptId = createString("receiptId");
 
-    public final StringPath deliveryState = createString("deliveryState");
-
-    public final NumberPath<Long> ordersId = createNumber("ordersId", Long.class);
+    public final StringPath state = createString("state");
 
     public final StringPath tCode = createString("tCode");
 

@@ -4,6 +4,8 @@ import java.sql.Timestamp;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -11,6 +13,8 @@ import javax.persistence.Id;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+
+import com.kosta.farm.util.RequestStatus;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -50,7 +54,8 @@ public class Request {
 	@Column
 	private Timestamp createDate; //자동
 	@Column
-	private String requestState; // 기간 만료 0, 요청 1, 성사 2, 취소 3 
+	@Enumerated(EnumType.STRING)
+	private String requestState = RequestStatus.REQUEST.name(); // EXPIRED, REQUEST, MATCHED,CANCEL
 	
 	
 	

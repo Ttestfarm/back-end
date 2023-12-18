@@ -4,12 +4,15 @@ import java.sql.Timestamp;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
+
+import com.kosta.farm.util.PaymentStatus;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,31 +25,37 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Payment {
-	@Id @GeneratedValue(strategy=GenerationType.IDENTITY)
-	private Long paymentId;
-	@Column
-	private String paymentBank; // 결제 은행
-	@Column
-	private Integer paymentDelivery; // 배송비
-	@Column
-	private Integer paymentPrice; // 상품금액
-	// private Integer totalPrice // 배송비 + 상품금액
+	@Id
+	private String receiptId;
+	@Column 
+	private Long userId;
+	@Column 
+	private Long farmerId;
+	@Column 
+	private Long productId;
+	@Column 
+	private Long requestId;
+	@Column 
+	private Long quotationId;
+	@Column 
+	private Long deliveryId;
+	
+	@Column // 배송정보
+	private String buyerName;
+	private String buyerTel;
+	private String buyerAddress;
+	
+	@Column // 결제정보
+	private String product; // 품목
+	private String price; // 가격
+	private String deliveryprice; // 배송비
+	private String amount; // 총 결제 가격
+	private String payType; // 결제 방법
+
 	@Column
 	@CreationTimestamp
 	private Timestamp createDate; // 결제 완료 날짜
 	@Column
-	@ColumnDefault("1")
-	private String state; // 결제취소 0, 결제완료 1
-	@Column
-	private Long userId; // userid 참조
-	@Column
-	private Integer productPrice; //상품가격
-	@Column
-	private Integer count; //수량
-	@Column
-	private Long farmerId;
-	@Column
-	private Long requestId; //요청서 아이디
-	@Column
-	private Long quotationId; //견적서 아이디
+    @Enumerated(EnumType.STRING)
+	private String state = PaymentStatus.PAID.name(); // READY, PAID, FAILED, CANCELLED
 }

@@ -4,6 +4,8 @@ import java.sql.Timestamp;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -12,6 +14,9 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+
+import com.kosta.farm.util.DeliveryStatus;
+import com.kosta.farm.util.PaymentStatus;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,10 +34,8 @@ public class Delivery {
 	private Long deliveryId;
 	// FK
 	@Column(unique = true)
-	private Long ordersId;
-	@Column(unique = true)
-	private Long deliveryInfoId;
-	
+	private String receiptId;
+
 	@Column 
 	private String tCode; // 택배사 코드
 	@Column
@@ -43,7 +46,6 @@ public class Delivery {
 	@CreationTimestamp
 	private Timestamp createDate;
 	@Column
-	@Builder.Default
-	@ColumnDefault("1")
-	private String deliveryState; // 0: 오류, 1: 배송중, 2: 배송 완료
+	@Enumerated(EnumType.STRING)
+	private String state = DeliveryStatus.SHIPPING.name();// ERROR, SHIPPING, COMPLETED
 }

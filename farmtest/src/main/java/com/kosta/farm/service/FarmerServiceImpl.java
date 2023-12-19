@@ -25,13 +25,16 @@ import com.kosta.farm.dto.QuotationDto;
 import com.kosta.farm.dto.RegFarmerDto;
 import com.kosta.farm.entity.Delivery;
 import com.kosta.farm.entity.Farmer;
+import com.kosta.farm.entity.FileVo;
 import com.kosta.farm.entity.Invoice;
 import com.kosta.farm.entity.Orders;
+import com.kosta.farm.entity.ProductFile;
 import com.kosta.farm.entity.Quotation;
 import com.kosta.farm.entity.Request;
 import com.kosta.farm.repository.DeliveryRepository;
 import com.kosta.farm.repository.FarmerDslRepository;
 import com.kosta.farm.repository.FarmerRepository;
+import com.kosta.farm.repository.FileVoRepository;
 import com.kosta.farm.repository.InvoiceRepository;
 import com.kosta.farm.repository.OrdersRepository;
 import com.kosta.farm.repository.QuotationRepository;
@@ -52,6 +55,7 @@ public class FarmerServiceImpl implements FarmerService {
 	private final OrdersRepository ordersRepository;
 	private final QuotationRepository quotationRepository;
 	private final InvoiceRepository invoiceRepository;
+	private final FileVoRepository fileVoRepository;
 	// DSL
 	private final FarmerDslRepository farmerDslRepository;
 	private final ObjectMapper objectMapper;
@@ -81,7 +85,27 @@ public class FarmerServiceImpl implements FarmerService {
 
 	// ** 견적서 **
 	@Override // 견적서 양식 (보내기 이벤트)-> 견적서 저장
-	public void saveQuotation(Quotation quotation) throws Exception {
+	public void saveQuotation(Quotation quotation, List<MultipartFile> files) throws Exception {
+		String dir = "c:/jisu/upload/";
+		String fileNums = "";
+		if (files != null && files.size() != 0) {
+			for (MultipartFile file : files) {
+				// filevo에 insert
+				FileVo filevo = FileVo.builder().directory(dir).fileName(file.getOriginalFilename())
+						.size(file.getSize()).build();
+				fileVoRepository.save(filevo);
+
+				// upload 폴더에 upload
+				File uploadFile = new File(dir + filevo.getFileId());
+				file.transferTo(uploadFile);
+				// file 번호 목록 만들기
+				if (!fileNums.equals(""))
+					fileNums += ",";
+				fileNums += filevo.getFileId();
+			}
+			quotation.setQuotationPicture(fileNums);
+		}
+
 		quotationRepository.save(quotation);
 	}
 
@@ -234,12 +258,8 @@ public class FarmerServiceImpl implements FarmerService {
 		// System.out.println("id " + ordersId);
 		// System.err.println("tCode " + tCode);
 		// System.out.println("tInvoice " + tInvoice);
-		deliveryRepository.save(Delivery.builder()
-				.ordersId(ordersId)
-				.tCode(tCode)
-				.tName(tName)
-				.tInvoice(tInvoice)
-				.build());
+		deliveryRepository
+				.save(Delivery.builder().ordersId(ordersId).tCode(tCode).tName(tName).tInvoice(tInvoice).build());
 
 		LocalDate currentDate = LocalDate.now();
 
@@ -367,15 +387,10 @@ public class FarmerServiceImpl implements FarmerService {
 	@Override
 	public Farmer registerFarmer(RegFarmerDto request, MultipartFile profileImage) throws Exception {
 
-		Farmer farmer = Farmer.builder()
-				.farmName(request.getFarmName())
-				.farmTel(request.getFarmTel())
-				.farmAddress(request.getFarmAddress())
-				.farmAddressDetail(request.getFarmAddressDetail())
-				.registrationNum(request.getRegistrationNum())
-				.farmBank(request.getFarmBank())
-				.farmAccountNum(request.getFarmAccountNum())
-				.build();
+		Farmer farmer = Farmer.builder().farmName(request.getFarmName()).farmTel(request.getFarmTel())
+				.farmAddress(request.getFarmAddress()).farmAddressDetail(request.getFarmAddressDetail())
+				.registrationNum(request.getRegistrationNum()).farmBank(request.getFarmBank())
+				.farmAccountNum(request.getFarmAccountNum()).build();
 
 		// 관심품목 입력받아서 # 기준으로 파싱하여 각각 저장
 		String[] interests = request.getFarmInterest().replaceAll("^\\s*#*", "").split("#");

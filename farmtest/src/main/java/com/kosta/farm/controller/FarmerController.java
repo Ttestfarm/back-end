@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.kosta.farm.dto.CompanyDto;
 import com.kosta.farm.dto.DeliveryDto;
@@ -36,7 +38,7 @@ import com.kosta.farm.service.FarmerService;
 import com.kosta.farm.unti.PageInfo;
 
 @RestController
-@RequestMapping("/farmer")
+//@RequestMapping("/farmer")
 public class FarmerController {
 	@Autowired
 	private FarmerService farmerService;
@@ -77,13 +79,18 @@ public class FarmerController {
 	}
 
 	// 견적서 보내기
-	@PostMapping("/regquot")
-	public ResponseEntity<String> regQuotation(@RequestBody Quotation quot, Authentication authentication) {
-		User user = (User) authentication.getPrincipal();
-		Long farmerId= user.getFarmerId();
+	@PostMapping("/regquot/{farmerId}")
+	public ResponseEntity<String> regQuotation(
+			@ModelAttribute Quotation quot, List<MultipartFile> quotepix,
+			@PathVariable Long farmerId
+			
+//			Authentication authentication
+			) {
+//		User user = (User) authentication.getPrincipal();
+//		Long farmerId= user.getFarmerId();
 		try {
 			quot.setFarmerId(farmerId);
-			farmerService.saveQuotation(quot);
+			farmerService.saveQuotation(quot,quotepix);
 			return new ResponseEntity<String>("성공", HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();

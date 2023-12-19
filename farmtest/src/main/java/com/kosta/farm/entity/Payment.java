@@ -30,15 +30,17 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Payment {
-	@Id @GeneratedValue(strategy=GenerationType.IDENTITY)
-	private Long paymentId;
+	@Id //paymentid 대신에	
+    private String receiptId; // PG 사에서 생성한 주문 번호
+    //receiptId: rsp.imp_uid!!,
 	@JoinColumn
 	@ManyToOne
-	private User user;
+	private User user; // 구매자
+
     @Column(nullable = false, unique = true)
-    private String receiptId; // PG 사에서 생성한 주문 번호
-    @Column(nullable = false, unique = true)
-    private String ordersId; // 우리가 생성한 주문 번호
+    private String ordersId; // 우리가 생성한 주문 번호 //merchant uid
+    //orderId: rsp.merchant_uid
+
     private PaymentMethod method; // 결제 수단
     private String name; // 결제 이름
     @Column(nullable = false)
@@ -62,9 +64,79 @@ public class Payment {
     
     //여기까지 payment을 위한 column
     
-    
-    
-    
+    //결제정보 테이블을 이름 똑같이 물어복;
+//    apply_num
+//    : 
+//    ""
+//    bank_name
+//    : 
+//    null
+//    buyer_addr
+//    : 
+//    ""
+//    buyer_email
+//    : 
+//    ""
+//    buyer_name
+//    : 
+//    ""
+//    buyer_postcode
+//    : 
+//    ""
+//    buyer_tel
+//    : 
+//    ""
+//    card_name
+//    : 
+//    null
+//    card_number
+//    : 
+//    "*********"
+//    card_quota
+//    : 
+//    0
+//    currency
+//    : 
+//    "KRW"
+//    custom_data
+//    : 
+//    null
+//    imp_uid
+//    : 
+//    "imp_136605693605"
+//    merchant_uid
+//    : 
+//    "mid_1702862604640"
+//    name
+//    : 
+//    "사과"
+//    paid_amount
+//    : 
+//    500
+//    paid_at
+//    : 
+//    1702862639
+//    pay_method
+//    : 
+//    "point"
+//    pg_provider
+//    : 
+//    "html5_inicis"
+//    pg_tid
+//    : 
+//    "StdpayCARDINIpayTest20231218102358979381"
+//    pg_type
+//    : 
+//    "payment"
+//    receipt_url
+//    : 
+//    "https://iniweb.inicis.com/DefaultWebApp/mall/cr/cm/mCmReceipt_head.jsp?noTid=StdpayCARDINIpayTest20231218102358979381&noMethod=1"
+//    status
+//    : 
+//    "paid"
+//    success
+//    : 
+//    true
     
 	@Column
 	private String paymentBank; // 결제 은행
@@ -72,7 +144,6 @@ public class Payment {
 	private Integer paymentDelivery; // 배송비
 	@Column
 	private Integer paymentPrice; // 상품금액
-	// private Integer totalPrice // 배송비 + 상품금액
 	@Column
 	@CreationTimestamp
 	private Timestamp createDate; // 결제 완료 날짜

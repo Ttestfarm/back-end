@@ -8,8 +8,11 @@ import java.util.Map;
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kosta.farm.dto.RequestDto;
 import com.kosta.farm.entity.Farmer;
 import com.kosta.farm.entity.Farmerfollow;
 import com.kosta.farm.entity.Orders;
@@ -22,8 +25,11 @@ import com.kosta.farm.entity.QProduct;
 import com.kosta.farm.entity.QQuotation;
 import com.kosta.farm.entity.QRequest;
 import com.kosta.farm.entity.QReview;
+import com.kosta.farm.entity.QUser;
 import com.kosta.farm.entity.Quotation;
+import com.kosta.farm.entity.Request;
 import com.kosta.farm.entity.Review;
+import com.kosta.farm.util.PageInfo;
 import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
@@ -34,6 +40,9 @@ import lombok.RequiredArgsConstructor;
 public class FarmDslRepository {
 	@Autowired
 	private JPAQueryFactory jpaQueryFactory;
+	
+	@Autowired
+	private ObjectMapper objectMapper;
 
 	// quotecount 가져오기
 	public Long findQuoteCountByRequestId(Long requestId) throws Exception {
@@ -90,7 +99,48 @@ public class FarmDslRepository {
 		QReview review = QReview.review;
 		return jpaQueryFactory.selectFrom(review).where(review.userId.eq(userId)).fetch();
 	}
-
+	public List<Tuple> getRequestsWithUsername(PageInfo pageInfo){
+        QRequest request = QRequest.request;
+        QUser user = QUser.user;
+		List<Tuple> result=jpaQueryFactory.select(request, user.userName)
+				.from(request).leftJoin(user).on(request.userId.eq(user.userId)).fetch();
+		return result;
+	}
+	
+	public Long requestAllCount() throws Exception {
+        QRequest request = QRequest.request;
+		return jpaQueryFactory.select(request.count()).from(request).fetchOne();
+	}
+	
+//	return jpaQueryFactory.select(farmer.count()).from(farmer).fetchOne();
+	
+	public List<RequestDto> requestListWithNameByPage(PageInfo pageInfo) throws Exception {
+        QRequest request = QRequest.request;
+        QUser user = QUser.user;
+        Long count=requestAllCount();
+        pageInfo.setAllPage((int)Math.ceil(count.intValue()/9));
+        PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 9);
+        
+        System.out.println(pageRequest.getOffset());
+        System.out.println(pageRequest.getPageSize());
+        List<Tuple> tupleList = 
+        		jpaQueryFactory.select(request,user.userName)
+			.from(request)
+			.leftJoin(user)
+			.on(request.userId.eq(user.userId))
+			.offset(pageRequest.getOffset())
+			.limit(pageRequest.getPageSize())
+			.orderBy(request.requestId.desc()).fetch();
+		
+        List<RequestDto> list = new ArrayList<>();
+        for(Tuple t : tupleList) {
+        	Request req =  t.get(0, Request.class);
+        	RequestDto reqDto = objectMapper.convertValue(req,RequestDto.class);
+        	reqDto.setUserName(t.get(1, String.class));
+        	list.add(reqDto);
+        }
+		return list;
+	}
 	public Map<String, Object> findQuotationsWithFarmerByRequestId(Long requestId) {
 		QQuotation quotation = QQuotation.quotation;
 		QFarmer farmer = QFarmer.farmer;
@@ -145,6 +195,7 @@ public class FarmDslRepository {
 				.where(orders.userId.eq(userId)).fetch();
 	}
 
+
 	@Transactional
 	public void updateStock(Long productId, Integer stock) {
 
@@ -159,5 +210,10 @@ public class FarmDslRepository {
 				.on(product.farmerId.eq(farmer.farmerId)).join(category).on(product.categoryId.eq(category.categoryId))
 				.where(category.categoryName.eq(categoryName)).fetch();
 	}
+	
+	
+
+	
+	
 
 }

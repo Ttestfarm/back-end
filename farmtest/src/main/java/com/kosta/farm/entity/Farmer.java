@@ -84,21 +84,27 @@ public class Farmer {
 		}
 		this.rating = totalRating / reviews.size();
 	}
-	
+
 	public FarmerDto toDto() {
-    return FarmerDto.builder()
-    		.farmerId(farmerId)
-    		.farmName(farmName)
-    		.farmPixurl(farmPixurl)
-    		.farmAddress(farmAddress)
-        .farmInterest1(farmInterest1)
-        .farmInterest2(farmInterest2)
-        .farmInterest3(farmInterest3)
-        .farmInterest4(farmInterest4)
-        .farmInterest5(farmInterest5)
-        .followCount(followCount)
-        .reviewCount(reviewCount)
-        .rating(rating)
-        .build();
+		StringBuilder farmInterestBuilder = new StringBuilder();
+		addFarmInterest(farmInterestBuilder, farmInterest1);
+		addFarmInterest(farmInterestBuilder, farmInterest2);
+		addFarmInterest(farmInterestBuilder, farmInterest3);
+		addFarmInterest(farmInterestBuilder, farmInterest4);
+		addFarmInterest(farmInterestBuilder, farmInterest5);
+		String farmInterest = farmInterestBuilder.toString();
+
+		return FarmerDto.builder().farmerId(farmerId).farmName(farmName).farmPixurl(farmPixurl).farmAddress(farmAddress)
+	            .farmInterest(farmInterest)
+				.followCount(followCount).reviewCount(reviewCount).rating(rating).build();
+	}
+
+	private void addFarmInterest(StringBuilder builder, String interest) {
+		if (interest != null && !interest.isEmpty()) {
+			if (builder.length() > 0) {
+				builder.append(", ");
+			}
+			builder.append(interest);
+		}
 	}
 }

@@ -32,7 +32,6 @@ public class Delivery {
 	private Long ordersId;
 	@Column(unique = true)
 	private Long deliveryInfoId;
-	
 	@Column 
 	private String tCode; // 택배사 코드
 	@Column

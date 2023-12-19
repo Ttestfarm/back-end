@@ -19,10 +19,14 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kosta.farm.dto.FarmerDto;
+import com.kosta.farm.dto.OrderHistoryDto;
+import com.kosta.farm.dto.ProductInfoDto;
+import com.kosta.farm.dto.QuotationInfoDto;
 import com.kosta.farm.dto.RequestDto;
 import com.kosta.farm.dto.ReviewDto;
 import com.kosta.farm.entity.Farmer;
 import com.kosta.farm.entity.Farmerfollow;
+import com.kosta.farm.entity.FileVo;
 import com.kosta.farm.entity.Orders;
 import com.kosta.farm.entity.Payment;
 import com.kosta.farm.entity.Product;
@@ -34,6 +38,7 @@ import com.kosta.farm.repository.FarmDslRepository;
 import com.kosta.farm.repository.FarmerDslRepository;
 import com.kosta.farm.repository.FarmerRepository;
 import com.kosta.farm.repository.FarmerfollowRepository;
+import com.kosta.farm.repository.FileVoRepository;
 import com.kosta.farm.repository.OrdersRepository;
 import com.kosta.farm.repository.PaymentRepository;
 import com.kosta.farm.repository.ProductFileRepository;
@@ -64,6 +69,7 @@ public class FarmServiceImpl implements FarmService {
 	private final RequestRepository requestRepository;
 	private final QuotationRepository quoteRepository;
 	private final UserService userService;
+	private final FileVoRepository fileVoRepository;
 
 	@Override // 이건 페이지네이션을 지원
 	public List<Farmer> farmerListByPage(PageInfo pageInfo) throws Exception {
@@ -128,10 +134,16 @@ public class FarmServiceImpl implements FarmService {
 	}
 
 	@Override
-	public List<Farmerfollow> getFollowingFarmersByUserId(Long userId) throws Exception {
-//		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 9,
-//				Sort.by(Sort.Direction.DESC, "farmerfollowId").and(Sort.by(Sort.Direction.DESC, "farmerId")));
-		return farmerfollowRepository.findByUserId(userId);
+	public List<Farmerfollow> getFollowingFarmersByUserId(Long userId, PageInfo pageInfo) throws Exception {
+		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 2,
+				Sort.by(Sort.Direction.DESC, "farmerFollowId").and(Sort.by(Sort.Direction.DESC, "farmerId")));
+		Page<Farmerfollow> pages = farmerfollowRepository.findByUserId(userId, pageRequest);
+		pageInfo.setAllPage(pages.getTotalPages());
+		List<Farmerfollow> farmerfollowList = new ArrayList<>();
+		for (Farmerfollow farmerfollow : pages.getContent()) {
+			farmerfollowList.add(farmerfollow);
+		}
+		return farmerfollowList;
 	}
 //	@Override
 //	public List<Farmerfollow> getFollowingFarmersByUserId(Long userId, PageInfo pageInfo) throws Exception {
@@ -144,6 +156,14 @@ public class FarmServiceImpl implements FarmService {
 //		}
 //		return null;
 //	}
+
+//	@Override
+//	public List<Farmerfollow> getFollowingFarmersByUserId(Long userId) throws Exception {
+////		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 9,
+////				Sort.by(Sort.Direction.DESC, "farmerfollowId").and(Sort.by(Sort.Direction.DESC, "farmerId")));
+//		return farmerfollowRepository.findByUserId(userId);
+//	}
+//	
 
 	// 요청서 쓰기
 	@Override
@@ -158,7 +178,7 @@ public class FarmServiceImpl implements FarmService {
 
 	@Override // 리뷰 작성하기 ordersId에 해당하면 리뷰를 쓸 수 있다 근데 하나의 주문에 하나의 review만 쓸 수 있다 리뷰가 추가되면 파머
 	// rating field 업데이트
-	public void addReview(Long ordersId, List<MultipartFile> files, Integer rating, String content) throws Exception {
+	public void addReview(Long ordersId, MultipartFile reviewpixUrl, Integer rating, String content) throws Exception {
 		Optional<Orders> oOrders = ordersRepository.findById(ordersId);
 		if (oOrders.isEmpty())
 			throw new Exception("해당하는 주문이 없습니다");
@@ -171,28 +191,25 @@ public class FarmServiceImpl implements FarmService {
 				.farmerId(orders.getFarmerId()).userId(orders.getUserId()).build();
 		System.out.println(content);
 
-		String dir = "c:/jisu/upload/";
 		String fileNums = "";
 
-		if (files != null && files.size() != 0) {
+		if (reviewpixUrl != null && !reviewpixUrl.isEmpty()) {
 
-			for (MultipartFile file : files) {
+			String dir = "c:/jisu/upload/";
 
-				ProductFile imageFile = ProductFile.builder().directory(dir).fileName(file.getOriginalFilename())
-						.size(file.getSize()).build();
-				productFileRepository.save(imageFile);
+			FileVo imageFile = FileVo.builder().directory(dir).fileName(reviewpixUrl.getOriginalFilename())
+					.size(reviewpixUrl.getSize()).build();
+			fileVoRepository.save(imageFile);
 
-				// upload 폴더에 upload
-				File uploadFile = new File(dir + imageFile.getProductFileId());
-				file.transferTo(uploadFile);
+			// upload 폴더에 upload
+			File uploadFile = new File(dir + imageFile.getFileId());
+			reviewpixUrl.transferTo(uploadFile);
+			if (!fileNums.equals(""))
+				fileNums += ",";
+			fileNums += imageFile.getFileId();
 
-				// file 번호 목록 만들기
-				if (!fileNums.equals(""))
-					fileNums += ",";
-				fileNums += imageFile.getProductFileId();
-			}
-			review.setReviewpixUrl(fileNums);
 		}
+		review.setReviewpixUrl(fileNums);
 // 리뷰 작성하기
 		reviewRepository.save(review);
 
@@ -213,7 +230,6 @@ public class FarmServiceImpl implements FarmService {
 
 	@Override
 	public Long addReviews(ReviewDto review, List<MultipartFile> files) throws Exception {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -418,18 +434,20 @@ public class FarmServiceImpl implements FarmService {
 	}
 
 	@Override // 매칭 메인페이지
-	public List<Request> requestListByPage(PageInfo pageInfo) throws Exception {
-		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 3,
-				Sort.by(Sort.Direction.DESC, "requestId"));
-		Page<Request> pages = requestRepository.findAll(pageRequest);
-		pageInfo.setAllPage(pages.getTotalPages());
-		List<Request> requestList = new ArrayList<>();
-		for (Request request : pages.getContent()) {
-			requestList.add(request);
-		}
-		return requestList;
+	@Transactional
+	public List<RequestDto> requestListByPage(PageInfo pageInfo) throws Exception {
+		
+		return farmDslRepository.requestListWithNameByPage(pageInfo);
 	}
-
+//	PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 3,
+//			Sort.by(Sort.Direction.DESC, "requestId"));
+//	Page<Request> pages = requestRepository.findAll(pageRequest);
+//	pageInfo.setAllPage(pages.getTotalPages());
+//	List<Request> requestList = new ArrayList<>();
+//	for (Request request : pages.getContent()) {
+//		requestList.add(request);
+//	}
+//	return requestList;
 	// 유저별로 리퀘스트쓴거
 	@Override // 노 스크롤 노페이지네이션
 	public List<Request> requestListByUser(Long userId) throws Exception {
@@ -476,6 +494,7 @@ public class FarmServiceImpl implements FarmService {
 			totalRating += farmer.getRating();
 		}
 		return numberofFarmers > 0 ? totalRating / numberofFarmers : 0;
+		
 	}
 
 	@Override
@@ -487,6 +506,58 @@ public class FarmServiceImpl implements FarmService {
 	@Override
 	public Map<String, Object> quoteWithFarmerByRequestId(Long requestId) throws Exception {
 		return farmDslRepository.findQuotationsWithFarmerByRequestId(requestId);
+	}
+
+	@Override
+	public ProductInfoDto getProductInfoFromOrder(Orders orders) throws Exception {
+		Long ordersId = orders.getOrdersId();
+		Long productId = orders.getProductId();
+		Product product = productRepository.findById(productId).get();
+
+		// Product로부터 필요한 정보를 가져와 ProductInfoDto에 설정
+		if (product != null) {
+			ProductInfoDto productInfo = new ProductInfoDto();
+			productInfo.setProductName(product.getProductName());
+			productInfo.setThumbNail(product.getThumbNail());
+
+			// 다른 필요한 정보들 설정
+
+			return productInfo;
+		}
+		return null; // 상품 정보가 없으면 null 반환
+	}
+
+	@Override
+	public QuotationInfoDto getQuotationInfoFromOrder(Orders orders) throws Exception {
+		Long quotationId = orders.getQuotationId();
+		if (quotationId == null) {
+			return null;
+		}
+		try {
+			Optional<Quotation> oQuote = quoteRepository.findById(quotationId);
+			if (oQuote.isPresent()) {
+				Quotation quote = oQuote.get();
+				QuotationInfoDto quoteInfo = new QuotationInfoDto();
+				quoteInfo.setQuotationProduct(quote.getQuotationProduct());
+				quoteInfo.setQuotationPicture(quote.getQuotationPicture());
+				return quoteInfo;
+			} else {
+				return null;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+
+	}
+
+	@Override
+	public OrderHistoryDto getOrderDetails(Long ordersId) throws Exception {
+		Orders orders = ordersRepository.findById(ordersId).get();
+		OrderHistoryDto orderHistoryDto = new OrderHistoryDto();
+		orderHistoryDto.setOrders(orders);
+
+		return null;
 	}
 
 }

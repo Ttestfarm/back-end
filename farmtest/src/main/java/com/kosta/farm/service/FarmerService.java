@@ -24,7 +24,7 @@ public interface FarmerService {
 	public List<Request> findRequestsByFarmInterest(Long farmerId, String farmInterest) throws Exception;
 
 	// 견적서 양식 (보내기 이벤트)-> 견적서 저장
-	void saveQuotation(Quotation quotation) throws Exception;
+	void saveQuotation(Quotation quotation, List<MultipartFile> files) throws Exception;
 
 	// 파머페이지 견적현황
 	public List<QuotationDto> findQuotationByFarmerIdAndStateAndPage(Long farmerId, String state, PageInfo pageInfo)

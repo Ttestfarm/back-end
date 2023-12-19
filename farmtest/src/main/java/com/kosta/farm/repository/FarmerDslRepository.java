@@ -1,41 +1,29 @@
-//package com.kosta.farm.repository;
-//
-//import java.sql.Date;
-//import java.util.List;
-//
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.data.domain.PageRequest;
-//import org.springframework.stereotype.Repository;
-//
-//import com.kosta.farm.entity.QDelivery;
-//import com.kosta.farm.entity.QDeliveryInfo;
-//import com.kosta.farm.entity.QInvoice;
-//import com.kosta.farm.entity.QOrders;
-//import com.kosta.farm.entity.QPayment;
-//import com.kosta.farm.entity.QProduct;
-//import com.kosta.farm.entity.QQuotation;
-//import com.kosta.farm.entity.QRequest;
-//import com.kosta.farm.entity.Quotation;
-//import com.kosta.farm.entity.Request;
-//import com.querydsl.core.Tuple;
-//import com.querydsl.core.types.dsl.CaseBuilder;
-//import com.querydsl.jpa.impl.JPAQueryFactory;
-//
-//import lombok.RequiredArgsConstructor;
-//
-//@Repository
-//@RequiredArgsConstructor
-//public class FarmerDslRepository {
-//	@Autowired
-//	private JPAQueryFactory jpaQueryFactory;
-//	
-//	// 파머 관심 농산물 조회
-////	public Farmer findFarmerByFarmerId(Long farmerId) {
-////		QFarmer farmer = QFarmer.farmer;
-////		return jpaQueryFactory.selectFrom(farmer)
-////				.where(farmer.farmerId.eq(farmerId))
-////				.fetchOne();
-////	}
+package com.kosta.farm.repository;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+import org.springframework.web.bind.annotation.PostMapping;
+
+import com.kosta.farm.entity.Farmer;
+import com.kosta.farm.entity.QFarmer;
+import com.querydsl.jpa.impl.JPAQueryFactory;
+
+import lombok.RequiredArgsConstructor;
+
+@Repository
+@RequiredArgsConstructor
+public class FarmerDslRepository {
+	@Autowired
+	private JPAQueryFactory jpaQueryFactory;
+	
+	// 파머 관심 농산물 조회
+	public Farmer findFarmerByFarmerId(Long farmerId) {
+		QFarmer farmer = QFarmer.farmer;
+		return jpaQueryFactory.selectFrom(farmer)
+				.where(farmer.farmerId.eq(farmerId))
+				.fetchOne();
+	}
+	
 //	
 //	// 매칭 주문 요청서 리스트
 //	public List<Request> findRequestByInterestAndFarmerId(Long farmerId, String farmInterest) {
@@ -335,4 +323,4 @@
 //						.and(deli.deliveryState.eq(deliveryState)))
 //				.fetchOne();
 //	}
-//}
+}

@@ -1,43 +1,50 @@
-//package com.kosta.farm.controller;
-//
-//import java.util.HashMap;
-//import java.util.List;
-//import java.util.Map;
-//
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.http.HttpStatus;
-//import org.springframework.http.ResponseEntity;
-//import org.springframework.security.core.Authentication;
-//import org.springframework.web.bind.annotation.GetMapping;
-//import org.springframework.web.bind.annotation.PathVariable;
-//import org.springframework.web.bind.annotation.PostMapping;
-//import org.springframework.web.bind.annotation.PutMapping;
-//import org.springframework.web.bind.annotation.RequestBody;
-//import org.springframework.web.bind.annotation.RequestMapping;
-//import org.springframework.web.bind.annotation.RequestParam;
-//import org.springframework.web.bind.annotation.ResponseBody;
-//import org.springframework.web.bind.annotation.RestController;
-//
-//import com.kosta.farm.dto.CompanyDto;
-////import com.kosta.farm.dto.DeliveryDto;
-//import com.kosta.farm.dto.ErrorResponseDto;
-//import com.kosta.farm.dto.FarmerDto;
-//import com.kosta.farm.dto.InvoiceDto;
-//import com.kosta.farm.dto.OrdersDto;
-//import com.kosta.farm.dto.QuotDelDto;
-//import com.kosta.farm.dto.QuotationDto;
-//import com.kosta.farm.entity.Farmer;
-//import com.kosta.farm.entity.Quotation;
-//import com.kosta.farm.entity.Request;
-//import com.kosta.farm.entity.User;
-//import com.kosta.farm.repository.OrdersRepository;
-//import com.kosta.farm.service.APIService;
+package com.kosta.farm.controller;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.kosta.farm.dto.CompanyDto;
+//import com.kosta.farm.dto.DeliveryDto;
+import com.kosta.farm.dto.ErrorResponseDto;
+import com.kosta.farm.dto.FarmerDto;
+import com.kosta.farm.dto.InvoiceDto;
+import com.kosta.farm.dto.OrdersDto;
+import com.kosta.farm.dto.QuotDelDto;
+import com.kosta.farm.dto.QuotationDto;
+import com.kosta.farm.dto.RegProductDto;
+import com.kosta.farm.entity.Farmer;
+import com.kosta.farm.entity.Quotation;
+import com.kosta.farm.entity.Request;
+import com.kosta.farm.entity.User;
+import com.kosta.farm.service.APIService;
 //import com.kosta.farm.service.FarmerService;
-//import com.kosta.farm.unti.PageInfo;
-//
-//@RestController
-//@RequestMapping("/farmer")
-//public class FarmerController {
+
+@RestController
+@RequestMapping("/farmer")
+public class FarmerController {
+	
+	@PostMapping("/regquot")
+	public void regQuotation() {
+		
+	
+	}
+	
 //	@Autowired
 //	private FarmerService farmerService;
 //	@Autowired
@@ -92,6 +99,13 @@
 //		}
 //	}
 //
+//	// 파머 상품 등록
+//	@PostMapping("regproduct")
+//	public void regProduct(@ModelAttribute RegProductDto dto) {
+//		
+//	}
+//	
+//	
 //	// 견적 현황 페이지
 //	// 견적서 상태로(0 : 견적서 취소, 1 : 대기중, 2 : 기간 만료, 3 : 결제완료) 견적서 리스트 보여주기
 //	@GetMapping("/quotlist/{state}/{page}")
@@ -267,4 +281,4 @@
 //			return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
 //		}
 //	}
-//}
+}

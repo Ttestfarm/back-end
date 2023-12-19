@@ -71,6 +71,7 @@ public class Payment {
 	@CreationTimestamp
 	private Timestamp createDate; // 결제 완료 날짜
 	@Column
+	@Builder.Default
     @Enumerated(EnumType.STRING)
-	private String state = PaymentStatus.PAID.name(); // ERROR, PAID, FAILED, READY, SHIPPING, COMPLETED
+	private PaymentStatus state = PaymentStatus.PAID; // ERROR, PAID, FAILED, READY, SHIPPING, COMPLETED
 }

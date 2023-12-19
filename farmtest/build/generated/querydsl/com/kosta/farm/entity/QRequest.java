@@ -37,7 +37,7 @@ public class QRequest extends EntityPathBase<Request> {
 
     public final StringPath requestQuantity = createString("requestQuantity");
 
-    public final StringPath requestState = createString("requestState");
+    public final EnumPath<com.kosta.farm.util.RequestStatus> state = createEnum("state", com.kosta.farm.util.RequestStatus.class);
 
     public final StringPath tel = createString("tel");
 

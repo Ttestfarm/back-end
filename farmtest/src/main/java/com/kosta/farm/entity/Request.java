@@ -54,8 +54,9 @@ public class Request {
 	@Column
 	private Timestamp createDate; //자동
 	@Column
+	@Builder.Default
 	@Enumerated(EnumType.STRING)
-	private String requestState = RequestStatus.REQUEST.name(); // EXPIRED, REQUEST, MATCHED,CANCEL
+	private RequestStatus state = RequestStatus.REQUEST; // EXPIRED, REQUEST, MATCHED,CANCEL
 	
 	
 	

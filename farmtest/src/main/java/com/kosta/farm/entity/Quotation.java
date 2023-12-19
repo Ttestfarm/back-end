@@ -53,6 +53,7 @@ public class Quotation {
 	@CreationTimestamp
 	private Timestamp createDate; // 견적서 보낸 날짜
 	@Column
+	@Builder.Default
 	@Enumerated(EnumType.STRING)
-	private String quotationState = QuotationStatus.READY.name(); // CANCEL, READY, EXPIRED, COMPLETED
+	private QuotationStatus state = QuotationStatus.READY; // CANCEL, READY, EXPIRED, COMPLETED
 }

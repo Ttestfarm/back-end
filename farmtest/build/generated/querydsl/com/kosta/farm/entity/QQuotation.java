@@ -35,9 +35,9 @@ public class QQuotation extends EntityPathBase<Quotation> {
 
     public final StringPath quotationQuantity = createString("quotationQuantity");
 
-    public final StringPath quotationState = createString("quotationState");
-
     public final NumberPath<Long> requestId = createNumber("requestId", Long.class);
+
+    public final EnumPath<com.kosta.farm.util.QuotationStatus> state = createEnum("state", com.kosta.farm.util.QuotationStatus.class);
 
     public QQuotation(String variable) {
         super(Quotation.class, forVariable(variable));

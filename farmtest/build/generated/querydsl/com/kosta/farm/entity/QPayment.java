@@ -49,7 +49,7 @@ public class QPayment extends EntityPathBase<Payment> {
 
     public final NumberPath<Long> requestId = createNumber("requestId", Long.class);
 
-    public final StringPath state = createString("state");
+    public final EnumPath<com.kosta.farm.util.PaymentStatus> state = createEnum("state", com.kosta.farm.util.PaymentStatus.class);
 
     public final StringPath tCode = createString("tCode");
 

@@ -8,6 +8,7 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.kosta.farm.dto.CompanyDto;
@@ -20,8 +21,9 @@ public class APIService {
 	
 	public List<CompanyDto> requestCompanyList() throws Exception{
 		StringBuilder sb = new StringBuilder("http://info.sweettracker.co.kr/api/v1/companylist?");
-
-		String serviceKey = "OstBNzBg0PI7Tr96ol661A";
+		
+//		@Value("${swetter.apiKey}")
+		String serviceKey = "";
 		
 		sb.append(URLDecoder.decode("t_key="+serviceKey, "UTF-8"));
 		

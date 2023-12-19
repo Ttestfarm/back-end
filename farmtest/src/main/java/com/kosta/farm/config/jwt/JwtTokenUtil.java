@@ -19,13 +19,12 @@ public class JwtTokenUtil {
 				.setClaims(claims)
 				.setIssuedAt(new Date(System.currentTimeMillis()))
 				.setExpiration(new Date(System.currentTimeMillis() + expireTime))
-				.signWith(SignatureAlgorithm.HS256, secretKey)
-				.compact();
+				.signWith(SignatureAlgorithm.HS256, secretKey.getBytes()).compact();
 	}
 
 	// Claims에서 userEmail 꺼내기
 	public static String getUserEmail(String token, String secretKey) {
-		return extractClaims(token, secretKey).get("userEmail").toString();
+		return extractClaims(token, secretKey).get("username").toString();
 	}
 
 	// 발급된 Token이 만료 시간이 지났는지 체크
@@ -37,6 +36,7 @@ public class JwtTokenUtil {
 
 	// SecretKey를 사용해 Token Parsing
 	private static Claims extractClaims(String token, String secretKey) {
-		return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
+		Claims claims = Jwts.parser().setSigningKey(secretKey.getBytes()).parseClaimsJws(token).getBody();
+		return claims;
 	}
 }

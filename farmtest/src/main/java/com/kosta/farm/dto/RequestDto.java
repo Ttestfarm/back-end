@@ -1,17 +1,27 @@
 package com.kosta.farm.dto;
 
+import java.sql.Date;
+import java.sql.Timestamp;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
 public class RequestDto {
-	private Long userId;
-	private String requestProduct;
-	private String requestQuantity;
-	private String requestDate;
-	private String requestMessage;
-	private String address;
-	private String tel;
-	private String requestState;
+   private Long userId;
+   private Long requestId;
+   private String requestProduct;
+   private String requestQuantity;
+   private Date requestDate;
+   private String requestMessage;
+   private Boolean choiceState; // 0 본인(기본 배송지), 1 선물
+
+   private String name;
+   private String tel;
+   private String address;
+   private String requestState;
+   private String userName;
+   private Timestamp createDate; //자동
+
 }

@@ -27,7 +27,7 @@ public class QRequest extends EntityPathBase<Request> {
 
     public final StringPath name = createString("name");
 
-    public final StringPath requestDate = createString("requestDate");
+    public final DatePath<java.sql.Date> requestDate = createDate("requestDate", java.sql.Date.class);
 
     public final NumberPath<Long> requestId = createNumber("requestId", Long.class);
 

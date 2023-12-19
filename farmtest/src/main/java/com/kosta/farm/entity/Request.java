@@ -1,5 +1,6 @@
 package com.kosta.farm.entity;
 
+import java.sql.Date;
 import java.sql.Timestamp;
 
 import javax.persistence.Column;
@@ -35,7 +36,7 @@ public class Request {
 	@Column
 	private String requestQuantity; //요청 물량
 	@Column
-	private String requestDate; // 요청 날짜
+	private Date requestDate; // 요청 날짜
 	@Column
 	private String requestMessage; //요청메세지
 	@Column

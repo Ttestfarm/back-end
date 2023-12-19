@@ -3,6 +3,7 @@ package com.kosta.farm.controller;
 import java.util.Map;
 import java.util.Random;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.http.HttpHeaders;
@@ -21,8 +22,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.kosta.farm.config.jwt.JwtTokenUtil;
+import com.kosta.farm.config.oauth2.OAuth2LoginSuccessHandler;
 import com.kosta.farm.dto.ErrorResponseDto;
-import com.kosta.farm.dto.FarmerDto;
 import com.kosta.farm.dto.JoinRequestDto;
 import com.kosta.farm.dto.LoginRequestDto;
 import com.kosta.farm.dto.ModifyFarmDto;
@@ -50,6 +51,9 @@ public class UserController {
 
   @Value("${jwt.expireTime}")
   private int expireTime;
+  
+  @Autowired
+  private OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
 	@PostMapping("/join")
 	public ResponseEntity<String> join(@RequestBody JoinRequestDto joinRequest) throws Exception {
@@ -66,7 +70,6 @@ public class UserController {
 	public ResponseEntity<String> checkEmail(@RequestBody Map<String, Object> userEmail) throws Exception {
 		try {
 			String inputEmail = (String) userEmail.get("userEmail");
-			
 			if (userService.checkEmail(inputEmail)) {
 				return ResponseEntity.ok("사용 가능한 이메일입니다.");
 			}
@@ -95,9 +98,9 @@ public class UserController {
 		}
 	}
 	
-	@GetMapping("/login/userInfo")
+	@GetMapping("/user/userInfo")
   public ResponseEntity<?> userInfo(Authentication auth) throws Exception {
-		User user =  (User)auth.getPrincipal();
+		User user = (User)auth.getPrincipal();
 		try {
 			User loginUser = userService.getLoginUserByUserEmail(user.getUserEmail());
 

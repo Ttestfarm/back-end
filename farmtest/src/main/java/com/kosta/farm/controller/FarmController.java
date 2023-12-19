@@ -233,15 +233,18 @@ public class FarmController {
 	}
 
 	// 유저의 파머찜리스트
-	@GetMapping("/followlist")
-	public ResponseEntity<Map<String, Object>> getFollowingFarmersByUserId(@RequestParam Long userId,
-			@RequestParam(required = false, name = "page", defaultValue = "1") Integer page)
+//	@GetMapping({"/user/followlist", "/user/followlist/{page}"})
+	@GetMapping("/user/followlist")
+	public ResponseEntity<Map<String, Object>> getFollowingFarmersByUserId(Authentication authentication,
+			@RequestParam(required = false, name = "page", defaultValue = "1") Integer page
+//			@PathVariable(required = false) Integer page
+			
+			)
 
-//			Authentication authentication
 //			,
 	{
-//		User user = (User) authentication.getPrincipal();
-//		Long userId = user.getUserId();
+		User user = (User) authentication.getPrincipal();
+		Long userId = user.getUserId();
 		try {
 			PageInfo pageInfo = PageInfo.builder().curPage(page).build();
 			List<Farmerfollow> followingFarmers = farmService.getFollowingFarmersByUserId(userId, pageInfo);

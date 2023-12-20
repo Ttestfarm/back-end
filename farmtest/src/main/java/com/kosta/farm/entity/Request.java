@@ -49,14 +49,18 @@ public class Request {
 	@Column
 	private String tel;
 	@Column
-	private String address;
+	private String address1;
+	@Column
+	private String address2;
+	@Column
+	private String address3;
 	@CreationTimestamp
 	@Column
 	private Timestamp createDate; //자동
 	@Column
 	@Builder.Default
 	@Enumerated(EnumType.STRING)
-	private RequestStatus state = RequestStatus.REQUEST; // EXPIRED, REQUEST, MATCHED,CANCEL
+	private RequestStatus state = RequestStatus.REQUEST; // EXPIRED, REQUEST, MATCHED, CANCEL
 	
 	
 	

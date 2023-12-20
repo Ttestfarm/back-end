@@ -25,6 +25,7 @@ import com.kosta.farm.dto.ErrorResponseDto;
 import com.kosta.farm.dto.FarmerDto;
 import com.kosta.farm.dto.InvoiceDto;
 import com.kosta.farm.dto.OrdersDto;
+import com.kosta.farm.dto.PaymentDto;
 import com.kosta.farm.dto.QuotDelDto;
 import com.kosta.farm.dto.QuotationDto;
 import com.kosta.farm.dto.RegProductDto;
@@ -33,72 +34,72 @@ import com.kosta.farm.entity.Quotation;
 import com.kosta.farm.entity.Request;
 import com.kosta.farm.entity.User;
 import com.kosta.farm.service.APIService;
-//import com.kosta.farm.service.FarmerService;
+import com.kosta.farm.service.FarmerService;
+import com.kosta.farm.util.PageInfo;
+import com.kosta.farm.util.QuotationStatus;
 
 @RestController
 @RequestMapping("/farmer")
 public class FarmerController {
 	
-	@PostMapping("/regquot")
-	public void regQuotation() {
-		
-	
-	}
-	
-//	@Autowired
-//	private FarmerService farmerService;
+	@Autowired
+	private FarmerService farmerService;
 //	@Autowired
 //	private APIService apiService;
-//	
-//
-//	// 매칭 주문 요청서 보기
-//	// farmerId를 받고 farmInterest return
-//	@GetMapping("/farmInterest")
-//	public ResponseEntity<Map<String, Object>> farmInterest(Authentication authentication) {
+	
+
+	// 매칭 주문 요청서 보기
+	// farmerId를 받고 farmInterest return
+	@GetMapping("/farmInterest")
+	public ResponseEntity<Map<String, Object>> farmInterest(Authentication authentication) {
 //		User user = (User) authentication.getPrincipal();
 //		Long farmerId= user.getFarmerId();
-//		try {
-//			Map<String, Object> res = new HashMap<>();
-//			List<String> interestList = farmerService.findFarmInterestByFarmerId(farmerId);
-//			List<Request> reqList = farmerService.findRequestsByFarmInterest(farmerId, interestList.get(0));
-//			res.put("interestList", interestList);
-//			res.put("reqList", reqList);
-//			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
-//		}
-//	}
-//
-//	// 관심 농산물인 요청서 리스트 보기
-//	@GetMapping("/requestlist")
-//	public ResponseEntity<List<Request>> requestList(@RequestParam String farmInterest, Authentication authentication) {
+		Long farmerId = (long) 1;
+		try {
+			Map<String, Object> res = new HashMap<>();
+			List<String> interestList = farmerService.findFarmInterestByFarmerId(farmerId);
+			List<Request> reqList = farmerService.findRequestsByFarmInterest(farmerId, interestList.get(0));
+			res.put("interestList", interestList);
+			res.put("reqList", reqList);
+			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	// 관심 농산물인 요청서 리스트 보기
+	@GetMapping("/requestlist")
+	public ResponseEntity<List<Request>> requestList(@RequestParam String farmInterest, Authentication authentication) {
 //		User user = (User) authentication.getPrincipal();
 //		Long farmerId= user.getFarmerId();
-//		try {
-//			List<Request> reqList = farmerService.findRequestsByFarmInterest(farmerId, farmInterest);
-//			return new ResponseEntity<List<Request>>(reqList, HttpStatus.OK);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			return new ResponseEntity<List<Request>>(HttpStatus.BAD_REQUEST);
-//		}
-//	}
-//
-//	// 견적서 보내기
-//	@PostMapping("/regquot")
-//	public ResponseEntity<String> regQuotation(@RequestBody Quotation quot, Authentication authentication) {
+		Long farmerId = (long) 1;
+		try {
+			List<Request> reqList = farmerService.findRequestsByFarmInterest(farmerId, farmInterest);
+			return new ResponseEntity<List<Request>>(reqList, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<List<Request>>(HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	// 견적서 보내기
+	@PostMapping("/regquot")
+	public ResponseEntity<String> regQuotation(@ModelAttribute Quotation quot, Authentication authentication) {
 //		User user = (User) authentication.getPrincipal();
 //		Long farmerId= user.getFarmerId();
-//		try {
-//			quot.setFarmerId(farmerId);
+		Long farmerId = (long) 1;
+		try {
+			quot.setFarmerId(farmerId);
+			System.out.println(quot);
 //			farmerService.saveQuotation(quot);
-//			return new ResponseEntity<String>("성공", HttpStatus.OK);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			return new ResponseEntity<String>("실패", HttpStatus.BAD_REQUEST);
-//		}
-//	}
-//
+			return new ResponseEntity<String>("성공", HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<String>("실패", HttpStatus.BAD_REQUEST);
+		}
+	}
+
 //	// 파머 상품 등록
 //	@PostMapping("regproduct")
 //	public void regProduct(@ModelAttribute RegProductDto dto) {
@@ -106,86 +107,97 @@ public class FarmerController {
 //	}
 //	
 //	
-//	// 견적 현황 페이지
-//	// 견적서 상태로(0 : 견적서 취소, 1 : 대기중, 2 : 기간 만료, 3 : 결제완료) 견적서 리스트 보여주기
-//	@GetMapping("/quotlist/{state}/{page}")
-//	public ResponseEntity<Map<String, Object>> quotList(@PathVariable String state, 
-//			@PathVariable Integer page, Authentication authentication) {
+	// 견적 현황 페이지
+	// 견적서 상태로(0 : 견적서 취소, 1 : 대기중, 2 : 기간 만료, 3 : 결제완료) 견적서 리스트 보여주기
+	@GetMapping("/quotlist/{state}/{page}")
+	public ResponseEntity<Map<String, Object>> quotList(@PathVariable String state, 
+			@PathVariable Integer page, Authentication authentication) {
 //		User user = (User) authentication.getPrincipal();
 //		Long farmerId= user.getFarmerId();
-//		try {
-//			PageInfo pageInfo = new PageInfo(page);
-//			List<QuotationDto> quotList = farmerService.findQuotationByFarmerIdAndStateAndPage(farmerId, state, pageInfo);
-//			Map<String, Object> res = new HashMap<>();
-//			res.put("pageInfo", pageInfo);
-//			res.put("quotList", quotList);
-//			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
-//		}
-//	}
-//
-//	// 견적서 취소
-//	@PostMapping("/quotdelete")
-//	public ResponseEntity<String> quotdelete(@RequestBody QuotDelDto dto) {
-//		try {
-//			farmerService.updateQuotationByFarmerIdAndRequestIds(dto.getFarmerId(), dto.getIds());
-//			return new ResponseEntity<String>(HttpStatus.OK);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			return new ResponseEntity<String>(HttpStatus.BAD_REQUEST);
-//		}
-//	}
-//
-//	// 견적서 상세보기
-//	@GetMapping("/quotdetail/{farmerId}/{quotationId}")
-//	public ResponseEntity<Quotation> quotdetail(@PathVariable Long farmerId, @PathVariable Long quotationId) {
-//		try {
-//			Quotation quot = farmerService.findQuotationByQuotationId(farmerId, quotationId);
-//			System.out.println(quot);
-//			return new ResponseEntity<Quotation>(quot, HttpStatus.OK);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			return new ResponseEntity<Quotation>(HttpStatus.BAD_REQUEST);
-//		}
-//	}
-//
-//	// 결제 완료 페이지
-//	@GetMapping("/orderlist/{type}/{page}")
-//	public ResponseEntity<Map<String, Object>> orderList(Authentication authentication,
-//			@PathVariable String type, @PathVariable Integer page) {
+		Long farmerId = (long) 1;
+		try {
+			PageInfo pageInfo = new PageInfo(page);
+			List<QuotationDto> quotList = farmerService.findQuotationByFarmerIdAndStateAndPage(farmerId, state, pageInfo);
+//			System.out.println(quotList.get(0).getAddress2());
+			Map<String, Object> res = new HashMap<>();
+			res.put("pageInfo", pageInfo);
+			res.put("quotList", quotList);
+			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	// 견적서 취소
+	@PostMapping("/quotdelete")
+	public ResponseEntity<String> quotdelete(@RequestBody QuotDelDto dto, Authentication authentication) {
 //		User user = (User) authentication.getPrincipal();
 //		Long farmerId= user.getFarmerId();
-//		try {
-//			PageInfo pageInfo = new PageInfo(page);
-//			List<OrdersDto> ordersList = farmerService.findOrdersByFarmerIdAndPage(farmerId, type, pageInfo);
-//			Map<String, Object> res = new HashMap<>();
-//			res.put("pageInfo", pageInfo);
-//			res.put("ordersList", ordersList);
-//			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
-//		}
-//	}
-//
-//	// 결제 완료(매칭, 주문) 상세 보기
-//	@GetMapping("/orderdetail/{ordersId}/{type}")
-//	public ResponseEntity<OrdersDto> orderDetail(Authentication authentication,
-//			@PathVariable Long ordersId, @PathVariable String type) {
+		Long farmerId = (long) 1;
+		dto.setFarmerId(farmerId);
+		try {
+			farmerService.updateQuotationByFarmerIdAndRequestIds(dto.getFarmerId(), dto.getIds());
+			return new ResponseEntity<String>("성공", HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<String>("실패", HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	// 견적서 상세보기
+	@GetMapping("/quotdetail/{quotationId}")
+	public ResponseEntity<Quotation> quotdetail(@PathVariable Long quotationId,
+			Authentication authentication) {
 //		User user = (User) authentication.getPrincipal();
 //		Long farmerId= user.getFarmerId();
-//		try {
-//			System.out.println(type);
-//			OrdersDto orders = farmerService.OrdersDetailQuotationId(farmerId, ordersId, type);
-//			return new ResponseEntity<OrdersDto>(orders, HttpStatus.OK);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			return new ResponseEntity<OrdersDto>(HttpStatus.BAD_REQUEST);
-//		}
-//	}
-//
+		Long farmerId = (long) 1;
+		try {
+			Quotation quot = farmerService.findQuotationByQuotationId(farmerId, quotationId);
+			System.out.println(quot);
+			return new ResponseEntity<Quotation>(quot, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Quotation>(HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	// 결제 완료 페이지
+	@GetMapping("/orderlist/{type}/{page}")
+	public ResponseEntity<Map<String, Object>> orderList(Authentication authentication,
+			@PathVariable String type, @PathVariable Integer page) {
+//		User user = (User) authentication.getPrincipal();
+//		Long farmerId= user.getFarmerId();
+		Long farmerId = (long) 1;
+		try {
+			PageInfo pageInfo = new PageInfo(page);
+			List<PaymentDto> ordersList = farmerService.findOrdersByFarmerIdAndPage(farmerId, type, pageInfo);
+			Map<String, Object> res = new HashMap<>();
+			res.put("pageInfo", pageInfo);
+			res.put("ordersList", ordersList);
+			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	// 결제 완료(매칭, 주문) 상세 보기
+	@GetMapping("/orderdetail/{receiptId}/{type}")
+	public ResponseEntity<PaymentDto> orderDetail(Authentication authentication,
+			@PathVariable String receiptId, @PathVariable String type) {
+		User user = (User) authentication.getPrincipal();
+		Long farmerId= user.getFarmerId();
+		try {
+			System.out.println(type);
+			PaymentDto orders = farmerService.OrdersDetailQuotationId(farmerId, receiptId, type);
+			return new ResponseEntity<PaymentDto>(orders, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<PaymentDto>(HttpStatus.BAD_REQUEST);
+		}
+	}
+
 //	// 택배사 정보 제공
 //	@GetMapping("companylist")
 //	public ResponseEntity<List<CompanyDto>> companyList(Authentication authentication) {

@@ -62,7 +62,8 @@ public class Payment {
 	
 	@Column // 결제정보
 	private String product; // 품목
-	private String price; // 가격
+	private Integer price; // 가격
+	private Integer count; // 수량
 	private String deliveryprice; // 배송비
 	private String amount; // 총 결제 가격
 	private String payType; // 결제 방법

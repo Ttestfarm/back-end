@@ -1,11 +1,24 @@
 package com.kosta.farm.repository;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
-import org.springframework.web.bind.annotation.PostMapping;
+import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Repository;
+
+import com.kosta.farm.dto.PaymentDto;
 import com.kosta.farm.entity.Farmer;
+import com.kosta.farm.entity.Payment;
 import com.kosta.farm.entity.QFarmer;
+import com.kosta.farm.entity.QPayment;
+import com.kosta.farm.entity.QQuotation;
+import com.kosta.farm.entity.QRequest;
+import com.kosta.farm.entity.Quotation;
+import com.kosta.farm.entity.Request;
+import com.kosta.farm.util.PaymentStatus;
+import com.kosta.farm.util.QuotationStatus;
+import com.kosta.farm.util.RequestStatus;
+import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
@@ -24,142 +37,130 @@ public class FarmerDslRepository {
 				.fetchOne();
 	}
 	
-//	
-//	// 매칭 주문 요청서 리스트
-//	public List<Request> findRequestByInterestAndFarmerId(Long farmerId, String farmInterest) {
-//		QRequest req = QRequest.request;
-//		QQuotation quot = QQuotation.quotation;
-//		return jpaQueryFactory.selectFrom(req)
-//				.leftJoin(quot)
-//				.on(req.requestId.eq(quot.requestId))
-//				.where(req.requestProduct.eq(farmInterest)
-//						.and(
-//								quot.farmerId.isNull()
-//								.or(quot.farmerId.ne(farmerId))
-//								)
-//						)
-//				.fetch();
-//	}
-//	
-//	// 파머페이지 견적현황 state : 0 (대기중), 1(기간만료), 2(결제완료) , 페이지 정보
-//	public List<Tuple> findQuotationByFarmerIdAndStateAndPaging(Long farmerId, String state, PageRequest pageRequest) {
-//		QQuotation quotation = QQuotation.quotation;
-//		QRequest req = QRequest.request;
-//		return jpaQueryFactory.select(quotation, req.address).distinct()
-//				.from(quotation)
-//				.join(req)
-//				.on(quotation.requestId.eq(req.requestId))
-//				.where(quotation.farmerId.eq(farmerId)
-//						.and(quotation.quotationState.eq(state))
-//						.and(req.requestState.eq("1"))
-//						)
-//				.orderBy(quotation.quotationId.desc())
-//				.offset(pageRequest.getOffset())
-//				.limit(pageRequest.getPageSize())
-//				.fetch();
-//	}
-//	
-//	// 견적서 수
-//	public Long findQuotationCountByFarmerId(Long farmerId, String state) {
-//		QQuotation quotation = QQuotation.quotation;
-//		return jpaQueryFactory.select(quotation.count())
-//				.from(quotation)
-//				.where(quotation.farmerId.eq(farmerId)
-//						.and(quotation.quotationState.eq(state)))
-//				.fetchOne();
-//	}
-//	
-//	
-//	// 견적서 취소 
-//	public void updateQuotationStateByfarmerIdAndRequestId(Long farmerId, List<Long> ids) {
-//		QQuotation quot = QQuotation.quotation;
-//		for(Long id : ids) {
-//			jpaQueryFactory.update(quot)
-//				.set(quot.quotationState, "0")
-//				.where(quot.farmerId.eq(farmerId).and(quot.quotationId.eq(id)))
-//				.execute();
-//		}
-//	}
-//	
-//	// 견적서 자세히보기
-//	public Quotation findQuotationByQuotationId(Long farmerId, Long quotationId) {
-//		QQuotation quot = QQuotation.quotation;
-//		return jpaQueryFactory.selectFrom(quot)
-//				.where(quot.farmerId.eq(farmerId)
-//						.and(quot.quotationId.eq(quotationId)))
-//				.fetchOne();
-//	}
-//	
-//	// 결제 완료 현환 ( 매칭 주문 )
-//	public List<Tuple> findOrdersQuotByFarmerIdAndPaging(Long farmerId, PageRequest pageRequest) {
-//		QOrders ord = QOrders.orders;
-//		QRequest req = QRequest.request;
-//		QQuotation quot = QQuotation.quotation;
-//		
-//		return jpaQueryFactory.select(ord.ordersId, quot.quotationProduct,
-//				quot.quotationQuantity, quot.quotationPrice
-//				, req.name, req.tel, req.address)
-//				.from(ord)
-//				.innerJoin(quot)
-//				.on(ord.quotationId.eq(quot.quotationId))
-//				.innerJoin(req)
-//				.on(ord.requestId.eq(req.requestId))
-//				.where(ord.farmerId.eq(farmerId)
-//						.and(ord.ordersState.eq("1")))
-//				.orderBy(ord.ordersId.desc())
-//				.offset(pageRequest.getOffset())
-//				.limit(pageRequest.getPageSize())
-//				.fetch();
-//	}
-//	
-//	// 결제 완료 현황 (받은 주문)
-//	public List<Tuple> findOrdersByFarmerIdAndPaging(Long farmerId, PageRequest pageRequest) {
-//		QOrders ord = QOrders.orders;
-//		QRequest req = QRequest.request;
-//		QProduct prod = QProduct.product;
-//		return jpaQueryFactory.select(ord.ordersId, prod.productName, prod.productQuantity
-//				, prod.productPrice, req.name, req.tel, req.address)
-//				.from(ord)
-//				.join(prod)
-//				.on(ord.productId.eq(prod.productId))
-//				.join(req)
-//				.on(ord.requestId.eq(req.requestId))
-//				.where(ord.quotationId.isNull()
-//						.and(ord.farmerId.eq(farmerId))
-//						.and(ord.ordersState.eq("1")))
-//				.orderBy(ord.ordersId.desc())
-//				.offset(pageRequest.getOffset())
-//				.limit(pageRequest.getPageSize())
-//				.fetch();
-//	}
-//	
-//	// 결제 완료(매칭)현환 수
-//		public Long findOrdersCountByFarmerIdAndQuotationIsNotNull(Long farmerId) {
-//			QOrders ord = QOrders.orders;
-//			return jpaQueryFactory.select(ord.count())
-//					.from(ord)
-//					.where(ord.farmerId.eq(farmerId)
-//							.and(ord.quotationId.isNotNull())
-//							)
-//					.fetchOne();
-//		}
-//		
-//	// 결제 완료(주문)현황 수
-//	public Long findOrdersCountByFarmerIdAndQuotationIsNull(Long farmerId) {
-//		QOrders ord = QOrders.orders;
-//		return jpaQueryFactory.select(ord.count())
-//				.from(ord)
-//				.where(ord.farmerId.eq(farmerId)
-//						.and(ord.quotationId.isNotNull()))
-//				.fetchOne();
-//	}
-//
-//	// 결제 완료(메칭) 상세 보기
+	
+	// 매칭 주문 요청서 리스트
+	public List<Request> findRequestByInterestAndFarmerId(Long farmerId, String farmInterest) {
+		QRequest req = QRequest.request;
+		QQuotation quot = QQuotation.quotation;
+		return jpaQueryFactory.selectFrom(req)
+				.leftJoin(quot).on(req.requestId.eq(quot.requestId))
+				.where(req.requestProduct.eq(farmInterest)
+						.and(req.state.eq(RequestStatus.REQUEST))
+						.and(
+								quot.farmerId.isNull()
+								.or(quot.farmerId.ne(farmerId))
+								)
+						)
+				.fetch();
+	}
+	
+	// 파머페이지 견적서현황 state : CANCEL, READY, EXPIRED, COMPLETED
+	public List<Tuple> findQuotationByFarmerIdAndStateAndPaging(Long farmerId, String state, PageRequest pageRequest) {
+		QQuotation quot = QQuotation.quotation;
+		QRequest req = QRequest.request;
+		return jpaQueryFactory.select(quot, req.address2)
+				.from(quot)
+				.join(req).on(req.requestId.eq(quot.requestId))
+				.where(quot.farmerId.eq(farmerId)
+						.and(quot.state.eq(QuotationStatus.valueOf(state)))
+						.and(req.state.eq(RequestStatus.REQUEST)))
+				.orderBy(quot.quotationId.desc())
+				.offset(pageRequest.getOffset())
+				.limit(pageRequest.getPageSize())
+				.fetch();
+	}
+	
+	// 견적서 수
+	public Long findQuotationCountByFarmerId(Long farmerId, String state) {
+		QQuotation quot = QQuotation.quotation;
+		return jpaQueryFactory.select(quot.count())
+				.from(quot)
+				.where(quot.farmerId.eq(farmerId)
+						.and(quot.state.eq(QuotationStatus.READY)))
+				.fetchOne();
+	}
+	
+	
+	// 견적서 취소 
+	public void updateQuotationStateByfarmerIdAndRequestId(Long farmerId, List<Long> ids) {
+		QQuotation quot = QQuotation.quotation;
+		
+		for(Long id : ids) {
+			jpaQueryFactory.update(quot)
+				.set(quot.state, QuotationStatus.CANCEL)
+				.where(quot.farmerId.eq(farmerId).and(quot.quotationId.eq(id)))
+				.execute();
+		}
+	}
+	
+	// 견적서 자세히보기
+	public Quotation findQuotationByQuotationId(Long farmerId, Long quotationId) {
+		QQuotation quot = QQuotation.quotation;
+		return jpaQueryFactory.selectFrom(quot)
+				.where(quot.farmerId.eq(farmerId)
+						.and(quot.quotationId.eq(quotationId)))
+				.fetchOne();
+	}
+	
+	// 결제 완료 현황 ( 매칭 주문 )
+	public List<Tuple> findOrdersQuotByFarmerIdAndPaging(Long farmerId, PageRequest pageRequest) {
+		QPayment pay = QPayment.payment;
+		QRequest req = QRequest.request;
+		QQuotation quot = QQuotation.quotation;
+		
+		return jpaQueryFactory.select(pay.receiptId, quot.quotationProduct,
+				quot.quotationQuantity, quot.quotationPrice
+				, req.name, req.tel, req.address1, req.address2, req.address3)
+				.from(pay)
+				.innerJoin(quot).on(pay.quotationId.eq(quot.quotationId))
+				.innerJoin(req).on(pay.requestId.eq(req.requestId))
+				.where(pay.farmerId.eq(farmerId)
+						.and(pay.state.eq(PaymentStatus.PAID)))
+				.orderBy(pay.receiptId.desc())
+				.offset(pageRequest.getOffset())
+				.limit(pageRequest.getPageSize())
+				.fetch();
+	}
+	
+	// 결제 완료 현황 (받은 주문)
+	public List<Payment> findOrdersByFarmerIdAndPaging(Long farmerId, PageRequest pageRequest) {
+		QPayment pay = QPayment.payment;
+		return jpaQueryFactory.selectFrom(pay)
+				.where(pay.farmerId.eq(farmerId)
+						.and(pay.quotationId.isNull())
+						.and(pay.state.eq(PaymentStatus.PAID)))
+				.orderBy(pay.receiptId.desc())
+				.offset(pageRequest.getOffset())
+				.limit(pageRequest.getPageSize())
+				.fetch();
+	}
+	
+	// 결제 완료(매칭)현환 수
+		public Long findOrdersCountByFarmerIdAndQuotationIsNotNull(Long farmerId) {
+			QPayment pay = QPayment.payment;
+			return jpaQueryFactory.select(pay.count())
+					.from(pay)
+					.where(pay.farmerId.eq(farmerId)
+							.and(pay.quotationId.isNotNull())
+							)
+					.fetchOne();
+		}
+		
+	// 결제 완료(주문)현황 수
+	public Long findOrdersCountByFarmerIdAndQuotationIsNull(Long farmerId) {
+		QPayment pay = QPayment.payment;
+		return jpaQueryFactory.select(pay.count())
+				.from(pay)
+				.where(pay.farmerId.eq(farmerId)
+						.and(pay.quotationId.isNotNull()))
+				.fetchOne();
+	}
+
+	// 결제 완료(메칭) 상세 보기
 //	public Tuple findOrderByFarmerIdAndOrderIdIsNotNull(Long farmerId, Long ordersId) {
-//		QOrders ord = QOrders.orders;
+//		QPayment pay = QPayment.payment;
 //		QRequest req = QRequest.request;
 //		QQuotation quot = QQuotation.quotation;
-//		QPayment pay = QPayment.payment;
 //		
 //		return jpaQueryFactory.select(ord.ordersId,
 //				quot.quotationProduct, quot.quotationQuantity, 
@@ -174,27 +175,18 @@ public class FarmerDslRepository {
 //				.where(ord.farmerId.eq(farmerId).and(ord.ordersId.eq(ordersId)))
 //				.fetchOne();
 //	}
-//	
-//	// 결제 완료 (주문) 상세 보기
-//	public Tuple findOrderByFarmerIdAndOrderIdAndQuotaionIdIsNull(Long farmerId, Long ordersId) {
-//		QOrders ord = QOrders.orders;
-//		QRequest req = QRequest.request;
-//		QProduct prod = QProduct.product;
-//		QPayment pay = QPayment.payment;
-//		
-//		return jpaQueryFactory.select(ord.ordersId, pay.createDate, prod.productName,
-//				prod.productQuantity, req.name, req.tel, req.address,
-//				pay.paymentBank, prod.productPrice, pay.paymentDelivery)
-//				.from(ord)
-//				.join(prod).on(ord.productId.eq(prod.productId))
-//				.join(req).on(ord.requestId.eq(req.requestId))
-//				.join(pay).on(ord.paymentId.eq(pay.paymentId))
-//				.where(ord.quotationId.isNull()
-//						.and(ord.farmerId.eq(farmerId))
-//						.and(ord.ordersId.eq(ordersId)))
-//				.fetchOne();
-//	}
-//	
+	
+	// 결제 완료 (주문) 상세 보기
+	public Payment findOrderByFarmerIdAndOrderIdAndQuotaionIdIsNull(Long farmerId, String receiptId) {
+		QPayment pay = QPayment.payment;
+		
+		return jpaQueryFactory.selectFrom(pay)
+				.where(pay.quotationId.isNull()
+						.and(pay.farmerId.eq(farmerId))
+						.and(pay.receiptId.eq(receiptId)))
+				.fetchOne();
+	}
+	
 //	// 발송 완료 (ordersId, delivery update)
 //	public void insertDeliveryWithOrdersIdAndTCodeAndTInvoice(Long ordersId, String tCode, String tInvoice) {
 //		QDelivery deli = QDelivery.delivery;

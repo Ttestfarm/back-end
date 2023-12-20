@@ -19,7 +19,11 @@ public class QRequest extends EntityPathBase<Request> {
 
     public static final QRequest request = new QRequest("request");
 
-    public final StringPath address = createString("address");
+    public final StringPath address1 = createString("address1");
+
+    public final StringPath address2 = createString("address2");
+
+    public final StringPath address3 = createString("address3");
 
     public final BooleanPath choiceState = createBoolean("choiceState");
 

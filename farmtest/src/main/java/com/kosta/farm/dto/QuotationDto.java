@@ -10,9 +10,8 @@ public class QuotationDto {
 	private String product;
 	private String quantity;
 	private Integer price;
-	private String address;
-	private String state;
+	private String address2;
+	private String newState;
 //	private String Comment;
-	
-	
+
 }

@@ -58,8 +58,8 @@ public interface FarmerService {
 			throws Exception;
 
 	// 파머등록
-	Farmer registerFarmer(RegFarmerDto request, MultipartFile profileImage) throws Exception;
+	Farmer registerFarmer(RegFarmerDto request, MultipartFile farmPixurl) throws Exception;
 
 	// 파머정보수정
-	Farmer modifyFarmer(ModifyFarmDto request, MultipartFile profileImage) throws Exception;
+	Farmer modifyFarmer(ModifyFarmDto request, MultipartFile farmPixurl) throws Exception;
 }

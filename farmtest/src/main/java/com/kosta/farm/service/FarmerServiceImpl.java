@@ -36,6 +36,7 @@ import com.kosta.farm.repository.InvoiceRepository;
 import com.kosta.farm.repository.OrdersRepository;
 import com.kosta.farm.repository.QuotationRepository;
 import com.kosta.farm.repository.RequestRepository;
+import com.kosta.farm.repository.UserRepository;
 import com.kosta.farm.unti.PageInfo;
 import com.querydsl.core.Tuple;
 
@@ -44,7 +45,9 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class FarmerServiceImpl implements FarmerService {
-
+	
+	private final UserService userService;
+	
 	// Repository
 	private final FarmerRepository farmerRepository;
 	private final RequestRepository requestRepository;
@@ -365,7 +368,7 @@ public class FarmerServiceImpl implements FarmerService {
 
 	// 파머등록
 	@Override
-	public Farmer registerFarmer(RegFarmerDto request, MultipartFile profileImage) throws Exception {
+	public Farmer registerFarmer(RegFarmerDto request, MultipartFile farmPixurl) throws Exception {
 
 		Farmer farmer = Farmer.builder()
 				.farmName(request.getFarmName())
@@ -376,7 +379,7 @@ public class FarmerServiceImpl implements FarmerService {
 				.farmBank(request.getFarmBank())
 				.farmAccountNum(request.getFarmAccountNum())
 				.build();
-
+		
 		// 관심품목 입력받아서 # 기준으로 파싱하여 각각 저장
 		String[] interests = request.getFarmInterest().replaceAll("^\\s*#*", "").split("#");
 		int numInterests = Math.min(interests.length, 5); // 최대 5개의 관심사로 제한
@@ -388,19 +391,23 @@ public class FarmerServiceImpl implements FarmerService {
 		farmer.setFarmInterest5(numInterests > 4 ? interests[4].trim() : null);
 
 		Farmer savedFarmer = farmerRepository.save(farmer);
-
-		if (profileImage != null && !profileImage.isEmpty()) {
+		
+//		if(telSelected) {
+//			userService.updateUserTel(loginUser, request.getFarmTel());
+//		}
+		
+		if (farmPixurl != null && !farmPixurl.isEmpty()) {
 			String dir = "C:/Users/USER/upload";
 
 			// 파일명 설정
 			String fileName = "profile_image_" + savedFarmer.getFarmerId() + "."
-					+ StringUtils.getFilenameExtension(profileImage.getOriginalFilename());
+					+ StringUtils.getFilenameExtension(farmPixurl.getOriginalFilename());
 
 			// 파일 저장 경로 설정
 			String filePath = Paths.get(dir, fileName).toString();
 
 			// 파일 저장
-			profileImage.transferTo(new File(filePath));
+			farmPixurl.transferTo(new File(filePath));
 
 			savedFarmer.setFarmPixurl(filePath);
 		}
@@ -409,7 +416,7 @@ public class FarmerServiceImpl implements FarmerService {
 	}
 
 	@Override
-	public Farmer modifyFarmer(ModifyFarmDto request, MultipartFile profileImage) throws Exception {
+	public Farmer modifyFarmer(ModifyFarmDto request, MultipartFile farmPixurl) throws Exception {
 		Long farmerId = request.getFarmerId();
 		// FarmerRepository를 사용하여 farmerId로 기존 Farmer 객체를 가져옴
 		Farmer farmer = farmerRepository.findById(farmerId).orElse(null);
@@ -433,18 +440,18 @@ public class FarmerServiceImpl implements FarmerService {
 		farmer.setFarmInterest4(numInterests > 3 ? interests[3].trim() : null);
 		farmer.setFarmInterest5(numInterests > 4 ? interests[4].trim() : null);
 
-		if (profileImage != null && !profileImage.isEmpty()) {
+		if (farmPixurl != null && !farmPixurl.isEmpty()) {
 			String dir = "C:/Users/USER/upload";
 
 			// 파일명 설정
 			String fileName = "profile_image_" + farmer.getFarmerId() + "."
-					+ StringUtils.getFilenameExtension(profileImage.getOriginalFilename());
+					+ StringUtils.getFilenameExtension(farmPixurl.getOriginalFilename());
 
 			// 파일 저장 경로 설정
 			String filePath = Paths.get(dir, fileName).toString();
 			System.out.println("filePath: " + filePath);
 			// 파일 저장
-			profileImage.transferTo(new File(filePath));
+			farmPixurl.transferTo(new File(filePath));
 
 			farmer.setFarmPixurl(filePath);
 		}

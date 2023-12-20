@@ -293,29 +293,29 @@ public class FarmerDslRepository {
    }
    
    // 정산 테이블 생성
-   public void insertInvoice(Long farmerId, Long ordersId, Date date) {
-      QInvoice in = QInvoice.invoice;
-      QPayment pay = QPayment.payment;
-      QOrders ord = QOrders.orders;
-      
-      Tuple result = jpaQueryFactory
-             .select(new CaseBuilder()
-                  .when(ord.quotationId.isNotNull()).then(3)
-                  .otherwise(5),
-                  pay.paymentPrice)
-             .from(ord)
-             .join(pay).on(ord.paymentId.eq(pay.paymentId))
-             .where(ord.farmerId.eq(farmerId).and(ord.ordersId.eq(ordersId)))
-             .fetchOne();
-      
-      jpaQueryFactory.insert(in)
-         .set(in.farmerId, farmerId)
-         .set(in.orderId, ordersId)
-         .set(in.invoiceDate1, date)
-         .set(in.invoiceCommission, result.get(0, Long.class))
-         .set(in.invoicePrice, result.get(1, Long.class))
-         .execute();
-   }
+//   public void insertInvoice(Long farmerId, Long ordersId, Date date) {
+//      QInvoice in = QInvoice.invoice;
+//      QPayment pay = QPayment.payment;
+//      QOrders ord = QOrders.orders;
+//      
+//      Tuple result = jpaQueryFactory
+//             .select(new CaseBuilder()
+//                  .when(ord.quotationId.isNotNull()).then(3)
+//                  .otherwise(5),
+//                  pay.paymentPrice)
+//             .from(ord)
+//             .join(pay).on(ord.paymentId.eq(pay.paymentId))
+//             .where(ord.farmerId.eq(farmerId).and(ord.ordersId.eq(ordersId)))
+//             .fetchOne();
+//      
+//      jpaQueryFactory.insert(in)
+//         .set(in.farmerId, farmerId)
+//         .set(in.orderId, ordersId)
+//         .set(in.invoiceDate1, date)
+//         .set(in.invoiceCommission, result.get(0, Long.class))
+//         .set(in.invoicePrice, result.get(1, Long.class))
+//         .execute();
+//   }
    
 //   정산 내역 리스트
 //   public List<Tuple> findOrdersIdAndDeliveryAndProductAndByDeliveryState(Long farmerId, String deliveryState, PageRequest pageRequest) {

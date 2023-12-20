@@ -228,7 +228,7 @@ public class UserController {
 	
 	@PostMapping("/findfarmer/reg-farmer")
 	public ResponseEntity<String> regFarmer(
-			@RequestPart("farmPixurl") MultipartFile profileImage,
+			@RequestPart("farmPixurl") MultipartFile farmPixurl,
       @RequestParam("farmName") String farmName,
       @RequestParam("farmTel") String farmTel,
       @RequestParam("farmAddress") String farmAddress,
@@ -250,9 +250,9 @@ public class UserController {
 	    request.setFarmBank(farmBank);
 	    request.setFarmAccountNum(farmAccountNum);
 	    request.setFarmInterest(farmInterest);
-	    request.setFarmPixurl(profileImage);
+	    request.setFarmPixurl(farmPixurl);
 	    
-			Farmer registeredFarmer = farmerService.registerFarmer(request, profileImage);
+			Farmer registeredFarmer = farmerService.registerFarmer(request, farmPixurl);
 			userService.updateUserInfoAfterRegFarmer(loginUser, registeredFarmer.getFarmerId());
 			return ResponseEntity.ok("파머등록 성공");
 		} catch (Exception e) {
@@ -263,7 +263,7 @@ public class UserController {
 	// 팜 정보 수정
 	@PutMapping("/farmer/modify-farm")
 	public ResponseEntity<?> modifyFarm(
-			@RequestPart("farmPixurl") MultipartFile profileImage,
+			@RequestPart("farmPixurl") MultipartFile farmPixurl,
       @RequestParam("farmName") String farmName,
       @RequestParam("farmTel") String farmTel,
       @RequestParam("farmAddress") String farmAddress,
@@ -295,9 +295,9 @@ public class UserController {
       request.setFarmBank(farmBank);
       request.setFarmAccountNum(farmAccountNum);
       request.setFarmInterest(farmInterest);
-      request.setFarmPixurl(profileImage);
+      request.setFarmPixurl(farmPixurl);
 			
-			Farmer modifiedFarmer = farmerService.modifyFarmer(request, profileImage);
+			Farmer modifiedFarmer = farmerService.modifyFarmer(request, farmPixurl);
 
 			return ResponseEntity.ok("파머 정보가 성공적으로 수정되었습니다");
 		} catch (NotFoundException e) {

@@ -4,8 +4,11 @@ import java.util.List;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import com.kosta.farm.dto.ModifyFarmDto;
 import com.kosta.farm.dto.PaymentDto;
 import com.kosta.farm.dto.QuotationDto;
+import com.kosta.farm.dto.RegFarmerDto;
+import com.kosta.farm.entity.Farmer;
 import com.kosta.farm.entity.Product;
 import com.kosta.farm.entity.Quotation;
 import com.kosta.farm.entity.Request;

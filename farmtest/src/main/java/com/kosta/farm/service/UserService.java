@@ -21,7 +21,9 @@ public interface UserService {
 	User findUserPassword(String userName, String userEmail) throws Exception;
 
 	String makeTempPassword() throws Exception;
-
+	
+	public boolean checkEmail(String userEmail) throws Exception;
+	
 	void updatePassword(Long userId, String newPassword) throws Exception;
 
 	void sendTempPasswordEmail(String userEmail, String tempPassword) throws Exception;

@@ -45,6 +45,7 @@ import com.kosta.farm.repository.RequestRepository;
 import com.kosta.farm.repository.ReviewRepository;
 import com.kosta.farm.repository.UserRepository;
 import com.kosta.farm.util.PageInfo;
+import com.kosta.farm.util.RequestStatus;
 import com.querydsl.core.Tuple;
 
 import lombok.RequiredArgsConstructor;
@@ -156,7 +157,7 @@ public class FarmServiceImpl implements FarmService {
 		Request Nrequest = Request.builder().requestProduct(request.getRequestProduct())
 				.requestDate(request.getRequestDate()).requestMessage(request.getRequestMessage())
 				.requestQuantity(request.getRequestQuantity()).address1(request.getAddress1()).userId(request.getUserId())
-				.tel(request.getTel()).requestState("1").build();
+				.tel(request.getTel()).state(RequestStatus.REQUEST).build();
 		Request add = requestRepository.save(Nrequest);
 		return add;
 	}
@@ -236,18 +237,18 @@ public class FarmServiceImpl implements FarmService {
 
 			for (MultipartFile file : files) {
 				// primgfiletable에 insert
-				File imageFile = File.builder().directory(dir).fileName(file.getOriginalFilename())
-						.size(file.getSize()).build();
-				productFileRepository.save(imageFile);
-
-				// upload 폴더에 upload
-				File uploadFile = new File(dir + imageFile.getFileId());
-				file.transferTo(uploadFile);
+//				FileVo imageFile = FileVo.builder().directory(dir).fileName(file.getOriginalFilename())
+//						.size(file.getSize()).build();
+//				productFileRepository.save(imageFile);
+//
+//				// upload 폴더에 upload
+//				FileVo uploadFile = new FileVo(dir + imageFile.getFileId());
+//				file.transferTo(uploadFile);
 
 				// file 번호 목록 만들기
 				if (!fileNums.equals(""))
 					fileNums += ",";
-				fileNums += imageFile.getFileId();
+//				fileNums += imageFile.getFileId();
 			}
 			product.setFileUrl(fileNums);
 		}

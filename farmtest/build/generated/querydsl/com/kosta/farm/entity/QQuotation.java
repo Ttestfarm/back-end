@@ -27,15 +27,7 @@ public class QQuotation extends EntityPathBase<Quotation> {
 
     public final NumberPath<Long> quotationId = createNumber("quotationId", Long.class);
 
-    public final StringPath quotationPicture1 = createString("quotationPicture1");
-
-    public final StringPath quotationPicture2 = createString("quotationPicture2");
-
-    public final StringPath quotationPicture3 = createString("quotationPicture3");
-
-    public final StringPath quotationPicture4 = createString("quotationPicture4");
-
-    public final StringPath quotationPicture5 = createString("quotationPicture5");
+    public final StringPath quotationImages = createString("quotationImages");
 
     public final NumberPath<Integer> quotationPrice = createNumber("quotationPrice", Integer.class);
 

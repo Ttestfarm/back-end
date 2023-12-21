@@ -7,7 +7,6 @@ import com.querydsl.core.types.dsl.*;
 import com.querydsl.core.types.PathMetadata;
 import javax.annotation.processing.Generated;
 import com.querydsl.core.types.Path;
-import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
@@ -18,45 +17,51 @@ public class QPayInfo extends EntityPathBase<PayInfo> {
 
     private static final long serialVersionUID = -1465208284L;
 
-    private static final PathInits INITS = PathInits.DIRECT2;
-
     public static final QPayInfo payInfo = new QPayInfo("payInfo");
 
     public final NumberPath<java.math.BigDecimal> amount = createNumber("amount", java.math.BigDecimal.class);
+
+    public final StringPath buyerAddress = createString("buyerAddress");
+
+    public final StringPath buyerName = createString("buyerName");
+
+    public final StringPath buyerTel = createString("buyerTel");
 
     public final NumberPath<java.math.BigDecimal> cancelledAmount = createNumber("cancelledAmount", java.math.BigDecimal.class);
 
     public final DateTimePath<java.time.LocalDateTime> cancelledAt = createDateTime("cancelledAt", java.time.LocalDateTime.class);
 
+    public final StringPath cancelText = createString("cancelText");
+
     public final NumberPath<Integer> count = createNumber("count", Integer.class);
 
     public final DateTimePath<java.time.LocalDateTime> createAt = createDateTime("createAt", java.time.LocalDateTime.class);
-
-    public final DateTimePath<java.sql.Timestamp> createDate = createDateTime("createDate", java.sql.Timestamp.class);
 
     public final DateTimePath<java.time.LocalDateTime> failedAt = createDateTime("failedAt", java.time.LocalDateTime.class);
 
     public final NumberPath<Long> farmerId = createNumber("farmerId", Long.class);
 
-    public final StringPath merchantUid = createString("merchantUid");
+    public final NumberPath<Integer> invoiceCommission = createNumber("invoiceCommission", Integer.class);
 
-    public final EnumPath<com.kosta.farm.util.PaymentMethod> method = createEnum("method", com.kosta.farm.util.PaymentMethod.class);
+    public final DatePath<java.sql.Date> invoiceDate = createDate("invoiceDate", java.sql.Date.class);
 
-    public final StringPath name = createString("name");
+    public final NumberPath<Integer> invoicePrice = createNumber("invoicePrice", Integer.class);
 
     public final StringPath ordersId = createString("ordersId");
 
-    public final NumberPath<java.math.BigDecimal> paidAmount = createNumber("paidAmount", java.math.BigDecimal.class);
-
-    public final DateTimePath<java.time.LocalDateTime> paidAt = createDateTime("paidAt", java.time.LocalDateTime.class);
-
-    public final StringPath paymentBank = createString("paymentBank");
+    public final DatePath<java.sql.Date> paidAt = createDate("paidAt", java.sql.Date.class);
 
     public final NumberPath<Integer> paymentDelivery = createNumber("paymentDelivery", Integer.class);
 
-    public final NumberPath<Integer> paymentPrice = createNumber("paymentPrice", Integer.class);
+    public final StringPath paymentMethod = createString("paymentMethod");
+
+    public final StringPath pgTid = createString("pgTid");
+
+    public final StringPath pgType = createString("pgType");
 
     public final NumberPath<Long> productId = createNumber("productId", Long.class);
+
+    public final StringPath productName = createString("productName");
 
     public final NumberPath<Integer> productPrice = createNumber("productPrice", Integer.class);
 
@@ -66,33 +71,28 @@ public class QPayInfo extends EntityPathBase<PayInfo> {
 
     public final NumberPath<Long> requestId = createNumber("requestId", Long.class);
 
-    public final StringPath state = createString("state");
+    public final EnumPath<com.kosta.farm.util.PaymentStatus> state = createEnum("state", com.kosta.farm.util.PaymentStatus.class);
 
-    public final EnumPath<com.kosta.farm.util.PaymentStatus> status = createEnum("status", com.kosta.farm.util.PaymentStatus.class);
+    public final StringPath status = createString("status");
 
-    public final QUser user;
+    public final StringPath tCode = createString("tCode");
+
+    public final StringPath tInvoice = createString("tInvoice");
+
+    public final StringPath tName = createString("tName");
 
     public final NumberPath<Long> userId = createNumber("userId", Long.class);
 
     public QPayInfo(String variable) {
-        this(PayInfo.class, forVariable(variable), INITS);
+        super(PayInfo.class, forVariable(variable));
     }
 
     public QPayInfo(Path<? extends PayInfo> path) {
-        this(path.getType(), path.getMetadata(), PathInits.getFor(path.getMetadata(), INITS));
+        super(path.getType(), path.getMetadata());
     }
 
     public QPayInfo(PathMetadata metadata) {
-        this(metadata, PathInits.getFor(metadata, INITS));
-    }
-
-    public QPayInfo(PathMetadata metadata, PathInits inits) {
-        this(PayInfo.class, metadata, inits);
-    }
-
-    public QPayInfo(Class<? extends PayInfo> type, PathMetadata metadata, PathInits inits) {
-        super(type, metadata, inits);
-        this.user = inits.isInitialized("user") ? new QUser(forProperty("user")) : null;
+        super(PayInfo.class, metadata);
     }
 
 }

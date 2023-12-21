@@ -27,7 +27,7 @@ public class QRequest extends EntityPathBase<Request> {
 
     public final BooleanPath choiceState = createBoolean("choiceState");
 
-    public final DateTimePath<java.sql.Timestamp> createDate = createDateTime("createDate", java.sql.Timestamp.class);
+    public final DatePath<java.sql.Date> createDate = createDate("createDate", java.sql.Date.class);
 
     public final StringPath name = createString("name");
 

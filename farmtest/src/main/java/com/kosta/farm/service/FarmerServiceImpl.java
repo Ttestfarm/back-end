@@ -1,6 +1,7 @@
 package com.kosta.farm.service;
 
 import java.io.File;
+import java.nio.file.Paths;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -15,26 +16,28 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kosta.farm.dto.ModifyFarmDto;
 import com.kosta.farm.dto.PaymentDto;
 import com.kosta.farm.dto.QuotationDto;
-//import com.kosta.farm.entity.Delivery;
+import com.kosta.farm.dto.RegFarmerDto;
 import com.kosta.farm.entity.Farmer;
 import com.kosta.farm.entity.FileVo;
-import com.kosta.farm.entity.Payment;
+import com.kosta.farm.entity.PayInfo;
 import com.kosta.farm.entity.Product;
 import com.kosta.farm.entity.Quotation;
 import com.kosta.farm.entity.Request;
-//import com.kosta.farm.repository.DeliveryRepository;
 import com.kosta.farm.repository.FarmerDslRepository;
 import com.kosta.farm.repository.FarmerRepository;
 import com.kosta.farm.repository.FileVoRepository;
-import com.kosta.farm.repository.PaymentRepository;
+import com.kosta.farm.repository.PayInfoRepository;
 import com.kosta.farm.repository.ProductRepository;
 import com.kosta.farm.repository.QuotationRepository;
 import com.kosta.farm.util.PageInfo;
 import com.kosta.farm.util.PaymentStatus;
 import com.querydsl.core.Tuple;
+import com.siot.IamportRestClient.response.Payment;
 
+import antlr.StringUtils;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -47,7 +50,7 @@ public class FarmerServiceImpl implements FarmerService {
 	private final FarmerRepository farmerRepository;
 	private final QuotationRepository quotationRepository;
 	private final FileVoRepository fileVoRepository;
-	private final PaymentRepository paymentRepository;
+	private final PayInfoRepository payInfoRepository;
 	private final ProductRepository productRepository;
 	// DSL
 	private final FarmerDslRepository farmerDslRepository;
@@ -94,13 +97,13 @@ public class FarmerServiceImpl implements FarmerService {
 				fileVoRepository.save(imageFile);
 
 				// upload 폴더에 upload
-				File uploadFile = new File(dir + imageFile.getProductFileId());
+				File uploadFile = new File(dir + imageFile.getFileId());
 				img.transferTo(uploadFile);
 
 				// file 번호 목록 만들기
 				if (!fileNums.equals(""))
 					fileNums += ",";
-				fileNums += imageFile.getProductFileId();
+				fileNums += imageFile.getFileId();
 			}
 			quotation.setQuotationImages(fileNums);
 		}
@@ -171,9 +174,9 @@ public class FarmerServiceImpl implements FarmerService {
 					.size(titleImage.getSize()).build();
 			fileVoRepository.save(imageFile);
 
-			File uploadFile = new File(dir + imageFile.getProductFileId());
+			File uploadFile = new File(dir + imageFile.getFileId());
 			titleImage.transferTo(uploadFile);
-			product.setThumbNail(imageFile.getProductFileId());
+			product.setThumbNail(imageFile.getFileId());
 		}
 
 		if (images != null && images.size() != 0) {
@@ -185,13 +188,13 @@ public class FarmerServiceImpl implements FarmerService {
 				fileVoRepository.save(imageFile);
 
 				// upload 폴더에 upload
-				File uploadFile = new File(dir + imageFile.getProductFileId());
+				File uploadFile = new File(dir + imageFile.getFileId());
 				img.transferTo(uploadFile);
 
 				// file 번호 목록 만들기
 				if (!fileNums.equals(""))
 					fileNums += ",";
-				fileNums += imageFile.getProductFileId();
+				fileNums += imageFile.getFileId();
 			}
 			product.setFileUrl(fileNums);
 		}
@@ -221,13 +224,13 @@ public class FarmerServiceImpl implements FarmerService {
 			allCount = farmerDslRepository.findOrdersCountByFarmerIdAndQuotationIsNotNull(farmerId);
 
 		} else if (type.equals("2")) { // 받은 주문
-			List<Payment> tempList = farmerDslRepository.findOrdersByFarmerIdAndPaging(farmerId, pageRequest);
-			for (Payment pay : tempList) {
+			List<PayInfo> tempList = farmerDslRepository.findOrdersByFarmerIdAndPaging(farmerId, pageRequest);
+			for (PayInfo pay : tempList) {
 				PaymentDto dto = new PaymentDto();
 				dto.setReceiptId(pay.getReceiptId());
-				dto.setProduct(pay.getProduct());
+				dto.setProduct(pay.getProductName());
 				dto.setCount(pay.getCount());
-				dto.setPrice(pay.getPrice());
+				dto.setPrice(pay.getProductPrice());
 				dto.setBuyerName(pay.getBuyerName());
 				dto.setBuyerTel(pay.getBuyerTel());
 				dto.setBuyerAddress(pay.getBuyerAddress());
@@ -252,7 +255,7 @@ public class FarmerServiceImpl implements FarmerService {
 		PaymentDto payment = new PaymentDto();
 		if (type.equals("1")) {
 			Tuple t = farmerDslRepository.findOrderByFarmerIdAndOrderIdIsNotNull(farmerId, receiptId);
-			Payment temp = t.get(0, Payment.class);
+			PayInfo temp = t.get(0, PayInfo.class);
 			payment.setReceiptId(temp.getReceiptId());
 			payment.setPayType(temp.getPayType());
 			payment.setDeliveryprice(temp.getDeliveryprice()); // 배송비
@@ -266,13 +269,13 @@ public class FarmerServiceImpl implements FarmerService {
 			payment.setBuyerTel(t.get(5, String.class));
 			payment.setBuyerAddress(t.get(6, String.class) + t.get(7, String.class) + t.get(8, String.class));
 
-			Timestamp timestamp = temp.getCreateDate();
+			Timestamp timestamp = temp.getPaidAt();
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 			String dateString = dateFormat.format(timestamp);
 			payment.setCreateDate(dateString);
 
 		} else if (type.equals("2")) {
-			Payment temp = farmerDslRepository.findOrderByFarmerIdAndOrderIdAndQuotaionIdIsNull(farmerId, receiptId);
+			PayInfo temp = farmerDslRepository.findOrderByFarmerIdAndOrderIdAndQuotaionIdIsNull(farmerId, receiptId);
 			payment.setReceiptId(temp.getReceiptId());
 			payment.setPayType(temp.getPayType());
 			payment.setDeliveryprice(temp.getDeliveryprice()); // 배송비
@@ -306,7 +309,7 @@ public class FarmerServiceImpl implements FarmerService {
 		// System.err.println("tCode " + tCode);
 		// System.out.println("tInvoice " + tInvoice);
 		// payment 테이블에 배송 정보 저장
-		Payment payment = paymentRepository.findById(receiptId).get();
+		PayInfo payment = paymentRepository.findById(receiptId).get();
 		payment.setTCode(tCode);
 		payment.setTName(tName);
 		payment.setTInvoice(tInvoice);

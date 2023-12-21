@@ -10,9 +10,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
 import com.kosta.farm.entity.Farmer;
-import com.kosta.farm.entity.Payment;
+import com.kosta.farm.entity.PayInfo;
 import com.kosta.farm.entity.QFarmer;
-import com.kosta.farm.entity.QPayment;
+import com.kosta.farm.entity.QPayInfo;
 import com.kosta.farm.entity.QQuotation;
 import com.kosta.farm.entity.QRequest;
 import com.kosta.farm.entity.Quotation;
@@ -103,7 +103,7 @@ public class FarmerDslRepository {
 
       // 결제 완료 현황 ( 매칭 주문 )
       public List<Tuple> findOrdersQuotByFarmerIdAndPaging(Long farmerId, PageRequest pageRequest) {
-            QPayment pay = QPayment.payment;
+            QPayInfo pay = QPayInfo.payInfo;
             QRequest req = QRequest.request;
             QQuotation quot = QQuotation.quotation;
 
@@ -122,8 +122,8 @@ public class FarmerDslRepository {
       }
 
       // 결제 완료 현황 (받은 주문)
-      public List<Payment> findOrdersByFarmerIdAndPaging(Long farmerId, PageRequest pageRequest) {
-            QPayment pay = QPayment.payment;
+      public List<PayInfo> findOrdersByFarmerIdAndPaging(Long farmerId, PageRequest pageRequest) {
+          QPayInfo pay = QPayInfo.payInfo;
             return jpaQueryFactory.selectFrom(pay)
                         .where(pay.farmerId.eq(farmerId)
                                     .and(pay.quotationId.isNull())
@@ -136,7 +136,7 @@ public class FarmerDslRepository {
 
       // 결제 완료(매칭)현환 수
       public Long findOrdersCountByFarmerIdAndQuotationIsNotNull(Long farmerId) {
-            QPayment pay = QPayment.payment;
+            QPayInfo pay = QPayInfo.payInfo;
             return jpaQueryFactory.select(pay.count())
                         .from(pay)
                         .where(pay.farmerId.eq(farmerId)
@@ -146,7 +146,7 @@ public class FarmerDslRepository {
 
       // 결제 완료(주문)현황 수
       public Long findOrdersCountByFarmerIdAndQuotationIsNull(Long farmerId) {
-            QPayment pay = QPayment.payment;
+            QPayInfo pay = QPayInfo.payInfo;
             return jpaQueryFactory.select(pay.count())
                         .from(pay)
                         .where(pay.farmerId.eq(farmerId)
@@ -156,7 +156,7 @@ public class FarmerDslRepository {
 
       // 결제 완료(메칭) 상세 보기
       public Tuple findOrderByFarmerIdAndOrderIdIsNotNull(Long farmerId, String receiptId) {
-            QPayment pay = QPayment.payment;
+            QPayInfo pay = QPayInfo.payInfo;
             QRequest req = QRequest.request;
             QQuotation quot = QQuotation.quotation;
             return jpaQueryFactory.select(pay, quot.quotationProduct, quot.quotationQuantity,
@@ -169,8 +169,8 @@ public class FarmerDslRepository {
       }
 
       // 결제 완료 (주문) 상세 보기
-      public Payment findOrderByFarmerIdAndOrderIdAndQuotaionIdIsNull(Long farmerId, String receiptId) {
-            QPayment pay = QPayment.payment;
+      public PayInfo findOrderByFarmerIdAndOrderIdAndQuotaionIdIsNull(Long farmerId, String receiptId) {
+            QPayInfo pay = QPayInfo.payInfo;
             return jpaQueryFactory.selectFrom(pay)
                         .where(pay.quotationId.isNull()
                                     .and(pay.farmerId.eq(farmerId))
@@ -181,7 +181,7 @@ public class FarmerDslRepository {
       // 발송 완료 처리 *테이블 변경으로 미사용
       // public void updatePaymentDelivery(String receiptId, String tCode, String
       // tName, String tInvoice) {
-      // QPayment pay = QPayment.payment;
+      // QPayInfo pay = QPayInfo.payment;
       // jpaQueryFactory.update(pay)
       // .set(pay.tCode, tCode)
       // .set(pay.tName, tName)
@@ -193,7 +193,7 @@ public class FarmerDslRepository {
       // 정산 데이터 추가 *테이블 변경으로 미사용
       // public void UpdatePaymentInvoice(String receiptId, Date date, String invoice)
       // {
-      // QPayment pay = QPayment.payment;
+      // QPayInfo pay = QPayInfo.payment;
       // jpaQueryFactory.update(pay)
       // .set(pay.invoiceDate, date)
       // .set(pay.invoiceCommission, )
@@ -204,7 +204,7 @@ public class FarmerDslRepository {
 
       // 판매 취소
       public void updatePaymentStateCANCEL(Long farmerId, String receiptId, String cancelText) {
-            QPayment pay = QPayment.payment;
+            QPayInfo pay = QPayInfo.payInfo;
             jpaQueryFactory.update(pay)
                         .set(pay.cancelText, cancelText)
                         .set(pay.state, PaymentStatus.CANCEL)
@@ -215,9 +215,9 @@ public class FarmerDslRepository {
       }
 
       // 배송 현황 리스트
-      public List<Payment> findOrdersIdAndDeliveryAndProductAndByDeliveryState(Long farmerId, String state,
+      public List<PayInfo> findOrdersIdAndDeliveryAndProductAndByDeliveryState(Long farmerId, String state,
                   PageRequest pageRequest) {
-            QPayment pay = QPayment.payment;
+            QPayInfo pay = QPayInfo.payInfo;
             QQuotation quot = QQuotation.quotation;
 
             // Payment state의 값을 String 클래로 받아서 enum 형태로 변환 후 비교
@@ -241,7 +241,7 @@ public class FarmerDslRepository {
 
       // 배송 현황 테이블 수
       public Long findDeliveryCountByFarmerIdAndDeliveryState(Long farmerId, String state) {
-            QPayment pay = QPayment.payment;
+            QPayInfo pay = QPayInfo.payInfo;
 
             // Payment state의 값을 String 클래로 받아서 enum 형태로 변환 후 비교
             PaymentStatus stateValue = null;
@@ -262,7 +262,7 @@ public class FarmerDslRepository {
       // 정산 테이블 생성 *테이블 변경으로 미사용
       // public void insertInvoice(Long farmerId, Long ordersId, Date date) {
       // QInvoice in = QInvoice.invoice;
-      // QPayment pay = QPayment.payment;
+      // QPayInfo pay = QPayInfo.payment;
       // QOrders ord = QOrders.orders;
       //
       // Tuple result = jpaQueryFactory
@@ -285,10 +285,10 @@ public class FarmerDslRepository {
       // }
 
       // 정산 내역 리스트
-      public List<Payment> findOrdersIdAndDeliveryAndProductAndByDeliveryState(Long farmerId, String sDate,
+      public List<PayInfo> findOrdersIdAndDeliveryAndProductAndByDeliveryState(Long farmerId, String sDate,
                   String eDate,
                   String state, PageRequest pageRequest) throws ParseException {
-            QPayment pay = QPayment.payment;
+            QPayInfo pay = QPayInfo.payInfo;
 
             // state를 String 클래스로 받아서 enum 클래스로 변환 후 Payment.state 비교
             PaymentStatus stateValue = null;
@@ -308,7 +308,7 @@ public class FarmerDslRepository {
                         .where(pay.farmerId.eq(farmerId)
                                     .and(pay.invoiceDate.between(startDate, endDate))
                                     .and(pay.state.eq(stateValue)))
-                        .orderBy(pay.createDate.desc())
+                        .orderBy(pay.paidAt.desc())
                         .offset(pageRequest.getOffset())
                         .limit(pageRequest.getPageSize())
                         .fetch();
@@ -317,7 +317,7 @@ public class FarmerDslRepository {
 
       // 정산 내역 리스트 수
       public Long invoiceCountByState(Long farmerId, String state) {
-            QPayment pay = QPayment.payment;
+            QPayInfo pay = QPayInfo.payInfo;
 
             // Payment state의 값을 String 클래로 받아서 enum 형태로 변환 후 비교
             PaymentStatus stateValue = null;

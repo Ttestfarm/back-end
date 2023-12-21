@@ -27,17 +27,25 @@ public class QQuotation extends EntityPathBase<Quotation> {
 
     public final NumberPath<Long> quotationId = createNumber("quotationId", Long.class);
 
-    public final StringPath quotationPicture = createString("quotationPicture");
+    public final StringPath quotationPicture1 = createString("quotationPicture1");
+
+    public final StringPath quotationPicture2 = createString("quotationPicture2");
+
+    public final StringPath quotationPicture3 = createString("quotationPicture3");
+
+    public final StringPath quotationPicture4 = createString("quotationPicture4");
+
+    public final StringPath quotationPicture5 = createString("quotationPicture5");
 
     public final NumberPath<Integer> quotationPrice = createNumber("quotationPrice", Integer.class);
 
     public final StringPath quotationProduct = createString("quotationProduct");
 
-    public final StringPath quotationQuantity = createString("quotationQuantity");
-
-    public final StringPath quotationState = createString("quotationState");
+    public final NumberPath<Integer> quotationQuantity = createNumber("quotationQuantity", Integer.class);
 
     public final NumberPath<Long> requestId = createNumber("requestId", Long.class);
+
+    public final EnumPath<com.kosta.farm.util.QuotationStatus> state = createEnum("state", com.kosta.farm.util.QuotationStatus.class);
 
     public QQuotation(String variable) {
         super(Quotation.class, forVariable(variable));

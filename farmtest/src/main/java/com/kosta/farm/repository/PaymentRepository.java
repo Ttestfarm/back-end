@@ -10,11 +10,11 @@ import com.kosta.farm.entity.Payment;
 import com.kosta.farm.entity.User;
 
 @Repository
-public interface PaymentRepository extends JpaRepository<Payment, Long> {
-	Payment findByUserId(Long userId);
-   
-	List<Payment> findAllByUser(User user);
-
-    Optional<Payment> findByOrdersIdAndUser(String ordersId, User user);
+public interface PaymentRepository extends JpaRepository<Payment, String> {
+//	Payment findByUserId(Long userId);
+//   
+//	List<Payment> findAllByUser(User user);
+//
+//    Optional<Payment> findByOrdersIdAndUser(String ordersId, User user);
 
 }

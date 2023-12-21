@@ -10,14 +10,14 @@ import com.querydsl.core.types.Path;
 
 
 /**
- * QProductFile is a Querydsl query type for ProductFile
+ * QFileVo is a Querydsl query type for FileVo
  */
 @Generated("com.querydsl.codegen.DefaultEntitySerializer")
-public class QProductFile extends EntityPathBase<ProductFile> {
+public class QFileVo extends EntityPathBase<FileVo> {
 
-    private static final long serialVersionUID = -494543687L;
+    private static final long serialVersionUID = 1751680743L;
 
-    public static final QProductFile productFile = new QProductFile("productFile");
+    public static final QFileVo fileVo = new QFileVo("fileVo");
 
     public final DateTimePath<java.sql.Timestamp> createDate = createDateTime("createDate", java.sql.Timestamp.class);
 
@@ -31,16 +31,16 @@ public class QProductFile extends EntityPathBase<ProductFile> {
 
     public final NumberPath<Long> size = createNumber("size", Long.class);
 
-    public QProductFile(String variable) {
-        super(ProductFile.class, forVariable(variable));
+    public QFileVo(String variable) {
+        super(FileVo.class, forVariable(variable));
     }
 
-    public QProductFile(Path<? extends ProductFile> path) {
+    public QFileVo(Path<? extends FileVo> path) {
         super(path.getType(), path.getMetadata());
     }
 
-    public QProductFile(PathMetadata metadata) {
-        super(ProductFile.class, metadata);
+    public QFileVo(PathMetadata metadata) {
+        super(FileVo.class, metadata);
     }
 
 }

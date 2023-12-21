@@ -8,6 +8,6 @@ import com.kosta.farm.entity.Quotation;
 
 public interface QuotationRepository extends JpaRepository<Quotation, Long> {
 	//requestid별로 quote목록 보기
-	List<Quotation> findQuoteByRequestId(Long requestId);
+//	List<Quotation> findQuoteByRequestId(Long requestId);
 	
 }

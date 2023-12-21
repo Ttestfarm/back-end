@@ -18,7 +18,7 @@ import org.springframework.util.FileCopyUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kosta.farm.dto.FarmerDto;
+import com.kosta.farm.dto.FarmerInfoDto;
 import com.kosta.farm.dto.OrderHistoryDto;
 import com.kosta.farm.dto.ProductInfoDto;
 import com.kosta.farm.dto.QuotationInfoDto;
@@ -27,8 +27,7 @@ import com.kosta.farm.dto.ReviewDto;
 import com.kosta.farm.entity.Farmer;
 import com.kosta.farm.entity.Farmerfollow;
 import com.kosta.farm.entity.FileVo;
-import com.kosta.farm.entity.Orders;
-import com.kosta.farm.entity.Payment;
+import com.kosta.farm.entity.PayInfo;
 import com.kosta.farm.entity.Product;
 import com.kosta.farm.entity.ProductFile;
 import com.kosta.farm.entity.Quotation;
@@ -39,8 +38,7 @@ import com.kosta.farm.repository.FarmerDslRepository;
 import com.kosta.farm.repository.FarmerRepository;
 import com.kosta.farm.repository.FarmerfollowRepository;
 import com.kosta.farm.repository.FileVoRepository;
-import com.kosta.farm.repository.OrdersRepository;
-import com.kosta.farm.repository.PaymentRepository;
+import com.kosta.farm.repository.PayInfoRepository;
 import com.kosta.farm.repository.ProductFileRepository;
 import com.kosta.farm.repository.ProductRepository;
 import com.kosta.farm.repository.QuotationRepository;
@@ -63,13 +61,12 @@ public class FarmServiceImpl implements FarmService {
 	private final ProductRepository productRepository;
 	private final ProductFileRepository productFileRepository;
 	private final ReviewRepository reviewRepository;
-	private final OrdersRepository ordersRepository;
 	private final UserRepository userRepository;
-	private final PaymentRepository paymentRepository;
 	private final RequestRepository requestRepository;
 	private final QuotationRepository quoteRepository;
 	private final UserService userService;
 	private final FileVoRepository fileVoRepository;
+	private final PayInfoRepository payInfoRepository;
 
 	@Override // 이건 페이지네이션을 지원
 	public List<Farmer> farmerListByPage(PageInfo pageInfo) throws Exception {
@@ -92,7 +89,7 @@ public class FarmServiceImpl implements FarmService {
 	}
 
 	@Override // 파머 서치리스트 sorting 추가
-	public List<FarmerDto> farmerSearchList(String keyword, String sortType, PageInfo pageInfo) throws Exception {
+	public List<FarmerInfoDto> farmerSearchList(String keyword, String sortType, PageInfo pageInfo) throws Exception {
 		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 8, Sort.by(Sort.Direction.DESC, sortType));
 		Page<Farmer> pages = farmerRepository
 
@@ -100,7 +97,7 @@ public class FarmServiceImpl implements FarmService {
 						keyword, keyword, keyword, keyword, keyword, pageRequest);
 
 		pageInfo.setAllPage(pages.getTotalPages()); // 나머지가 필요 없다 b/c 무한 스크롤 현재 페이지랑 마지막 페이지만 필요하단
-		List<FarmerDto> farmerDtoList = new ArrayList<>();
+		List<FarmerInfoDto> farmerDtoList = new ArrayList<>();
 		for (Farmer farmer : pages.getContent()) {
 			farmerDtoList.add(farmer.toDto());
 		}
@@ -109,9 +106,9 @@ public class FarmServiceImpl implements FarmService {
 	}
 
 	@Override
-	public List<FarmerDto> findfarmerDetail(Long farmerId) throws Exception {
+	public List<FarmerInfoDto> findfarmerDetail(Long farmerId) throws Exception {
 		List<Farmer> detail = farmerRepository.findListByFarmerId(farmerId);
-		List<FarmerDto> farmerDtoList = new ArrayList<>();
+		List<FarmerInfoDto> farmerDtoList = new ArrayList<>();
 		for (Farmer farmer : detail) {
 			farmerDtoList.add(farmer.toDto());
 
@@ -120,13 +117,13 @@ public class FarmServiceImpl implements FarmService {
 	}
 
 	@Override // 파머리스트 sorting으로
-	public List<FarmerDto> findFarmersWithSorting(String sortType, PageInfo pageInfo) throws Exception {
+	public List<FarmerInfoDto> findFarmersWithSorting(String sortType, PageInfo pageInfo) throws Exception {
 		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 16,
 				Sort.by(Sort.Direction.DESC, sortType).and(Sort.by(Sort.Direction.DESC, "farmerId")));
 		Page<Farmer> pages = farmerRepository.findAll(pageRequest);
 		pageInfo.setAllPage(pages.getTotalPages());
 		// 나머지가 필요 없다 b/c 무한 스크롤 현재 페이지랑 마지막 페이지만 필요하다
-		List<FarmerDto> farmerDtoList = new ArrayList<>();
+		List<FarmerInfoDto> farmerDtoList = new ArrayList<>();
 		for (Farmer farmer : pages.getContent()) {
 			farmerDtoList.add(farmer.toDto());
 		}
@@ -145,17 +142,6 @@ public class FarmServiceImpl implements FarmService {
 		}
 		return farmerfollowList;
 	}
-//	@Override
-//	public List<Farmerfollow> getFollowingFarmersByUserId(Long userId, PageInfo pageInfo) throws Exception {
-//		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 8,
-//				Sort.by(Sort.Direction.DESC, "farmerId"));
-//		Page<Farmerfollow> pages = farmerfollowRepository.findByUserId(userId);
-//		pageInfo.setAllPage(pages.getTotalPages());
-//		List<FarmerDto> farmerDtoList= new ArrayList<>() {
-//			
-//		}
-//		return null;
-//	}
 
 //	@Override
 //	public List<Farmerfollow> getFollowingFarmersByUserId(Long userId) throws Exception {
@@ -163,14 +149,14 @@ public class FarmServiceImpl implements FarmService {
 ////				Sort.by(Sort.Direction.DESC, "farmerfollowId").and(Sort.by(Sort.Direction.DESC, "farmerId")));
 //		return farmerfollowRepository.findByUserId(userId);
 //	}
-//	
+	
 
 	// 요청서 쓰기
 	@Override
 	public Request addRequest(RequestDto request) throws Exception {
 		Request Nrequest = Request.builder().requestProduct(request.getRequestProduct())
 				.requestDate(request.getRequestDate()).requestMessage(request.getRequestMessage())
-				.requestQuantity(request.getRequestQuantity()).address(request.getAddress()).userId(request.getUserId())
+				.requestQuantity(request.getRequestQuantity()).address1(request.getAddress1()).userId(request.getUserId())
 				.tel(request.getTel()).requestState("1").build();
 		Request add = requestRepository.save(Nrequest);
 		return add;
@@ -178,16 +164,17 @@ public class FarmServiceImpl implements FarmService {
 
 	@Override // 리뷰 작성하기 ordersId에 해당하면 리뷰를 쓸 수 있다 근데 하나의 주문에 하나의 review만 쓸 수 있다 리뷰가 추가되면 파머
 	// rating field 업데이트
-	public void addReview(Long ordersId, MultipartFile reviewpixUrl, Integer rating, String content) throws Exception {
-		Optional<Orders> oOrders = ordersRepository.findById(ordersId);
-		if (oOrders.isEmpty())
+	public void addReview(String receiptId, MultipartFile reviewpixUrl, Integer rating, String content)
+			throws Exception {
+		Optional<PayInfo> oPay = payInfoRepository.findById(receiptId);
+		if (oPay.isEmpty())
 			throw new Exception("해당하는 주문이 없습니다");
-		Orders orders = oOrders.get();
-		Optional<Review> oReview = reviewRepository.findByOrdersId(orders.getOrdersId());
+		PayInfo orders = oPay.get();
+		Optional<Review> oReview = reviewRepository.findByReceiptId(orders.getReceiptId());
 		if (oReview.isPresent())
 			throw new Exception("이미 존재하는 리뷰가 있습니다");
 
-		Review review = Review.builder().ordersId(orders.getOrdersId()).rating(rating).content(content)
+		Review review = Review.builder().receiptId(orders.getReceiptId()).rating(rating).content(content)
 				.farmerId(orders.getFarmerId()).userId(orders.getUserId()).build();
 		System.out.println(content);
 
@@ -358,68 +345,6 @@ public class FarmServiceImpl implements FarmService {
 		return true;
 	}
 
-	@Override // payment상태 불러오기
-	public Boolean checkPaymentState(Long userId) throws Exception {
-		Payment payment = paymentRepository.findByUserId(userId);
-		if ("1".equals(payment.getState())) { // 1이 결제완료
-			return true;
-		}
-		return false;
-	}
-
-	@Transactional
-	@Override // 주문 생성
-	public void makeOrder(Long productId, Long paymentId) throws Exception {
-		// 1. productId 로 product 조회
-		// 상품의 현재 재고 확인
-		// 결제상태 확인
-		Optional<Payment> oPayment = paymentRepository.findById(paymentId);
-		if (oPayment.isEmpty())
-			throw new Exception("결제내역이 존재하지 않습니다");
-
-		Payment payment = oPayment.get();
-
-		if (!payment.getState().equals("1")) { // 1=결제완료
-			throw new Exception("결제가 완료되지 않았습니다. 주문을 진행할 수 없습니다");
-		}
-
-		// 2 product정보 일부내용을 builder를 이용하여 orders객체생성
-		// 주문하려는 수량과 상품의 재고를 비교하여 확인
-		Product product = null;
-		if (payment.getQuotationId() == null) {
-			product = productRepository.findById(productId).get();
-			Integer currentStock = product.getProductStock();
-			if (currentStock == (null) || (currentStock < payment.getCount())) {
-				throw new Exception("상품의 재고가 부족합니다. 현재 재고 수량: " + currentStock);
-			}
-		}
-
-		Orders orders = Orders.builder().userId(payment.getUserId()).productId(productId)
-				.farmerId(payment.getFarmerId()) // 파머 아이디도 저장
-				.ordersPrice(payment.getProductPrice()) // 총 가격은 상품 =가격 * 수량
-				.ordersState(payment.getState()).paymentId(paymentId).ordersCount(payment.getCount()).build();
-		try {
-			// 3. repository 이용해서 save;
-			ordersRepository.save(orders);
-			if (product != null) {
-				product.removeStock(payment.getCount());
-				productRepository.save(product);
-			}
-			// order가 저장되었고 quotationid가 있다면 (매칭주문)
-			if (orders != null && payment.getRequestId() != null) {
-				Optional<Request> oRequest = requestRepository.findById(payment.getRequestId());
-				if (oRequest.isPresent()) {
-					Request request = oRequest.get();
-					request.setRequestState("2"); // 요청상태를 2로 변경
-					requestRepository.save(request);
-				}
-			}
-
-		} catch (Exception e) {
-			throw new Exception("주문을 처리하는 도중 오류가 발생했습니다");
-		}
-	}
-
 	@Override // 파머 디테일페이지 가져오기
 	public Farmer farmerDetail(Long farmerId) throws Exception {
 		Optional<Farmer> ofarmer = farmerRepository.findById(farmerId);
@@ -436,9 +361,10 @@ public class FarmServiceImpl implements FarmService {
 	@Override // 매칭 메인페이지
 	@Transactional
 	public List<RequestDto> requestListByPage(PageInfo pageInfo) throws Exception {
-		
+
 		return farmDslRepository.requestListWithNameByPage(pageInfo);
 	}
+
 //	PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 3,
 //			Sort.by(Sort.Direction.DESC, "requestId"));
 //	Page<Request> pages = requestRepository.findAll(pageRequest);
@@ -455,8 +381,8 @@ public class FarmServiceImpl implements FarmService {
 	}
 
 	@Override // 유저별로 오더리스트 가져오기
-	public List<Orders> getOrdersListByUser(Long userId) throws Exception {
-		return ordersRepository.findOrdersByUserId(userId);
+	public List<PayInfo> getOrdersListByUser(Long userId) throws Exception {
+		return payInfoRepository.findPayInfoByUserId(userId);
 	}
 
 	@Override // 견적서 리스트 가져오기 request에 맞는
@@ -465,8 +391,8 @@ public class FarmServiceImpl implements FarmService {
 	}
 
 	@Override // order랑 review를 가져오기 이거 안됨 오늘 해야함
-	public List<Orders> getOrdersandReviewByUser(Long userId) throws Exception {
-		return farmDslRepository.findOrderswithReviewByUserId(userId);
+	public List<PayInfo> getOrdersandReviewByUser(Long userId) throws Exception {
+		return farmDslRepository.findPayInfowithReviewByUserId(userId);
 
 	}
 
@@ -494,7 +420,7 @@ public class FarmServiceImpl implements FarmService {
 			totalRating += farmer.getRating();
 		}
 		return numberofFarmers > 0 ? totalRating / numberofFarmers : 0;
-		
+
 	}
 
 	@Override
@@ -509,9 +435,9 @@ public class FarmServiceImpl implements FarmService {
 	}
 
 	@Override
-	public ProductInfoDto getProductInfoFromOrder(Orders orders) throws Exception {
-		Long ordersId = orders.getOrdersId();
-		Long productId = orders.getProductId();
+	public ProductInfoDto getProductInfoFromOrder(PayInfo payInfo) throws Exception {
+		String receiptId = payInfo.getReceiptId();
+		Long productId = payInfo.getProductId();
 		Product product = productRepository.findById(productId).get();
 
 		// Product로부터 필요한 정보를 가져와 ProductInfoDto에 설정
@@ -528,8 +454,8 @@ public class FarmServiceImpl implements FarmService {
 	}
 
 	@Override
-	public QuotationInfoDto getQuotationInfoFromOrder(Orders orders) throws Exception {
-		Long quotationId = orders.getQuotationId();
+	public QuotationInfoDto getQuotationInfoFromOrder(PayInfo payInfo) throws Exception {
+		Long quotationId = payInfo.getQuotationId();
 		if (quotationId == null) {
 			return null;
 		}
@@ -552,12 +478,28 @@ public class FarmServiceImpl implements FarmService {
 	}
 
 	@Override
-	public OrderHistoryDto getOrderDetails(Long ordersId) throws Exception {
-		Orders orders = ordersRepository.findById(ordersId).get();
+	public OrderHistoryDto getOrderDetails(String recieptId) throws Exception {
+		PayInfo payInfo= payInfoRepository.findById(recieptId).get();
 		OrderHistoryDto orderHistoryDto = new OrderHistoryDto();
-		orderHistoryDto.setOrders(orders);
-
+		orderHistoryDto.setPayInfo(payInfo);
 		return null;
 	}
+
+	@Override
+	public void savePaymentInfo(PayInfo payInfo) throws Exception {
+		payInfoRepository.save(payInfo);
+		Product product = null;
+		if (payInfo.getQuotationId() == null) {
+			product = productRepository.findById(payInfo.getProductId()).get();
+			Integer currentStock = product.getProductStock();
+			if (currentStock == (null) || (currentStock < payInfo.getCount())) {
+				throw new Exception("상품의 재고가 부족합니다. 현재 재고 수량: " + currentStock);
+			} else {
+				product.setProductStock(currentStock-payInfo.getCount());
+				productRepository.save(product);
+			}
+		} 
+	}
+
 
 }

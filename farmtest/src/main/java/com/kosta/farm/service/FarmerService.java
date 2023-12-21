@@ -7,7 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.kosta.farm.dto.DeliveryDto;
 import com.kosta.farm.dto.InvoiceDto;
 import com.kosta.farm.dto.ModifyFarmDto;
-import com.kosta.farm.dto.OrdersDto;
+//import com.kosta.farm.dto.OrdersDto;
 import com.kosta.farm.dto.QuotationDto;
 import com.kosta.farm.dto.RegFarmerDto;
 import com.kosta.farm.entity.Farmer;
@@ -36,18 +36,18 @@ public interface FarmerService {
 	// 견적서 상세보기
 	public Quotation findQuotationByQuotationId(Long farmerId, Long quotationId) throws Exception;
 
-	// 결제 완료 현황
-	public List<OrdersDto> findOrdersByFarmerIdAndPage(Long farmerId, String type, PageInfo pageInfo) throws Exception;
+//	// 결제 완료 현황
+//	public List<OrdersDto> findOrdersByFarmerIdAndPage(Long farmerId, String type, PageInfo pageInfo) throws Exception;
 
 	// 결제 완료(매칭, 주문) 상세보기
-	public OrdersDto OrdersDetailQuotationId(Long farmerId, Long ordersId, String type) throws Exception;
+//	public OrdersDto OrdersDetailQuotationId(Long farmerId, Long ordersId, String type) throws Exception;
 
 	// 발송 완료 처리
-	public void insertDeliveryAndInvoice(Long farmerId, Long ordersId, String tCode, String tName, String tInvoice)
-			throws Exception;
+//	public void insertDeliveryAndInvoice(Long farmerId, Long ordersId, String tCode, String tName, String tInvoice)
+//			throws Exception;
 
 	// 판매 취소 처리
-	public void deleteOrderState(Long farmerId, Long orderId, String cancelText) throws Exception;
+//	public void deleteOrderState(Long farmerId, Long orderId, String cancelText) throws Exception;
 
 	// 배송 현황 리스트
 	public List<DeliveryDto> findDeliberyByFarmerIdAndDeliveryState(Long farmerId, String deliveryState,

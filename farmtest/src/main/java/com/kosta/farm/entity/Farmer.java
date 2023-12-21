@@ -16,6 +16,7 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.kosta.farm.dto.FarmerDto;
+import com.kosta.farm.dto.FarmerInfoDto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -85,7 +86,7 @@ public class Farmer {
 		this.rating = totalRating / reviews.size();
 	}
 
-	public FarmerDto toDto() {
+	public FarmerInfoDto toDto() {
 		StringBuilder farmInterestBuilder = new StringBuilder();
 		addFarmInterest(farmInterestBuilder, farmInterest1);
 		addFarmInterest(farmInterestBuilder, farmInterest2);
@@ -94,7 +95,7 @@ public class Farmer {
 		addFarmInterest(farmInterestBuilder, farmInterest5);
 		String farmInterest = farmInterestBuilder.toString();
 
-		return FarmerDto.builder().farmerId(farmerId).farmName(farmName).farmPixurl(farmPixurl).farmAddress(farmAddress)
+		return FarmerInfoDto.builder().farmerId(farmerId).farmName(farmName).farmPixurl(farmPixurl).farmAddress(farmAddress)
 	            .farmInterest(farmInterest)
 				.followCount(followCount).reviewCount(reviewCount).rating(rating).build();
 	}

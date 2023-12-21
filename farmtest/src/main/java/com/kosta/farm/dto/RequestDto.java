@@ -19,9 +19,11 @@ public class RequestDto {
 
 	private String name;
 	private String tel;
-	private String address;
+	private String address1;
+	private String address2;
+	private String address3;
 	private String requestState;
 	private String userName;
-	private Timestamp createDate; //자동
+	private Date createDate; //자동
 
 }

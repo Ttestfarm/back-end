@@ -27,7 +27,7 @@ import com.kosta.farm.entity.Delivery;
 import com.kosta.farm.entity.Farmer;
 import com.kosta.farm.entity.FileVo;
 import com.kosta.farm.entity.Invoice;
-import com.kosta.farm.entity.Orders;
+//import com.kosta.farm.entity.Orders;
 import com.kosta.farm.entity.ProductFile;
 import com.kosta.farm.entity.Quotation;
 import com.kosta.farm.entity.Request;
@@ -52,7 +52,7 @@ public class FarmerServiceImpl implements FarmerService {
 	private final FarmerRepository farmerRepository;
 	private final RequestRepository requestRepository;
 	private final DeliveryRepository deliveryRepository;
-	private final OrdersRepository ordersRepository;
+//	private final OrdersRepository ordersRepository;
 	private final QuotationRepository quotationRepository;
 	private final InvoiceRepository invoiceRepository;
 	private final FileVoRepository fileVoRepository;
@@ -290,16 +290,16 @@ public class FarmerServiceImpl implements FarmerService {
 	}
 
 	// 판매 취소
-	@Transactional
-	public void deleteOrderState(Long farmerId, Long ordersId, String cancelText) throws Exception {
-		// Orders State 변경
-		farmerDslRepository.deleteOrderState(ordersId, farmerId, cancelText);
-
-		// Payment State 변경
-		Orders ord = ordersRepository.findById(ordersId).get();
-		Long paymentId = ord.getPaymentId();
-		farmerDslRepository.updatePaymentByOrdersId(paymentId);
-	}
+//	@Transactional
+//	public void deleteOrderState(Long farmerId, Long ordersId, String cancelText) throws Exception {
+//		// Orders State 변경
+//		farmerDslRepository.deleteOrderState(ordersId, farmerId, cancelText);
+//
+//		// Payment State 변경
+//		Orders ord = ordersRepository.findById(ordersId).get();
+//		Long paymentId = ord.getPaymentId();
+//		farmerDslRepository.updatePaymentByOrdersId(paymentId);
+//	}
 
 	// 배송 현황 리스트
 	@Override

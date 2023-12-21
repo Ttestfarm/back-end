@@ -7,8 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
+import com.kosta.farm.entity.Farmer;
 import com.kosta.farm.entity.QDelivery;
 import com.kosta.farm.entity.QDeliveryInfo;
+import com.kosta.farm.entity.QFarmer;
 import com.kosta.farm.entity.QInvoice;
 import com.kosta.farm.entity.QOrders;
 import com.kosta.farm.entity.QPayment;
@@ -30,12 +32,12 @@ public class FarmerDslRepository {
 	private JPAQueryFactory jpaQueryFactory;
 	
 	// 파머 관심 농산물 조회
-//	public Farmer findFarmerByFarmerId(Long farmerId) {
-//		QFarmer farmer = QFarmer.farmer;
-//		return jpaQueryFactory.selectFrom(farmer)
-//				.where(farmer.farmerId.eq(farmerId))
-//				.fetchOne();
-//	}
+	public Farmer findFarmerByFarmerId(Long farmerId) {
+		QFarmer farmer = QFarmer.farmer;
+		return jpaQueryFactory.selectFrom(farmer)
+				.where(farmer.farmerId.eq(farmerId))
+				.fetchOne();
+	}
 	
 	// 매칭 주문 요청서 리스트
 	public List<Request> findRequestByInterestAndFarmerId(Long farmerId, String farmInterest) {

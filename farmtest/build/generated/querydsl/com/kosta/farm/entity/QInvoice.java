@@ -23,15 +23,13 @@ public class QInvoice extends EntityPathBase<Invoice> {
 
     public final NumberPath<Long> farmerId = createNumber("farmerId", Long.class);
 
-    public final NumberPath<Long> invoiceCommission = createNumber("invoiceCommission", Long.class);
+    public final NumberPath<Integer> invoiceCommission = createNumber("invoiceCommission", Integer.class);
 
-    public final DatePath<java.sql.Date> invoiceDate1 = createDate("invoiceDate1", java.sql.Date.class);
-
-    public final DatePath<java.sql.Date> invoiceDate2 = createDate("invoiceDate2", java.sql.Date.class);
+    public final DatePath<java.sql.Date> invoiceDate = createDate("invoiceDate", java.sql.Date.class);
 
     public final NumberPath<Long> invoiceId = createNumber("invoiceId", Long.class);
 
-    public final NumberPath<Long> invoicePrice = createNumber("invoicePrice", Long.class);
+    public final NumberPath<Integer> invoicePrice = createNumber("invoicePrice", Integer.class);
 
     public final StringPath invoiceState = createString("invoiceState");
 

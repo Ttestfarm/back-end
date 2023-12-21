@@ -4,23 +4,20 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.kosta.farm.dto.FarmerDto;
+import com.kosta.farm.dto.FarmerInfoDto;
 import com.kosta.farm.dto.OrderHistoryDto;
 import com.kosta.farm.dto.ProductInfoDto;
 import com.kosta.farm.dto.QuotationInfoDto;
@@ -29,16 +26,14 @@ import com.kosta.farm.dto.RequestWithQuotationCountDTO;
 import com.kosta.farm.dto.ReviewDto;
 import com.kosta.farm.entity.Farmer;
 import com.kosta.farm.entity.Farmerfollow;
-import com.kosta.farm.entity.Orders;
+import com.kosta.farm.entity.PayInfo;
 import com.kosta.farm.entity.Product;
-import com.kosta.farm.entity.Quotation;
 import com.kosta.farm.entity.Request;
 import com.kosta.farm.entity.Review;
 import com.kosta.farm.entity.User;
 import com.kosta.farm.repository.ProductRepository;
 import com.kosta.farm.service.FarmService;
 import com.kosta.farm.util.PageInfo;
-import com.querydsl.core.Tuple;
 
 @RestController
 public class FarmController {
@@ -52,7 +47,7 @@ public class FarmController {
 	public ResponseEntity<String> insertReview(
 			@ModelAttribute ReviewDto review, MultipartFile reviewpixUrl) {
 		try {
-			farmService.addReview(review.getOrdersId(), reviewpixUrl, review.getRating(), review.getContent());
+			farmService.addReview(review.getReceiptId(), reviewpixUrl, review.getRating(), review.getContent());
 			return ResponseEntity.ok("리뷰 작성이 완료되었습니다");
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -60,7 +55,6 @@ public class FarmController {
 		}
 
 	}
-
 	// 상품 등록 이거도 나머지 완성해야함
 	@PostMapping("/farmer/regprod")
 	public ResponseEntity<Integer> regProduct(@ModelAttribute Product product, MultipartFile mainFile,
@@ -110,7 +104,7 @@ public class FarmController {
 			}
 			System.out.println(keyword);
 			PageInfo pageInfo = PageInfo.builder().curPage(page).build();
-			List<FarmerDto> farmerList = null;
+			List<FarmerInfoDto> farmerList = null;
 			if (keyword.equals("all")) {
 				// 전체파머스 리스트를 보여준다
 				farmerList = farmService.findFarmersWithSorting(sortType, pageInfo);
@@ -127,8 +121,8 @@ public class FarmController {
 		}
 
 	}
-
-//    User loginUser = userService.getLoginUserByUserEmail(auth.getName());
+//
+////    User loginUser = userService.getLoginUserByUserEmail(auth.getName());
 	@GetMapping("/findfarmer/{farmerId}") // default 기본페이지 디테일
 	public ResponseEntity<Map<String, Object>> farmerDetail(@PathVariable(name = "farmerId") Long farmerId,
 //			@PathVariable(name="userId") Long userId,
@@ -176,7 +170,6 @@ public class FarmController {
 			@PathVariable(required = false) Long farmerId) {
 		try {
 			Map<String, Object> res = new HashMap<>();
-//			PageInfo pageInfo = PageInfo.builder().curPage(1).build();
 			PageInfo pageInfo = PageInfo.builder().curPage(page).build();
 			List<Review> reviewList = farmService.getReviewListByFarmer(farmerId, pageInfo);
 			res.put("reviewList", reviewList);
@@ -248,9 +241,9 @@ public class FarmController {
 		try {
 			PageInfo pageInfo = PageInfo.builder().curPage(page).build();
 			List<Farmerfollow> followingFarmers = farmService.getFollowingFarmersByUserId(userId, pageInfo);
-			List<FarmerDto> followingFarmersDetails = new ArrayList<>();
+			List<FarmerInfoDto> followingFarmersDetails = new ArrayList<>();
 			for (Farmerfollow farmerfollow : followingFarmers) {
-				List<FarmerDto> farmerDetail = farmService.findfarmerDetail(farmerfollow.getFarmerId());
+				List<FarmerInfoDto> farmerDetail = farmService.findfarmerDetail(farmerfollow.getFarmerId());
 				followingFarmersDetails.addAll(farmerDetail);
 			}
 			Map<String, Object> res = new HashMap<>();
@@ -264,7 +257,7 @@ public class FarmController {
 			return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
 		}
 	}
-
+//
 	@GetMapping("/user") // 받은 매칭 견적 list
 	public ResponseEntity<Map<String, Object>> matchingList(
 //			@RequestParam Long userId
@@ -303,27 +296,27 @@ public class FarmController {
 //		Long userId = user.getUserId();
 		try {
 			Map<String, Object> res = new HashMap<>();
-			List<Orders> buyList = farmService.getOrdersListByUser(userId);
+			List<PayInfo> buyList = farmService.getOrdersListByUser(userId);
 			List<OrderHistoryDto> OrdersWithReview = new ArrayList<>();
 			List<Review> reviewList = farmService.getReviewListByUser(userId);
-			for (Orders orders : buyList) {
-				Long ordersId = orders.getOrdersId();
+			for (PayInfo payInfo : buyList) {
+				String receiptId = payInfo.getReceiptId();
 				OrderHistoryDto orderHistory = new OrderHistoryDto();
-				orderHistory.setOrders(orders);
+				orderHistory.setPayInfo(payInfo);
 //			    Product productInfo = farmService.getProductInfoFromOrder(orders); // getProductInfo()를 통해 Product 정보 가져오기
 //			    orderHistory.setProductInfo(productInfo); // OrderHistoryDto에 Product 정보 설정
 				// order에 따른 리뷰
-				Review findreview = findReviewForOrder(reviewList, ordersId);
+				Review findreview = findReviewForOrder(reviewList, receiptId);
 				if (findreview != null) {
 					orderHistory.setReview(findreview);
 				}
 				// 주문에 대한 상품 정보(ProductInfoDto) 가져오기
-				ProductInfoDto productInfo = farmService.getProductInfoFromOrder(orders);
+				ProductInfoDto productInfo = farmService.getProductInfoFromOrder(payInfo);
 				if (productInfo != null) {
 					orderHistory.setProductInfo(productInfo);
 				}
 				// 주문에 대한 견적 정보(QuotationInfoDto) 가져오기
-				QuotationInfoDto quotationInfo = farmService.getQuotationInfoFromOrder(orders);
+				QuotationInfoDto quotationInfo = farmService.getQuotationInfoFromOrder(payInfo);
 				if (quotationInfo != null) {
 					orderHistory.setQuotationInfo(quotationInfo);
 				}
@@ -338,17 +331,14 @@ public class FarmController {
 		}
 	}
 
-	private Review findReviewForOrder(List<Review> reviewList, Long ordersId) {
+	private Review findReviewForOrder(List<Review> reviewList, String receiptId) {
 		for (Review review : reviewList) {
-			if (review.getOrdersId().equals(ordersId)) {
+			if (review.getReceiptId().equals(receiptId)){
 				return review;
 			}
 		}
 		return null; // 리뷰가 없으면 null로 반환
 	}
-
-//	private Product findProductForOrder(List<Product> productLis)
-
 	@GetMapping("/user/{requestId}") // 받은 매칭 견적에서 견적서 자세히 보기
 	public ResponseEntity<Map<String, Object>> matchingListDetail(@PathVariable Long requestId) {
 		try {
@@ -362,55 +352,8 @@ public class FarmController {
 
 	}
 
-	@GetMapping("/mypage/buylist/") // 주문 상세 farmerController에 있는지 보기
-	public ResponseEntity<String> ordersDetail(@RequestParam(required = false, name = "ordersId") Long ordersId) {
-		try {
-			Map<String, Object> res = new HashMap<>();
-//address 
-//tel 입력한 값?
-//수령인 getusername아니면 입력한 값 불러오기
-//배송메모
-//payment에서 불러오기?
 
-		} catch (Exception e) {
-			e.printStackTrace();
 
-		}
-		return null;
 
-	}
-
-	// 필요 없는 controller 이거 안씀
-	@PostMapping("/placeorder")
-	public ResponseEntity<String> placeOrders(@RequestParam Long productId, @RequestParam Long userId,
-			@RequestParam Integer count, @RequestParam Long paymentId) {
-		try {
-			farmService.makeOrder(productId, paymentId);
-			return new ResponseEntity<String>("주문이 성공적으로 생성되었습니다", HttpStatus.OK);
-		} catch (Exception e) {
-			e.printStackTrace();
-			return new ResponseEntity<String>(HttpStatus.BAD_REQUEST);
-		}
-
-	}
-
-	// 이거 무시
-	@GetMapping("/order/{productId}")
-	public String order(@PathVariable(value = "productId") Long productId, Model model) {
-		try {
-			System.out.println("productId: " + productId);
-			Optional<Product> product = productRepository.findById(productId);
-			if (product == null) {
-				System.out.println("상품을 찾을 수 없습니다");
-				model.addAttribute("error_msg", "상품을 찾을 수 없습니다");
-				return "error";
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-
-		}
-		return null;
-
-	}
 
 }

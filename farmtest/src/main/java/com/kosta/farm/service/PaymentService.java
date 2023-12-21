@@ -1,107 +1,156 @@
 package com.kosta.farm.service;
 
-import java.math.BigDecimal;
-import java.time.ZoneId;
-import java.util.Objects;
-import java.util.Optional;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.URL;
+import java.util.Map;
 
-import javax.transaction.Transactional;
+import javax.net.ssl.HttpsURLConnection;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.stereotype.Service;
 
-import com.kosta.farm.entity.Payment;
-import com.kosta.farm.entity.User;
-import com.kosta.farm.repository.PaymentRepository;
-import com.kosta.farm.util.PaymentMethod;
-import com.kosta.farm.util.PaymentStatus;
-import com.siot.IamportRestClient.IamportClient;
-import com.siot.IamportRestClient.exception.IamportResponseException;
-import com.siot.IamportRestClient.response.IamportResponse;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.kosta.farm.entity.PayInfo;
+
+import lombok.Data;
 
 @Service
 public class PaymentService {
-//iamport API 키와 시크릿을 주입받는 부분
-	private final PaymentRepository paymentRepository;
-	@Value("${iamport.key}")
-	private String restApiKey;
-	@Value("${iamport.secret}")
-	private String restApiSecret;
-	private IamportClient iamportClient;
-	@Autowired
-	public PaymentService(PaymentRepository paymentRepository) {
-		this.paymentRepository = paymentRepository;
-	}
+	
+	@Value("${imp_key}")
+	private String impKey;
 
-	@Transactional //사용자의 결제 정보를 생성하는 메서드
-	public Payment requestPayment(User user, String name, BigDecimal amount) throws Exception {
-		Payment payment = new Payment()	;
-		payment.setUser(user);
-		payment.setOrdersId(user.getUserName() + "_" + Objects.hash(user, name, amount, System.currentTimeMillis()));
-		payment.setName(name);
-		payment.setAmount(amount);
-		return paymentRepository.save(payment);
-	}
-	@Transactional
-	public Payment verifyPayment(Payment payment, User user) throws Exception {
-        // 결제 내역의 유효성을 확인하고 결제 상태를 업데이트
-		if (!payment.getUser().equals(user)) {
-			throw new NotFoundException();
-		}
-		IamportClient iamportClient = new IamportClient(restApiKey, restApiSecret);
-		try {
-			IamportResponse<com.siot.IamportRestClient.response.Payment> paymentResponse = iamportClient
-					.paymentByImpUid(payment.getReceiptId());
-			if (Objects.nonNull(paymentResponse.getResponse())) {
-				com.siot.IamportRestClient.response.Payment paymentData = paymentResponse.getResponse();
-				if (payment.getReceiptId().equals(paymentData.getImpUid())
-						&& payment.getOrdersId().equals(paymentData.getMerchantUid())
-						&& payment.getAmount().compareTo(paymentData.getAmount()) == 0) {
-					PaymentMethod method = PaymentMethod.valueOf(paymentData.getPayMethod().toUpperCase());
-					PaymentStatus status = PaymentStatus.valueOf(paymentData.getStatus().toUpperCase());
-					payment.setMethod(method);
-					payment.setStatus(status);
-					paymentRepository.save(payment);
-					if (status.equals(PaymentStatus.READY)) {
-						if (method.equals(PaymentMethod.VBANK)) {
-							throw new Exception(paymentData.getVbankNum() + " " + paymentData.getVbankDate() + " "
-									+ paymentData.getVbankName());
-						} else {
-							throw new Exception("Payment was not completed.");
-						}
-					} else if (status.equals(PaymentStatus.PAID)) {
-						payment.setPaidAt(
-								paymentData.getPaidAt().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
-						paymentRepository.save(payment);
-					} else if (status.equals(PaymentStatus.FAILED)) {
-						throw new Exception("Payment failed.");
-					} else if (status.equals(PaymentStatus.CANCELLED)) {
-						throw new Exception("This is a cancelled payment.");
-					}
-				} else {
-					throw new Exception("The amount paid and the amount to be paid do not match.");
-				}
-			} else {
-				throw new NotFoundException();
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return payment;
+	@Value("${imp_secret}")
+	private String impSecret;
+	
+	@Data
+	private class Response{
+		private PaymentInfo response;
 	}
 	
-    // receiptId와 ordersId를 기준으로 결제 내역을 확인하고 결제 상태를 업데이트하는 메서드
-	@Transactional
-	public Payment verifyPayment(String receiptId, String ordersId, User user) throws Exception {
-		Optional<Payment> oPayment = paymentRepository.findByOrdersIdAndUser(ordersId, user);
-		if (oPayment.isPresent()) {
-			Payment payment = oPayment.get();
-			payment.setReceiptId(receiptId);
-			return verifyPayment(payment, user);
-		} else {
-			throw new Exception(ordersId + "결제정보를 찾지 못했습니다");
-		}
+	@Data
+	private class PaymentInfo{
+		private Integer amount;
 	}
+	
+	
+
+	public String getToken() throws IOException { //토큰 발행
+
+		HttpsURLConnection conn = null;
+
+		URL url = new URL("https://api.iamport.kr/users/getToken");
+
+		conn = (HttpsURLConnection) url.openConnection();
+
+		conn.setRequestMethod("POST");
+		conn.setRequestProperty("Content-type", "application/json");
+		conn.setRequestProperty("Accept", "application/json");
+		conn.setDoOutput(true);
+		JsonObject json = new JsonObject();
+
+		json.addProperty("imp_key", impKey);
+		json.addProperty("imp_secret", impSecret);
+		
+		BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
+		
+		bw.write(json.toString());
+		bw.flush();
+		bw.close();
+
+		BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(), "utf-8"));
+
+		Gson gson = new Gson();
+
+		String response = gson.fromJson(br.readLine(), Map.class).get("response").toString();
+		
+		System.out.println(response);
+
+		String token = gson.fromJson(response, Map.class).get("access_token").toString();
+
+		br.close();
+		conn.disconnect();
+
+		return token;
+	}
+
+	public Boolean paymentInfo(String imp_uid, String access_token, PayInfo payInfo) throws IOException {
+
+	    HttpsURLConnection conn = null;
+	    
+	    URL url = new URL("https://api.iamport.kr/payments/" + imp_uid);
+	 
+	    conn = (HttpsURLConnection) url.openConnection();
+	 
+	    conn.setRequestMethod("GET");
+	    conn.setRequestProperty("Authorization", access_token);
+	    conn.setDoOutput(true);
+	 
+	    BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(), "utf-8"));
+	    
+	    Gson gson = new Gson();
+	    
+	    Response response = gson.fromJson(br.readLine(), Response.class);
+	    
+	    br.close();
+	    conn.disconnect();
+	    
+	    if(response.getResponse().getAmount() != payInfo.getAmount().intValue()) {
+	    	paymentCancel(access_token, imp_uid, response.getResponse().getAmount(),"금액불일치" );
+	    	return false;
+	    }
+	    return true;
+	}
+	
+	
+	
+	public void paymentCancel(String access_token, String imp_uid, int amount, String reason) throws IOException  {
+		System.out.println("결제 취소");
+		
+		System.out.println(access_token);
+		
+		System.out.println(imp_uid);
+		
+		HttpsURLConnection conn = null;
+		URL url = new URL("https://api.iamport.kr/payments/cancel");
+ 
+		conn = (HttpsURLConnection) url.openConnection();
+ 
+		conn.setRequestMethod("POST");
+ 
+		conn.setRequestProperty("Content-type", "application/json");
+		conn.setRequestProperty("Accept", "application/json");
+		conn.setRequestProperty("Authorization", access_token);
+ 
+		conn.setDoOutput(true);
+		
+		JsonObject json = new JsonObject();
+ 
+		json.addProperty("reason", reason);
+		json.addProperty("imp_uid", imp_uid);
+		json.addProperty("amount", amount);
+		json.addProperty("checksum", amount);
+ 
+		BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(conn.getOutputStream()));
+ 
+		bw.write(json.toString());
+		bw.flush();
+		bw.close();
+		
+		BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(), "utf-8"));
+ 
+		br.close();
+		conn.disconnect();
+		
+		
+	}
+	
+	
+	
+	
 }

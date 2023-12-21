@@ -1,7 +1,6 @@
 package com.kosta.farm.entity;
 
 import java.sql.Date;
-import java.sql.Timestamp;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -27,18 +26,18 @@ import lombok.NoArgsConstructor;
 @DynamicUpdate
 public class Request {
 	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long requestId;
 	@Column
 	private Long userId;
 	@Column
-	private String requestProduct; //요청 품목
+	private String requestProduct; // 요청 품목
 	@Column
-	private String requestQuantity; //요청 물량
+	private String requestQuantity; // 요청 물량
 	@Column
 	private Date requestDate; // 요청 날짜
 	@Column
-	private String requestMessage; //요청메세지
+	private String requestMessage; // 요청메세지
 	@Column
 	private Boolean choiceState; // 0 본인(기본 배송지), 1 선물
 	@Column
@@ -46,18 +45,15 @@ public class Request {
 	@Column
 	private String tel;
 	@Column
-	private String address;
+	private String address1;
+	@Column
+	private String address2;
+	@Column
+	private String address3;
 	@CreationTimestamp
 	@Column
-	private Timestamp createDate; //자동
+	private Date createDate; // 자동
 	@Column
-	private String requestState; // 기간 만료 0, 요청 1, 성사 2, 취소 3 
-	
-	
-	
-	
-	
-	
-		
-	
+	private String requestState; // 기간 만료 0, 요청 1, 성사 2, 취소 3
+
 }

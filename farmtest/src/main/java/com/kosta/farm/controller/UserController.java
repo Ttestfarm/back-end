@@ -41,7 +41,7 @@ import lombok.RequiredArgsConstructor;
 public class UserController {
 
 	private final UserService userService;
-	private final FarmerService farmerService;
+//	private final FarmerService farmerService;
 	
 	private final BCryptPasswordEncoder encoder;
 	
@@ -223,87 +223,87 @@ public class UserController {
 		}
 	}
 	
-	@PostMapping("/findfarmer/reg-farmer")
-	public ResponseEntity<String> regFarmer(
-			@RequestPart("farmPixurl") MultipartFile profileImage,
-      @RequestParam("farmName") String farmName,
-      @RequestParam("farmTel") String farmTel,
-      @RequestParam("farmAddress") String farmAddress,
-      @RequestParam("farmAddressDetail") String farmAddressDetail,
-      @RequestParam("registrationNum") String registrationNum,
-      @RequestParam("farmBank") String farmBank,
-      @RequestParam("farmAccountNum") String farmAccountNum,
-      @RequestParam("farmInterest") String farmInterest,
-      Authentication auth) throws Exception {
-		
-		try {
-			User loginUser = (User) auth.getPrincipal();
-			RegFarmerDto request = new RegFarmerDto();
-	    request.setFarmName(farmName);
-	    request.setFarmTel(farmTel);
-	    request.setFarmAddress(farmAddress);
-	    request.setFarmAddressDetail(farmAddressDetail);
-	    request.setRegistrationNum(registrationNum);
-	    request.setFarmBank(farmBank);
-	    request.setFarmAccountNum(farmAccountNum);
-	    request.setFarmInterest(farmInterest);
-	    request.setFarmPixurl(profileImage);
-	    
-			Farmer registeredFarmer = farmerService.registerFarmer(request, profileImage);
-			userService.updateUserInfoAfterRegFarmer(loginUser, registeredFarmer.getFarmerId());
-			return ResponseEntity.ok("파머등록 성공");
-		} catch (Exception e) {
-			return ResponseEntity.badRequest().body("파머등록 실패: " + e.getMessage());
-		}
-	}
-	
-	// 팜 정보 수정
-	@PutMapping("/farmer/modify-farm")
-	public ResponseEntity<?> modifyFarm(
-			@RequestPart("farmPixurl") MultipartFile profileImage,
-      @RequestParam("farmName") String farmName,
-      @RequestParam("farmTel") String farmTel,
-      @RequestParam("farmAddress") String farmAddress,
-      @RequestParam("farmAddressDetail") String farmAddressDetail,
-      @RequestParam("registrationNum") String registrationNum,
-      @RequestParam("farmBank") String farmBank,
-      @RequestParam("farmAccountNum") String farmAccountNum,
-      @RequestParam("farmInterest") String farmInterest,
-      Authentication auth) throws Exception {
-		
-		try {
-			User loginUser = (User) auth.getPrincipal();
-			// 로그인한 유저의 farmerId 가져오기
-			Long farmerId = loginUser.getFarmerId();
-			
-			if (farmerId == null) {
-				// 로그인한 유저가 파머가 아닌 경우 에러 응답
-				ErrorResponseDto errorResponse = new ErrorResponseDto("파머 정보가 없습니다", "파머로 등록된 사용자가 아닙니다");
-				return ResponseEntity.status(400).body(errorResponse);
-			}
-
-			ModifyFarmDto request = new ModifyFarmDto();
-      request.setFarmerId(farmerId);
-      request.setFarmName(farmName);
-      request.setFarmTel(farmTel);
-      request.setFarmAddress(farmAddress);
-      request.setFarmAddressDetail(farmAddressDetail);
-      request.setRegistrationNum(registrationNum);
-      request.setFarmBank(farmBank);
-      request.setFarmAccountNum(farmAccountNum);
-      request.setFarmInterest(farmInterest);
-      request.setFarmPixurl(profileImage);
-			
-			Farmer modifiedFarmer = farmerService.modifyFarmer(request, profileImage);
-
-			return ResponseEntity.ok("파머 정보가 성공적으로 수정되었습니다");
-		} catch (NotFoundException e) {
-			ErrorResponseDto errorResponse = new ErrorResponseDto("파머를 찾을 수 없습니다", e.getMessage());
-			return ResponseEntity.status(404).body(errorResponse);
-		} catch (Exception e) {
-			ErrorResponseDto errorResponse = new ErrorResponseDto("파머 정보 수정 실패", e.getMessage());
-			return ResponseEntity.badRequest().body(errorResponse);
-		}
-	}
+//	@PostMapping("/findfarmer/reg-farmer")
+//	public ResponseEntity<String> regFarmer(
+//			@RequestPart("farmPixurl") MultipartFile profileImage,
+//      @RequestParam("farmName") String farmName,
+//      @RequestParam("farmTel") String farmTel,
+//      @RequestParam("farmAddress") String farmAddress,
+//      @RequestParam("farmAddressDetail") String farmAddressDetail,
+//      @RequestParam("registrationNum") String registrationNum,
+//      @RequestParam("farmBank") String farmBank,
+//      @RequestParam("farmAccountNum") String farmAccountNum,
+//      @RequestParam("farmInterest") String farmInterest,
+//      Authentication auth) throws Exception {
+//		
+//		try {
+//			User loginUser = (User) auth.getPrincipal();
+//			RegFarmerDto request = new RegFarmerDto();
+//	    request.setFarmName(farmName);
+//	    request.setFarmTel(farmTel);
+//	    request.setFarmAddress(farmAddress);
+//	    request.setFarmAddressDetail(farmAddressDetail);
+//	    request.setRegistrationNum(registrationNum);
+//	    request.setFarmBank(farmBank);
+//	    request.setFarmAccountNum(farmAccountNum);
+//	    request.setFarmInterest(farmInterest);
+//	    request.setFarmPixurl(profileImage);
+//	    
+//			Farmer registeredFarmer = farmerService.registerFarmer(request, profileImage);
+//			userService.updateUserInfoAfterRegFarmer(loginUser, registeredFarmer.getFarmerId());
+//			return ResponseEntity.ok("파머등록 성공");
+//		} catch (Exception e) {
+//			return ResponseEntity.badRequest().body("파머등록 실패: " + e.getMessage());
+//		}
+//	}
+//	
+//	// 팜 정보 수정
+//	@PutMapping("/farmer/modify-farm")
+//	public ResponseEntity<?> modifyFarm(
+//			@RequestPart("farmPixurl") MultipartFile profileImage,
+//      @RequestParam("farmName") String farmName,
+//      @RequestParam("farmTel") String farmTel,
+//      @RequestParam("farmAddress") String farmAddress,
+//      @RequestParam("farmAddressDetail") String farmAddressDetail,
+//      @RequestParam("registrationNum") String registrationNum,
+//      @RequestParam("farmBank") String farmBank,
+//      @RequestParam("farmAccountNum") String farmAccountNum,
+//      @RequestParam("farmInterest") String farmInterest,
+//      Authentication auth) throws Exception {
+//		
+//		try {
+//			User loginUser = (User) auth.getPrincipal();
+//			// 로그인한 유저의 farmerId 가져오기
+//			Long farmerId = loginUser.getFarmerId();
+//			
+//			if (farmerId == null) {
+//				// 로그인한 유저가 파머가 아닌 경우 에러 응답
+//				ErrorResponseDto errorResponse = new ErrorResponseDto("파머 정보가 없습니다", "파머로 등록된 사용자가 아닙니다");
+//				return ResponseEntity.status(400).body(errorResponse);
+//			}
+//
+//			ModifyFarmDto request = new ModifyFarmDto();
+//      request.setFarmerId(farmerId);
+//      request.setFarmName(farmName);
+//      request.setFarmTel(farmTel);
+//      request.setFarmAddress(farmAddress);
+//      request.setFarmAddressDetail(farmAddressDetail);
+//      request.setRegistrationNum(registrationNum);
+//      request.setFarmBank(farmBank);
+//      request.setFarmAccountNum(farmAccountNum);
+//      request.setFarmInterest(farmInterest);
+//      request.setFarmPixurl(profileImage);
+//			
+//			Farmer modifiedFarmer = farmerService.modifyFarmer(request, profileImage);
+//
+//			return ResponseEntity.ok("파머 정보가 성공적으로 수정되었습니다");
+//		} catch (NotFoundException e) {
+//			ErrorResponseDto errorResponse = new ErrorResponseDto("파머를 찾을 수 없습니다", e.getMessage());
+//			return ResponseEntity.status(404).body(errorResponse);
+//		} catch (Exception e) {
+//			ErrorResponseDto errorResponse = new ErrorResponseDto("파머 정보 수정 실패", e.getMessage());
+//			return ResponseEntity.badRequest().body(errorResponse);
+//		}
+//	}
 
 }

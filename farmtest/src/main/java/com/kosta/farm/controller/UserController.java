@@ -162,8 +162,9 @@ public class UserController {
     }
 	}
 	
-	@GetMapping("/user/modify-user/check-sms/{telNum}")
+	@GetMapping("/modify-user/check-sms/{telNum}")
 	public @ResponseBody String sendSMS(@PathVariable String telNum) {
+		System.out.println(telNum);
 		try {
 			Random rand = new Random();
 			String numStr = "";

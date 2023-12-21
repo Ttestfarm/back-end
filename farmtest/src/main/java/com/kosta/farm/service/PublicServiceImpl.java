@@ -1,26 +1,47 @@
 package com.kosta.farm.service;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.FileCopyUtils;
 
 import com.kosta.farm.dto.CompanyDto;
 import com.nimbusds.jose.shaded.json.JSONArray;
 import com.nimbusds.jose.shaded.json.JSONObject;
 import com.nimbusds.jose.shaded.json.parser.JSONParser;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
-public class APIService {
+@RequiredArgsConstructor
+public class PublicServiceImpl implements PublicService {
 	
-	public List<CompanyDto> requestCompanyList() throws Exception{
+	@Value("$(upload.paht)")
+	private String uploadPath;
+	
+	@Override
+	public void readImage(Integer num, OutputStream out) throws Exception {
+		FileInputStream fis = new FileInputStream(uploadPath + num);
+		FileCopyUtils.copy(fis, out);
+		fis.close();
+	}
+	
+	// 택배 API
+	@Override
+	public List<CompanyDto> requestCompanyList() throws Exception {
 		StringBuilder sb = new StringBuilder("http://info.sweettracker.co.kr/api/v1/companylist?");
-		String serviceKey = "OstBNzBg0PI7Tr96ol661A";
+		
+//		@Value("${swetter.apiKey}")
+		String serviceKey = "";
 		
 		sb.append(URLDecoder.decode("t_key="+serviceKey, "UTF-8"));
 		

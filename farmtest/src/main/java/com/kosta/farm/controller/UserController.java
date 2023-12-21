@@ -43,17 +43,17 @@ public class UserController {
 
 	private final UserService userService;
 	private final FarmerService farmerService;
-	
-	private final BCryptPasswordEncoder encoder;
-	
-  @Value("${jwt.secretKey}")
-  private String secretKey;
 
-  @Value("${jwt.expireTime}")
-  private int expireTime;
-  
-  @Autowired
-  private OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+	private final BCryptPasswordEncoder encoder;
+
+	@Value("${jwt.secretKey}")
+	private String secretKey;
+
+	@Value("${jwt.expireTime}")
+	private int expireTime;
+
+	@Autowired
+	private OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
 	@PostMapping("/join")
 	public ResponseEntity<String> join(@RequestBody JoinRequestDto joinRequest) throws Exception {
@@ -88,80 +88,78 @@ public class UserController {
 			}
 
 			String token = JwtTokenUtil.createToken(user.getUserEmail(), secretKey, expireTime);
-			
+
 			HttpHeaders headers = new HttpHeaders();
-			
+
 			headers.add("Authorization", "Bearer " + token);
 			return ResponseEntity.ok().headers(headers).body("로그인 성공");
 		} catch (Exception e) {
 			return ResponseEntity.badRequest().body(e.getMessage());
 		}
 	}
-	
+
 	@GetMapping("/user/userInfo")
-  public ResponseEntity<?> userInfo(Authentication auth) throws Exception {
-		User user = (User)auth.getPrincipal();
+	public ResponseEntity<?> userInfo(Authentication auth) throws Exception {
+		User user = (User) auth.getPrincipal();
 		try {
 			User loginUser = userService.getLoginUserByUserEmail(user.getUserEmail());
 
-	    UserInfoDto userInfoResponse = new UserInfoDto(
-	            loginUser.getUserId(),
-	            loginUser.getFarmerId(),
-	            loginUser.getUserName(),
-	            loginUser.getUserEmail(),
-	            loginUser.getUserPassword(),
-	            loginUser.getUserTel(),
-	            loginUser.getAddress1(),
-	            loginUser.getAddress2(),
-	            loginUser.getAddress3(),
-	            loginUser.getUserRole().name()
-	    );
-	    
-	    return ResponseEntity.ok().body(userInfoResponse);
+			UserInfoDto userInfoResponse = new UserInfoDto(
+					loginUser.getUserId(),
+					loginUser.getFarmerId(),
+					loginUser.getUserName(),
+					loginUser.getUserEmail(),
+					loginUser.getUserPassword(),
+					loginUser.getUserTel(),
+					loginUser.getAddress1(),
+					loginUser.getAddress2(),
+					loginUser.getAddress3(),
+					loginUser.getUserRole().name());
+
+			return ResponseEntity.ok().body(userInfoResponse);
 		} catch (Exception e) {
 			ErrorResponseDto errorResponse = new ErrorResponseDto("유저 정보 불러오기 실패", e.getMessage());
-      return ResponseEntity.badRequest().body(errorResponse);
+			return ResponseEntity.badRequest().body(errorResponse);
 		}
 	}
-	
+
 	@PutMapping("/user/modify-user")
 	public ResponseEntity<?> modifyUser(@RequestBody ModifyUserDto modifyUserRequest, Authentication auth) {
-    try {
-      // 로그인한 사용자 정보 가져오기
-      User loginUser = (User) auth.getPrincipal();
+		try {
+			// 로그인한 사용자 정보 가져오기
+			User loginUser = (User) auth.getPrincipal();
 
-      // 사용자 정보 수정
-      loginUser.setUserName(modifyUserRequest.getUserName());
-      loginUser.setUserPassword(encoder.encode(modifyUserRequest.getUserPassword()));
-      loginUser.setUserTel(modifyUserRequest.getUserTel());
-      loginUser.setAddress1(modifyUserRequest.getAddress1());
-      loginUser.setAddress2(modifyUserRequest.getAddress2());
-      loginUser.setAddress3(modifyUserRequest.getAddress3());
+			// 사용자 정보 수정
+			loginUser.setUserName(modifyUserRequest.getUserName());
+			loginUser.setUserPassword(encoder.encode(modifyUserRequest.getUserPassword()));
+			loginUser.setUserTel(modifyUserRequest.getUserTel());
+			loginUser.setAddress1(modifyUserRequest.getAddress1());
+			loginUser.setAddress2(modifyUserRequest.getAddress2());
+			loginUser.setAddress3(modifyUserRequest.getAddress3());
 
-      // 수정된 사용자 정보 저장
-      userService.saveUser(loginUser);
+			// 수정된 사용자 정보 저장
+			userService.saveUser(loginUser);
 
-      // 수정된 사용자 정보 응답
-      UserInfoDto modifiedUserInfo = new UserInfoDto(
-              loginUser.getUserId(),
-              loginUser.getFarmerId(),
-              loginUser.getUserName(),
-              loginUser.getUserEmail(),
-              loginUser.getUserPassword(),
-              loginUser.getUserTel(),
-              loginUser.getAddress1(),
-              loginUser.getAddress2(),
-              loginUser.getAddress3(),
-              loginUser.getUserRole().name()
-      );
+			// 수정된 사용자 정보 응답
+			UserInfoDto modifiedUserInfo = new UserInfoDto(
+					loginUser.getUserId(),
+					loginUser.getFarmerId(),
+					loginUser.getUserName(),
+					loginUser.getUserEmail(),
+					loginUser.getUserPassword(),
+					loginUser.getUserTel(),
+					loginUser.getAddress1(),
+					loginUser.getAddress2(),
+					loginUser.getAddress3(),
+					loginUser.getUserRole().name());
 
-      return ResponseEntity.ok().body(modifiedUserInfo);
-    } catch (Exception e) {
-      ErrorResponseDto errorResponse = new ErrorResponseDto("회원 정보 수정 실패", e.getMessage());
-      return ResponseEntity.badRequest().body(errorResponse);
-    }
+			return ResponseEntity.ok().body(modifiedUserInfo);
+		} catch (Exception e) {
+			ErrorResponseDto errorResponse = new ErrorResponseDto("회원 정보 수정 실패", e.getMessage());
+			return ResponseEntity.badRequest().body(errorResponse);
+		}
 	}
-	
+
 	@GetMapping("/user/modify-user/check-sms/{telNum}")
 	public @ResponseBody String sendSMS(@PathVariable String telNum) {
 		try {
@@ -181,7 +179,7 @@ public class UserController {
 			return "인증번호 전송 오류가 발생했습니다.";
 		}
 	}
-	
+
 	@GetMapping("/find-email/{userName}/{userTel}")
 	public ResponseEntity<?> findEmail(@PathVariable String userName, @PathVariable String userTel) {
 		try {
@@ -200,7 +198,7 @@ public class UserController {
 			return ResponseEntity.badRequest().body(errorResponse);
 		}
 	}
-	
+
 	@GetMapping("/find-pw/{userName}/{userEmail}")
 	public ResponseEntity<?> findPassword(@PathVariable String userName, @PathVariable String userEmail) {
 		try {
@@ -210,10 +208,10 @@ public class UserController {
 			if (foundUser != null) {
 				// 사용자를 찾았을 경우 임시 비밀번호 생성
 				String tempPassword = userService.makeTempPassword();
-				
+
 				// 임시 비밀번호로 DB 업데이트
 				userService.updatePassword(foundUser.getUserId(), tempPassword);
-				
+
 				// 이메일 전송
 				userService.sendTempPasswordEmail(foundUser.getUserEmail(), tempPassword);
 				return ResponseEntity.ok().body("임시 비밀번호가 이메일로 전송되었습니다.");
@@ -225,33 +223,33 @@ public class UserController {
 			return ResponseEntity.badRequest().body(errorResponse);
 		}
 	}
-	
+
 	@PostMapping("/findfarmer/reg-farmer")
 	public ResponseEntity<String> regFarmer(
 			@RequestPart("farmPixurl") MultipartFile profileImage,
-      @RequestParam("farmName") String farmName,
-      @RequestParam("farmTel") String farmTel,
-      @RequestParam("farmAddress") String farmAddress,
-      @RequestParam("farmAddressDetail") String farmAddressDetail,
-      @RequestParam("registrationNum") String registrationNum,
-      @RequestParam("farmBank") String farmBank,
-      @RequestParam("farmAccountNum") String farmAccountNum,
-      @RequestParam("farmInterest") String farmInterest,
-      Authentication auth) throws Exception {
-		
+			@RequestParam("farmName") String farmName,
+			@RequestParam("farmTel") String farmTel,
+			@RequestParam("farmAddress") String farmAddress,
+			@RequestParam("farmAddressDetail") String farmAddressDetail,
+			@RequestParam("registrationNum") String registrationNum,
+			@RequestParam("farmBank") String farmBank,
+			@RequestParam("farmAccountNum") String farmAccountNum,
+			@RequestParam("farmInterest") String farmInterest,
+			Authentication auth) throws Exception {
+
 		try {
 			User loginUser = (User) auth.getPrincipal();
 			RegFarmerDto request = new RegFarmerDto();
-	    request.setFarmName(farmName);
-	    request.setFarmTel(farmTel);
-	    request.setFarmAddress(farmAddress);
-	    request.setFarmAddressDetail(farmAddressDetail);
-	    request.setRegistrationNum(registrationNum);
-	    request.setFarmBank(farmBank);
-	    request.setFarmAccountNum(farmAccountNum);
-	    request.setFarmInterest(farmInterest);
-	    request.setFarmPixurl(profileImage);
-	    
+			request.setFarmName(farmName);
+			request.setFarmTel(farmTel);
+			request.setFarmAddress(farmAddress);
+			request.setFarmAddressDetail(farmAddressDetail);
+			request.setRegistrationNum(registrationNum);
+			request.setFarmBank(farmBank);
+			request.setFarmAccountNum(farmAccountNum);
+			request.setFarmInterest(farmInterest);
+			request.setFarmPixurl(profileImage);
+
 			Farmer registeredFarmer = farmerService.registerFarmer(request, profileImage);
 			userService.updateUserInfoAfterRegFarmer(loginUser, registeredFarmer.getFarmerId());
 			return ResponseEntity.ok("파머등록 성공");
@@ -259,26 +257,26 @@ public class UserController {
 			return ResponseEntity.badRequest().body("파머등록 실패: " + e.getMessage());
 		}
 	}
-	
+
 	// 팜 정보 수정
 	@PutMapping("/farmer/modify-farm")
 	public ResponseEntity<?> modifyFarm(
 			@RequestPart("farmPixurl") MultipartFile profileImage,
-      @RequestParam("farmName") String farmName,
-      @RequestParam("farmTel") String farmTel,
-      @RequestParam("farmAddress") String farmAddress,
-      @RequestParam("farmAddressDetail") String farmAddressDetail,
-      @RequestParam("registrationNum") String registrationNum,
-      @RequestParam("farmBank") String farmBank,
-      @RequestParam("farmAccountNum") String farmAccountNum,
-      @RequestParam("farmInterest") String farmInterest,
-      Authentication auth) throws Exception {
-		
+			@RequestParam("farmName") String farmName,
+			@RequestParam("farmTel") String farmTel,
+			@RequestParam("farmAddress") String farmAddress,
+			@RequestParam("farmAddressDetail") String farmAddressDetail,
+			@RequestParam("registrationNum") String registrationNum,
+			@RequestParam("farmBank") String farmBank,
+			@RequestParam("farmAccountNum") String farmAccountNum,
+			@RequestParam("farmInterest") String farmInterest,
+			Authentication auth) throws Exception {
+
 		try {
 			User loginUser = (User) auth.getPrincipal();
 			// 로그인한 유저의 farmerId 가져오기
 			Long farmerId = loginUser.getFarmerId();
-			
+
 			if (farmerId == null) {
 				// 로그인한 유저가 파머가 아닌 경우 에러 응답
 				ErrorResponseDto errorResponse = new ErrorResponseDto("파머 정보가 없습니다", "파머로 등록된 사용자가 아닙니다");
@@ -286,17 +284,17 @@ public class UserController {
 			}
 
 			ModifyFarmDto request = new ModifyFarmDto();
-      request.setFarmerId(farmerId);
-      request.setFarmName(farmName);
-      request.setFarmTel(farmTel);
-      request.setFarmAddress(farmAddress);
-      request.setFarmAddressDetail(farmAddressDetail);
-      request.setRegistrationNum(registrationNum);
-      request.setFarmBank(farmBank);
-      request.setFarmAccountNum(farmAccountNum);
-      request.setFarmInterest(farmInterest);
-      request.setFarmPixurl(profileImage);
-			
+			request.setFarmerId(farmerId);
+			request.setFarmName(farmName);
+			request.setFarmTel(farmTel);
+			request.setFarmAddress(farmAddress);
+			request.setFarmAddressDetail(farmAddressDetail);
+			request.setRegistrationNum(registrationNum);
+			request.setFarmBank(farmBank);
+			request.setFarmAccountNum(farmAccountNum);
+			request.setFarmInterest(farmInterest);
+			request.setFarmPixurl(profileImage);
+
 			Farmer modifiedFarmer = farmerService.modifyFarmer(request, profileImage);
 
 			return ResponseEntity.ok("파머 정보가 성공적으로 수정되었습니다");

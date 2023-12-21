@@ -32,17 +32,16 @@ public class OrderHistoryDto {
    // 리뷰정보
    private Review review;
    // 상품정보
-    private ProductInfoDto productInfo;
-    private QuotationInfoDto quotationInfo;
+   private ProductInfoDto productInfo;
+   private QuotationInfoDto quotationInfo;
+
    public Review getReview() {
       return this.review;
    }
-   
-   
-   
-//   
-//   private Product productInfo;
-//   public Product getProductInfo() {
-//      return this.productInfo;
-//   }
+
+   //
+   // private Product productInfo;
+   // public Product getProductInfo() {
+   // return this.productInfo;
+   // }
 }

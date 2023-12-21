@@ -1,4 +1,4 @@
- package com.kosta.farm.service;
+package com.kosta.farm.service;
 
 import java.util.List;
 import java.util.Map;
@@ -73,7 +73,8 @@ public interface FarmService {
    // 이미 파머팔로우완료 한거
    Boolean selectedFarmerfollow(Long userId, Long farmerId) throws Exception;
 
-//   Boolean selectedFarmerfollowByEmail(String userEmail, Long farmerId) throws Exception;
+   // Boolean selectedFarmerfollowByEmail(String userEmail, Long farmerId) throws
+   // Exception;
 
    Farmer farmerInfo(Long farmerId) throws Exception;
 
@@ -112,7 +113,9 @@ public interface FarmService {
    Map<String, Object> quoteWithFarmerByRequestId(Long requestId) throws Exception;
 
    ProductInfoDto getProductInfoFromOrder(Orders orders) throws Exception;
+
    QuotationInfoDto getQuotationInfoFromOrder(Orders orders) throws Exception;
+
    OrderHistoryDto getOrderDetails(Long ordersId) throws Exception;
-      
+
 }

@@ -79,15 +79,16 @@ public class FarmController {
    @PostMapping("/matching/{userId}") // 요청서 작성하기
    public ResponseEntity<String> writeRequest(
          @PathVariable Long userId,
-         @ModelAttribute RequestDto request 
-//         Authentication authentication
+         @ModelAttribute RequestDto request
+   // Authentication authentication
    ) {
-//      User user = (User) authentication.getPrincipal();
-//      Long userId = user.getUserId();
+      // User user = (User) authentication.getPrincipal();
+      // Long userId = user.getUserId();
       try {
-//         String tel = user.getUserTel();
-//         String address = user.getAddress1() + user.getAddress2() + user.getAddress3();
-//         // 만약 저기서 adderss를 입력 안햇으면 불러와야함
+         // String tel = user.getUserTel();
+         // String address = user.getAddress1() + user.getAddress2() +
+         // user.getAddress3();
+         // // 만약 저기서 adderss를 입력 안햇으면 불러와야함
          request.setUserId(userId);
          Request req = farmService.addRequest(request);
          return ResponseEntity.ok("요청서를 등록했습니다 : " + req);
@@ -128,10 +129,10 @@ public class FarmController {
 
    }
 
-//    User loginUser = userService.getLoginUserByUserEmail(auth.getName());
+   // User loginUser = userService.getLoginUserByUserEmail(auth.getName());
    @GetMapping("/findfarmer/{farmerId}") // default 기본페이지 디테일
    public ResponseEntity<Map<String, Object>> farmerDetail(@PathVariable(name = "farmerId") Long farmerId,
-//         @PathVariable(name="userId") Long userId,
+         // @PathVariable(name="userId") Long userId,
          Authentication authentication) {
       User user = (User) authentication.getPrincipal();
       Long userId = user.getUserId();
@@ -153,10 +154,10 @@ public class FarmController {
    // 파머 follow 했는지 여부 안되었으면 follow가 된다
    @GetMapping("/findfarmer/{farmerId}/follow")
    public ResponseEntity<Map<String, Object>> farmerFollow(
-//         Authentication authentication,
+         // Authentication authentication,
          @RequestParam Long userId, @PathVariable Long farmerId) {
-//      User user = (User) authentication.getPrincipal();
-//      Long userId = user.getUserId();
+      // User user = (User) authentication.getPrincipal();
+      // Long userId = user.getUserId();
       try {
          Map<String, Object> res = new HashMap<>();
          Boolean selectFarmer = farmService.farmerfollow(userId, farmerId); // authentication 부터 아이디 가져옴
@@ -170,13 +171,13 @@ public class FarmController {
       }
    }
 
-// 리뷰 리스트 페이징처리
+   // 리뷰 리스트 페이징처리
    @GetMapping("findfarmer/{farmerId}/review/{page}")
    public ResponseEntity<Map<String, Object>> farmerReviewList(@PathVariable(required = false) Integer page,
          @PathVariable(required = false) Long farmerId) {
       try {
          Map<String, Object> res = new HashMap<>();
-//         PageInfo pageInfo = PageInfo.builder().curPage(1).build();
+         // PageInfo pageInfo = PageInfo.builder().curPage(1).build();
          PageInfo pageInfo = PageInfo.builder().curPage(page).build();
          List<Review> reviewList = farmService.getReviewListByFarmer(farmerId, pageInfo);
          res.put("reviewList", reviewList);
@@ -220,7 +221,7 @@ public class FarmController {
          // 매칭완료 requeststate2
          Map<String, Object> res = new HashMap<>();
          res.put("matchingList", matchingList);
-         res.put("average",Math.round(average*100.0)/100.0);
+         res.put("average", Math.round(average * 100.0) / 100.0);
          res.put("matchingProgress", matchingProgress);
          res.put("foundMatching", foundMatching);
          res.put("pageInfo", pageInfo);
@@ -233,15 +234,15 @@ public class FarmController {
    }
 
    // 유저의 파머찜리스트
-//   @GetMapping({"/user/followlist", "/user/followlist/{page}"})
+   // @GetMapping({"/user/followlist", "/user/followlist/{page}"})
    @GetMapping("/user/followlist")
    public ResponseEntity<Map<String, Object>> getFollowingFarmersByUserId(Authentication authentication,
          @RequestParam(required = false, name = "page", defaultValue = "1") Integer page
-//         @PathVariable(required = false) Integer page
-         
-         )
+   // @PathVariable(required = false) Integer page
 
-//         ,
+   )
+
+   // ,
    {
       User user = (User) authentication.getPrincipal();
       Long userId = user.getUserId();
@@ -267,7 +268,7 @@ public class FarmController {
 
    @GetMapping("/user") // 받은 매칭 견적 list
    public ResponseEntity<Map<String, Object>> matchingList(
-//         @RequestParam Long userId
+         // @RequestParam Long userId
          Authentication authentication) {
       User user = (User) authentication.getPrincipal();
       Long userId = user.getUserId();
@@ -296,11 +297,11 @@ public class FarmController {
    // 구매내역 불러오기 하기 후기도 같이 불러옴
    @GetMapping("/buylist")
    public ResponseEntity<Map<String, Object>> buyList(@RequestParam Long userId
-//         ,
-//         Authentication authentication
+   // ,
+   // Authentication authentication
    ) {
-//      User user = (User) authentication.getPrincipal();
-//      Long userId = user.getUserId();
+      // User user = (User) authentication.getPrincipal();
+      // Long userId = user.getUserId();
       try {
          Map<String, Object> res = new HashMap<>();
          List<Orders> buyList = farmService.getOrdersListByUser(userId);
@@ -310,8 +311,9 @@ public class FarmController {
             Long ordersId = orders.getOrdersId();
             OrderHistoryDto orderHistory = new OrderHistoryDto();
             orderHistory.setOrders(orders);
-//             Product productInfo = farmService.getProductInfoFromOrder(orders); // getProductInfo()를 통해 Product 정보 가져오기
-//             orderHistory.setProductInfo(productInfo); // OrderHistoryDto에 Product 정보 설정
+            // Product productInfo = farmService.getProductInfoFromOrder(orders); //
+            // getProductInfo()를 통해 Product 정보 가져오기
+            // orderHistory.setProductInfo(productInfo); // OrderHistoryDto에 Product 정보 설정
             // order에 따른 리뷰
             Review findreview = findReviewForOrder(reviewList, ordersId);
             if (findreview != null) {
@@ -347,7 +349,7 @@ public class FarmController {
       return null; // 리뷰가 없으면 null로 반환
    }
 
-//   private Product findProductForOrder(List<Product> productLis)
+   // private Product findProductForOrder(List<Product> productLis)
 
    @GetMapping("/user/{requestId}") // 받은 매칭 견적에서 견적서 자세히 보기
    public ResponseEntity<Map<String, Object>> matchingListDetail(@PathVariable Long requestId) {
@@ -366,11 +368,11 @@ public class FarmController {
    public ResponseEntity<String> ordersDetail(@RequestParam(required = false, name = "ordersId") Long ordersId) {
       try {
          Map<String, Object> res = new HashMap<>();
-//address 
-//tel 입력한 값?
-//수령인 getusername아니면 입력한 값 불러오기
-//배송메모
-//payment에서 불러오기?
+         // address
+         // tel 입력한 값?
+         // 수령인 getusername아니면 입력한 값 불러오기
+         // 배송메모
+         // payment에서 불러오기?
 
       } catch (Exception e) {
          e.printStackTrace();

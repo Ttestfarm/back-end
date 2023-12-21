@@ -145,25 +145,28 @@ public class FarmServiceImpl implements FarmService {
       }
       return farmerfollowList;
    }
-//   @Override
-//   public List<Farmerfollow> getFollowingFarmersByUserId(Long userId, PageInfo pageInfo) throws Exception {
-//      PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 8,
-//            Sort.by(Sort.Direction.DESC, "farmerId"));
-//      Page<Farmerfollow> pages = farmerfollowRepository.findByUserId(userId);
-//      pageInfo.setAllPage(pages.getTotalPages());
-//      List<FarmerDto> farmerDtoList= new ArrayList<>() {
-//         
-//      }
-//      return null;
-//   }
+   // @Override
+   // public List<Farmerfollow> getFollowingFarmersByUserId(Long userId, PageInfo
+   // pageInfo) throws Exception {
+   // PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 8,
+   // Sort.by(Sort.Direction.DESC, "farmerId"));
+   // Page<Farmerfollow> pages = farmerfollowRepository.findByUserId(userId);
+   // pageInfo.setAllPage(pages.getTotalPages());
+   // List<FarmerDto> farmerDtoList= new ArrayList<>() {
+   //
+   // }
+   // return null;
+   // }
 
-//   @Override
-//   public List<Farmerfollow> getFollowingFarmersByUserId(Long userId) throws Exception {
-////      PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 9,
-////            Sort.by(Sort.Direction.DESC, "farmerfollowId").and(Sort.by(Sort.Direction.DESC, "farmerId")));
-//      return farmerfollowRepository.findByUserId(userId);
-//   }
-//   
+   // @Override
+   // public List<Farmerfollow> getFollowingFarmersByUserId(Long userId) throws
+   // Exception {
+   //// PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 9,
+   //// Sort.by(Sort.Direction.DESC,
+   // "farmerfollowId").and(Sort.by(Sort.Direction.DESC, "farmerId")));
+   // return farmerfollowRepository.findByUserId(userId);
+   // }
+   //
 
    // 요청서 쓰기
    @Override
@@ -210,20 +213,20 @@ public class FarmServiceImpl implements FarmService {
 
       }
       review.setReviewpixUrl(fileNums);
-// 리뷰 작성하기
+      // 리뷰 작성하기
       reviewRepository.save(review);
 
-// 판매자의 리뷰 목록 가져오기
+      // 판매자의 리뷰 목록 가져오기
       List<Review> farmerReviews = reviewRepository.findAllByFarmerId(review.getFarmerId()); // farmersid에 해당하는 리뷰 목록
 
-// 해당 판매자의 평균 별점 업데이트
+      // 해당 판매자의 평균 별점 업데이트
       Farmer farmer = farmerRepository.findById(review.getFarmerId())
             .orElseThrow(() -> new Exception("해당 판매자를 찾을 수 없습니다."));
       farmer.updateAvgRating(farmerReviews);
       Integer reviewCount = farmerReviews.size();
       farmer.setReviewCount(reviewCount);
 
-// 업데이트된 판매자 엔티티 저장
+      // 업데이트된 판매자 엔티티 저장
       farmerRepository.save(farmer);
 
    }
@@ -278,7 +281,7 @@ public class FarmServiceImpl implements FarmService {
       fis.close();
    }
 
-//리뷰
+   // 리뷰
    @Override // 리뷰숫자순으로 파머 가져오기
    public List<Farmer> getFarmerByReviewCount(Integer reviewCount) throws Exception {
       return farmerRepository.findByreviewCount(reviewCount);
@@ -296,7 +299,7 @@ public class FarmServiceImpl implements FarmService {
       pageInfo.setEndPage(endPage);
       List<Review> reviewList = new ArrayList<>();
       for (Review review : pages.getContent()) {
-//         String userName=userRepository.findUserNameByUserId(review.getUserId());
+         // String userName=userRepository.findUserNameByUserId(review.getUserId());
 
          reviewList.add(review);
       }
@@ -436,18 +439,19 @@ public class FarmServiceImpl implements FarmService {
    @Override // 매칭 메인페이지
    @Transactional
    public List<RequestDto> requestListByPage(PageInfo pageInfo) throws Exception {
-      
+
       return farmDslRepository.requestListWithNameByPage(pageInfo);
    }
-//   PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 3,
-//         Sort.by(Sort.Direction.DESC, "requestId"));
-//   Page<Request> pages = requestRepository.findAll(pageRequest);
-//   pageInfo.setAllPage(pages.getTotalPages());
-//   List<Request> requestList = new ArrayList<>();
-//   for (Request request : pages.getContent()) {
-//      requestList.add(request);
-//   }
-//   return requestList;
+
+   // PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 3,
+   // Sort.by(Sort.Direction.DESC, "requestId"));
+   // Page<Request> pages = requestRepository.findAll(pageRequest);
+   // pageInfo.setAllPage(pages.getTotalPages());
+   // List<Request> requestList = new ArrayList<>();
+   // for (Request request : pages.getContent()) {
+   // requestList.add(request);
+   // }
+   // return requestList;
    // 유저별로 리퀘스트쓴거
    @Override // 노 스크롤 노페이지네이션
    public List<Request> requestListByUser(Long userId) throws Exception {
@@ -494,7 +498,7 @@ public class FarmServiceImpl implements FarmService {
          totalRating += farmer.getRating();
       }
       return numberofFarmers > 0 ? totalRating / numberofFarmers : 0;
-      
+
    }
 
    @Override

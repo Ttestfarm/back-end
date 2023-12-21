@@ -17,4 +17,7 @@ public class PageInfo {
 	private Integer startPage;
 	private Integer endPage;
 
+	public PageInfo(Integer page) {
+		this.curPage = page;
+	}
 }

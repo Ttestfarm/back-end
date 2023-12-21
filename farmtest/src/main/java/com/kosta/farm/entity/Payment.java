@@ -1,23 +1,18 @@
 package com.kosta.farm.entity;
 
-import java.math.BigDecimal;
+import java.sql.Date;
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
-import org.springframework.data.annotation.CreatedDate;
 
-import com.kosta.farm.util.PaymentMethod;
 import com.kosta.farm.util.PaymentStatus;
+
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,65 +25,56 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Payment {
-	@Id @GeneratedValue(strategy=GenerationType.IDENTITY)
-	private Long paymentId;
-	@JoinColumn
-	@ManyToOne
-	private User user;
-    @Column(nullable = false, unique = true)
-    private String receiptId; // PG 사에서 생성한 주문 번호
-    @Column(nullable = false, unique = true)
-    private String ordersId; // 우리가 생성한 주문 번호
-    private PaymentMethod method; // 결제 수단
-    private String name; // 결제 이름
-    @Column(nullable = false)
-    private BigDecimal amount; // 결제 금액
-    @Builder.Default
-    @Column(nullable = false)
-    private PaymentStatus status = PaymentStatus.READY; // 상태
-
-    @CreatedDate
-    private LocalDateTime createAt; // 결제 요청 일시
-
-    private LocalDateTime paidAt; // 결제 완료 일시
-
-    private LocalDateTime failedAt; // 결제 실패 일시
-    
-    @Builder.Default
-    private BigDecimal cancelledAmount = BigDecimal.ZERO; // 취소된 금액
-
-    private LocalDateTime cancelledAt; // 결제 취소 일시
-
-    
-    //여기까지 payment을 위한 column
-    
-    
-    
-    
-    
+	@Id
+	private String receiptId;
+	@Column 
+	private Long userId;
+	@Column 
+	private Long farmerId;
+	@Column 
+	private Long productId;
+	@Column 
+	private Long requestId;
+	@Column 
+	private Long quotationId;
+	private Long deliveryId;
+	
+	@Column // 배송정보
+	private String buyerName;
+	private String buyerTel;
+	private String buyerAddress;
+	
+	@Column 
+	private String tCode; // 택배사 코드
 	@Column
-	private String paymentBank; // 결제 은행
+	private String tName; // 택배사 이름
 	@Column
-	private Integer paymentDelivery; // 배송비
+	private String tInvoice; // 송장번호
+	
+	@Column // 결제정보
+	private String product; // 품목
+	private Integer price; // 가격
+	private Integer count; // 수량
+	private String deliveryprice; // 배송비
+	private String amount; // 총 결제 가격
+	private String payType; // 결제 방법
+
 	@Column
-	private Integer paymentPrice; // 상품금액
-	// private Integer totalPrice // 배송비 + 상품금액
+	private Date invoiceDate; // 정산예정일 "yyyy-MM-dd" 형식
+	@Column
+	private Integer invoiceCommission; // 수수료
+	@Column
+	private Integer invoicePrice; // 정산금액
+	
+	@Column
+	private String cancelText; // 판매 취소 사유
+	
 	@Column
 	@CreationTimestamp
 	private Timestamp createDate; // 결제 완료 날짜
 	@Column
-	@ColumnDefault("1")
-	private String state; // 결제취소 0, 결제완료 1
-	@Column
-	private Long userId; // userid 참조
-	@Column
-	private Integer productPrice; //상품가격
-	@Column
-	private Integer count; //수량
-	@Column
-	private Long farmerId;
-	@Column
-	private Long requestId; //요청서 아이디
-	@Column
-	private Long quotationId; //견적서 아이디
+	@Builder.Default
+    @Enumerated(EnumType.STRING)
+	private PaymentStatus state = PaymentStatus.PAID; 
+	// ERROR, PAID(결제완료), FAILED, READY(대기중), CANCEL(판매취소), SHIPPING(배송중), COMPLETED(배송완료), UNSETTLEMENT(미정산), SETTLEMENT(정산완료)
 }

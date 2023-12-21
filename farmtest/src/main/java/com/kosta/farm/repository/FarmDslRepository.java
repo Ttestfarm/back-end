@@ -40,7 +40,7 @@ import lombok.RequiredArgsConstructor;
 public class FarmDslRepository {
    @Autowired
    private JPAQueryFactory jpaQueryFactory;
-   
+
    @Autowired
    private ObjectMapper objectMapper;
 
@@ -49,7 +49,7 @@ public class FarmDslRepository {
       QQuotation quotation = QQuotation.quotation;
       return jpaQueryFactory.select(quotation.count()).from(quotation).where(quotation.requestId.eq(requestId))
             .fetchOne();
-//      return count;
+      // return count;
    };
 
    // 파머 수 가져오기
@@ -99,54 +99,55 @@ public class FarmDslRepository {
       QReview review = QReview.review;
       return jpaQueryFactory.selectFrom(review).where(review.userId.eq(userId)).fetch();
    }
-   public List<Tuple> getRequestsWithUsername(PageInfo pageInfo){
-        QRequest request = QRequest.request;
-        QUser user = QUser.user;
-      List<Tuple> result=jpaQueryFactory.select(request, user.userName)
+
+   public List<Tuple> getRequestsWithUsername(PageInfo pageInfo) {
+      QRequest request = QRequest.request;
+      QUser user = QUser.user;
+      List<Tuple> result = jpaQueryFactory.select(request, user.userName)
             .from(request).leftJoin(user).on(request.userId.eq(user.userId)).fetch();
       return result;
    }
-   
+
    public Long requestAllCount() throws Exception {
-        QRequest request = QRequest.request;
+      QRequest request = QRequest.request;
       return jpaQueryFactory.select(request.count()).from(request).fetchOne();
    }
-   
-//   return jpaQueryFactory.select(farmer.count()).from(farmer).fetchOne();
-   
+
+   // return jpaQueryFactory.select(farmer.count()).from(farmer).fetchOne();
+
    public List<RequestDto> requestListWithNameByPage(PageInfo pageInfo) throws Exception {
-        QRequest request = QRequest.request;
-        QUser user = QUser.user;
-        Long count=requestAllCount();
-        pageInfo.setAllPage((int)Math.ceil(count.intValue()/9));
-        PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 9);
-        
-        System.out.println(pageRequest.getOffset());
-        System.out.println(pageRequest.getPageSize());
-        List<Tuple> tupleList = 
-              jpaQueryFactory.select(request,user.userName)
-         .from(request)
-         .leftJoin(user)
-         .on(request.userId.eq(user.userId))
-         .offset(pageRequest.getOffset())
-         .limit(pageRequest.getPageSize())
-         .orderBy(request.requestId.desc()).fetch();
-      
-        List<RequestDto> list = new ArrayList<>();
-        for(Tuple t : tupleList) {
-           Request req =  t.get(0, Request.class);
-           RequestDto reqDto = objectMapper.convertValue(req,RequestDto.class);
-           reqDto.setUserName(t.get(1, String.class));
-           list.add(reqDto);
-        }
+      QRequest request = QRequest.request;
+      QUser user = QUser.user;
+      Long count = requestAllCount();
+      pageInfo.setAllPage((int) Math.ceil(count.intValue() / 9));
+      PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 9);
+
+      System.out.println(pageRequest.getOffset());
+      System.out.println(pageRequest.getPageSize());
+      List<Tuple> tupleList = jpaQueryFactory.select(request, user.userName)
+            .from(request)
+            .leftJoin(user)
+            .on(request.userId.eq(user.userId))
+            .offset(pageRequest.getOffset())
+            .limit(pageRequest.getPageSize())
+            .orderBy(request.requestId.desc()).fetch();
+
+      List<RequestDto> list = new ArrayList<>();
+      for (Tuple t : tupleList) {
+         Request req = t.get(0, Request.class);
+         RequestDto reqDto = objectMapper.convertValue(req, RequestDto.class);
+         reqDto.setUserName(t.get(1, String.class));
+         list.add(reqDto);
+      }
       return list;
    }
+
    public Map<String, Object> findQuotationsWithFarmerByRequestId(Long requestId) {
       QQuotation quotation = QQuotation.quotation;
       QFarmer farmer = QFarmer.farmer;
 
       List<Tuple> quotesWithFarmer = jpaQueryFactory
-            .select(quotation, farmer.farmName, 
+            .select(quotation, farmer.farmName,
                   farmer.farmAddress, farmer.farmPixurl, farmer.rating,
                   farmer.reviewCount, farmer.followCount)
             .from(quotation).leftJoin(farmer).on(quotation.farmerId.eq(farmer.farmerId))
@@ -195,7 +196,6 @@ public class FarmDslRepository {
             .where(orders.userId.eq(userId)).fetch();
    }
 
-
    @Transactional
    public void updateStock(Long productId, Integer stock) {
 
@@ -210,10 +210,5 @@ public class FarmDslRepository {
             .on(product.farmerId.eq(farmer.farmerId)).join(category).on(product.categoryId.eq(category.categoryId))
             .where(category.categoryName.eq(categoryName)).fetch();
    }
-   
-   
-
-   
-   
 
 }

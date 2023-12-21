@@ -436,15 +436,10 @@ public class FarmerServiceImpl implements FarmerService {
 	@Override
 	public Farmer registerFarmer(RegFarmerDto request, MultipartFile farmPixurl) throws Exception {
 
-		Farmer farmer = Farmer.builder()
-				.farmName(request.getFarmName())
-				.farmTel(request.getFarmTel())
-				.farmAddress(request.getFarmAddress())
-				.farmAddressDetail(request.getFarmAddressDetail())
-				.registrationNum(request.getRegistrationNum())
-				.farmBank(request.getFarmBank())
-				.farmAccountNum(request.getFarmAccountNum())
-				.build();
+		Farmer farmer = Farmer.builder().farmName(request.getFarmName()).farmTel(request.getFarmTel())
+				.farmAddress(request.getFarmAddress()).farmAddressDetail(request.getFarmAddressDetail())
+				.registrationNum(request.getRegistrationNum()).farmBank(request.getFarmBank())
+				.farmAccountNum(request.getFarmAccountNum()).build();
 
 		// 관심품목 입력받아서 # 기준으로 파싱하여 각각 저장
 		String[] interests = request.getFarmInterest().replaceAll("^\\s*#*", "").split("#");

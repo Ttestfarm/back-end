@@ -14,6 +14,6 @@ import com.kosta.farm.entity.Review;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
 	Page<Review> findByFarmerId(Long FarmerId, PageRequest pageRequest);
-	Optional<Review> findByOrdersId(Long ordersId);
+	Optional<Review> findByReceiptId(String receiptId);
     List<Review> findAllByFarmerId(Long farmerId);
 }

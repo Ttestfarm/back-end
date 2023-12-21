@@ -1,49 +1,58 @@
-//package com.kosta.farm.controller;
-//
-//import java.math.BigDecimal;
-//
-//import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
-//import org.springframework.http.ResponseEntity;
-//import org.springframework.security.core.Authentication;
-//import org.springframework.web.bind.annotation.PathVariable;
-//import org.springframework.web.bind.annotation.PostMapping;
-//import org.springframework.web.bind.annotation.PutMapping;
-//import org.springframework.web.bind.annotation.RequestBody;
-//import org.springframework.web.bind.annotation.RequestMapping;
-//import org.springframework.web.bind.annotation.RestController;
-//
-//import com.kosta.farm.dto.PaymentRequest;
-//import com.kosta.farm.entity.Payment;
-//import com.kosta.farm.entity.User;
-//import com.kosta.farm.service.PaymentService;
-//import com.kosta.farm.service.UserService;
-//
-//import lombok.RequiredArgsConstructor;
-//
-//@RequestMapping("payments")
-//@RequiredArgsConstructor
-//@RestController
-//public class PaymentController {
-//	private final PaymentService paymentService;
-//	private final UserService userService;
-//
-//	@PostMapping
-//	public ResponseEntity<?> requestPayment(Authentication authentication, @RequestBody PaymentRequest request)
-//			throws Exception {
-//		User user = (User) authentication.getPrincipal();
-//		BigDecimal amount = new BigDecimal(request.getAmount());
-//		Payment payment = paymentService.requestPayment(user, request.getName(), amount);
-//		return ResponseEntity.ok(payment);
-//	}
-//
-//	@PutMapping("{ordersId}")
-//	public ResponseEntity<?> verifyPayment(Authentication authentication, @PathVariable String ordersId,
-//			@RequestBody String receiptId) throws Exception {
-//		User user = (User) authentication.getPrincipal();
-////		Long userId = user.getUserId();
-//
-//		Payment payment = paymentService.verifyPayment(receiptId, ordersId, user);
-//		return ResponseEntity.ok(payment);
-//	}
-//
-//}
+package com.kosta.farm.controller;
+
+import java.io.IOException;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.kosta.farm.entity.PayInfo;
+import com.kosta.farm.entity.User;
+import com.kosta.farm.service.FarmService;
+import com.kosta.farm.service.PaymentService;
+
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
+@RestController
+public class PaymentController {
+	@Autowired
+	private PaymentService paymentService;
+	@Autowired
+	private FarmService farmService;
+	
+	
+	// 카드 결제 성공 후
+	@PostMapping("/processPayment")
+	public ResponseEntity<String> processPayment(
+			Authentication authentication, 
+			@RequestBody PayInfo payInfo)
+			throws IOException {
+		User user = (User) authentication.getPrincipal();
+		System.out.println(user);
+		Long userId = user.getUserId();
+
+		String token = paymentService.getToken();
+
+		System.out.println("토큰 : " + token);
+		System.out.println(payInfo);
+		// 결제 완료된 금액
+		try {
+			Boolean paySuccess = paymentService.paymentInfo(payInfo.getReceiptId(), token, payInfo);
+			System.out.println(payInfo);
+			payInfo.setUserId(userId);
+			if(paySuccess) farmService.savePaymentInfo(payInfo);
+			return new ResponseEntity<>("주문이 완료되었습니다", HttpStatus.OK);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+//			paymentService.payMentCancel(token, orderInfo.getImpUid(), amount, "결제 에러");
+			return new ResponseEntity<String>("결제 에러", HttpStatus.BAD_REQUEST);
+		}
+
+	}
+}

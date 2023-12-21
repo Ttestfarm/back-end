@@ -38,19 +38,15 @@ public class Product {
 	@Column
 	private Integer ShippingCost; // 배송비
 	@Column
-	private Integer addShippingCost;
-	@Column
 	@CreationTimestamp
 	private Timestamp createDate;
 	@Column
-	private String productState; // 판매중, 매진, (판매취소)
+	private String state; // 판매중, 매진, (판매취소)
 	@Column
 	private String fileUrl; // 나머지 파일
 	@Column
 	private Long thumbNail; // 대표이미지 id
 
-//    private LocalDateTime regTime; //등록 시간
-//    private LocalDateTime updateTime; //수정 시간
 
 	public void removeStock(Integer productStock) throws Exception {
 		Integer restStock = this.productStock - productStock;

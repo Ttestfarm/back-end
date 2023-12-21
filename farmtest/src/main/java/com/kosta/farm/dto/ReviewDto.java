@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class ReviewDto {
-	private Long ordersId;
+	private String receiptId;
 	private Integer rating;
 	private String content;
 }

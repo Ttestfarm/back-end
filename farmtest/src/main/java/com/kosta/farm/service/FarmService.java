@@ -25,7 +25,7 @@ import com.kosta.farm.util.PageInfo;
 import com.querydsl.core.Tuple;
 
 public interface FarmService {
-	// 상품 등록
+	// 상품 등록???????
 	Long productEnter(Product product, MultipartFile thmbnail, List<MultipartFile> file) throws Exception;
 
 	// 리뷰 등록

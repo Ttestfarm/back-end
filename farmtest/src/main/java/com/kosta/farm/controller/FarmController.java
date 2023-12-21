@@ -54,20 +54,6 @@
 //
 //	}
 //
-//	// 상품 등록 이거도 나머지 완성해야함
-//	@PostMapping("/farmer/regprod")
-//	public ResponseEntity<Integer> regProduct(@ModelAttribute Product product, MultipartFile mainFile,
-//			List<MultipartFile> additionalFiles) {
-//		try {
-//			Integer num = (farmService.productEnter(product, mainFile, additionalFiles)).intValue();
-//			System.out.println(num);
-//			return new ResponseEntity<Integer>(num, HttpStatus.OK);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			return new ResponseEntity<Integer>(HttpStatus.BAD_REQUEST);
-//		}
-//	}
-//
 //	// 거의 완성
 //	@PostMapping("/matching/{userId}") // 요청서 작성하기
 //	public ResponseEntity<String> writeRequest(@RequestBody RequestDto request,

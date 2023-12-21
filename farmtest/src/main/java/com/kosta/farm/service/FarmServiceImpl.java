@@ -197,43 +197,6 @@
 //	}
 //
 //	@Override
-//	public Long productEnter(Product product, MultipartFile thumbNail, List<MultipartFile> files) throws Exception {
-//		String dir = "c:/jisu/upload/";
-//		String fileNums = "";
-//		if (thumbNail != null && !thumbNail.isEmpty()) {
-//			ProductFile imageFile = ProductFile.builder().directory(dir).fileName(thumbNail.getOriginalFilename())
-//					.size(thumbNail.getSize()).build();
-//			productFileRepository.save(imageFile);
-//			File uploadFile = new File(dir + imageFile.getProductFileId());
-//			thumbNail.transferTo(uploadFile);
-//			product.setThumbNail(imageFile.getProductFileId());
-//		}
-//
-//		if (files != null && files.size() != 0) {
-//
-//			for (MultipartFile file : files) {
-//				// primgfiletable에 insert
-//				ProductFile imageFile = ProductFile.builder().directory(dir).fileName(file.getOriginalFilename())
-//						.size(file.getSize()).build();
-//				productFileRepository.save(imageFile);
-//
-//				// upload 폴더에 upload
-//				File uploadFile = new File(dir + imageFile.getProductFileId());
-//				file.transferTo(uploadFile);
-//
-//				// file 번호 목록 만들기
-//				if (!fileNums.equals(""))
-//					fileNums += ",";
-//				fileNums += imageFile.getProductFileId();
-//			}
-//			product.setFileUrl(fileNums);
-//		}
-//		// product table에 insert
-//		productRepository.save(product);
-//		return product.getProductId();
-//	}
-//
-//	@Override
 //	public void readImage(Integer num, ServletOutputStream outputStream) throws Exception {
 //		String dir = "c:/jisu/upload/";
 //		FileInputStream fis = new FileInputStream(dir + num);

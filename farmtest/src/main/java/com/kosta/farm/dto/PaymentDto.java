@@ -9,7 +9,6 @@ import com.kosta.farm.util.PaymentStatus;
 import lombok.Data;
 
 @Data
-
 public class PaymentDto {
 	private String receiptId; // 결제번호
 	private Long userId;

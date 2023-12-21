@@ -25,9 +25,6 @@
 //import com.querydsl.core.Tuple;
 //
 //public interface FarmService {
-//	// 상품 등록
-//	Long productEnter(Product product, MultipartFile thmbnail, List<MultipartFile> file) throws Exception;
-//
 //	// 리뷰 등록
 //	void addReview(Long ordersId, List<MultipartFile> files, Integer rating, String content) throws Exception;
 //

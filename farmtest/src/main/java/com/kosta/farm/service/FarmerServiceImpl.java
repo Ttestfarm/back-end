@@ -1,6 +1,6 @@
 package com.kosta.farm.service;
 
-import java.lang.StackWalker.Option;
+import java.io.File;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -8,25 +8,29 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kosta.farm.dto.PaymentDto;
 import com.kosta.farm.dto.QuotationDto;
 //import com.kosta.farm.entity.Delivery;
 import com.kosta.farm.entity.Farmer;
+import com.kosta.farm.entity.FileVo;
 import com.kosta.farm.entity.Payment;
+import com.kosta.farm.entity.Product;
 import com.kosta.farm.entity.Quotation;
 import com.kosta.farm.entity.Request;
 //import com.kosta.farm.repository.DeliveryRepository;
 import com.kosta.farm.repository.FarmerDslRepository;
 import com.kosta.farm.repository.FarmerRepository;
-import com.kosta.farm.repository.InvoiceRepository;
+import com.kosta.farm.repository.FileVoRepository;
 import com.kosta.farm.repository.PaymentRepository;
+import com.kosta.farm.repository.ProductRepository;
 import com.kosta.farm.repository.QuotationRepository;
-import com.kosta.farm.repository.RequestRepository;
 import com.kosta.farm.util.PageInfo;
 import com.kosta.farm.util.PaymentStatus;
 import com.querydsl.core.Tuple;
@@ -39,14 +43,18 @@ public class FarmerServiceImpl implements FarmerService {
 
 	// Repository
 	private final FarmerRepository farmerRepository;
-	private final PaymentRepository paymentRepository;
-	private final RequestRepository requestRepository;
 	private final QuotationRepository quotationRepository;
-	private final InvoiceRepository invoiceRepository;
+	private final FileVoRepository fileVoRepository;
+	private final PaymentRepository paymentRepository;
+	private final ProductRepository productRepository;
 	// DSL
 	private final FarmerDslRepository farmerDslRepository;
 	private final ObjectMapper objectMapper;
 	
+	
+	@Value("$(upload.paht)")
+	private String dir;
+
 	// ** 매칭 주문 요청서 보기 **
 	// 파머 관신 농산물 조회
 	@Override
@@ -63,7 +71,6 @@ public class FarmerServiceImpl implements FarmerService {
 		return interestList;
 	}
 
-	
 	// 관심 농산물인 요청서 리스트 보기
 	@Override
 	public List<Request> findRequestsByFarmInterest(Long farmerId, String farmInterest) throws Exception {
@@ -72,8 +79,31 @@ public class FarmerServiceImpl implements FarmerService {
 	}
 
 	// ** 견적서 **
-	@Override // 견적서 양식 (보내기 이벤트)-> 견적서 저장 
-	public void saveQuotation(Quotation quotation) throws Exception {
+	// 견적서 보내기(저장)
+	@Override 
+	public void saveQuotation(Quotation quotation, List<MultipartFile> images) throws Exception {
+		String fileNums = "";
+
+		if (images != null && images.size() != 0) {
+
+			for (MultipartFile img : images) {
+				// primgfiletable에 insert
+				FileVo imageFile = FileVo.builder().directory(dir).fileName(img.getOriginalFilename())
+						.size(img.getSize()).build();
+				fileVoRepository.save(imageFile);
+
+				// upload 폴더에 upload
+				File uploadFile = new File(dir + imageFile.getProductFileId());
+				img.transferTo(uploadFile);
+
+				// file 번호 목록 만들기
+				if (!fileNums.equals(""))
+					fileNums += ",";
+				fileNums += imageFile.getProductFileId();
+			}
+			quotation.setQuotationImages(fileNums);
+		}
+		// 견적서 DB에 저장
 		quotationRepository.save(quotation);
 	}
 
@@ -93,9 +123,10 @@ public class FarmerServiceImpl implements FarmerService {
 			String address2 = t.get(1, String.class);
 
 			dto.setQuotationId(quot.getQuotationId());
-			dto.setProduct(quot.getQuotationProduct());
-			dto.setQuantity(quot.getQuotationQuantity());
-			dto.setPrice(quot.getQuotationPrice());
+			dto.setQuotationProduct(quot.getQuotationProduct());
+			dto.setQuotationQuantity(quot.getQuotationQuantity());
+			dto.setQuotationPrice(quot.getQuotationPrice());
+			
 			dto.setAddress2(address2);
 			dto.setNewState(quot.getState().name());
 			
@@ -129,6 +160,44 @@ public class FarmerServiceImpl implements FarmerService {
 		return farmerDslRepository.findQuotationByQuotationId(farmerId, quotationId);
 	}
 
+	// 파머 상품 등록
+	public void productEnter(Product product, MultipartFile titleImage, List<MultipartFile> images) throws Exception {
+		String fileNums = "";
+		
+		if (titleImage != null && !titleImage.isEmpty()) {
+			FileVo imageFile = FileVo.builder().directory(dir).fileName(titleImage.getOriginalFilename())
+					.size(titleImage.getSize()).build();
+			fileVoRepository.save(imageFile);
+			
+			File uploadFile = new File(dir + imageFile.getProductFileId());
+			titleImage.transferTo(uploadFile);
+			product.setThumbNail(imageFile.getProductFileId());
+		}
+
+		if (images != null && images.size() != 0) {
+
+			for (MultipartFile img : images) {
+				// primgfiletable에 insert
+				FileVo imageFile = FileVo.builder().directory(dir).fileName(img.getOriginalFilename())
+						.size(img.getSize()).build();
+				fileVoRepository.save(imageFile);
+
+				// upload 폴더에 upload
+				File uploadFile = new File(dir + imageFile.getProductFileId());
+				img.transferTo(uploadFile);
+
+				// file 번호 목록 만들기
+				if (!fileNums.equals(""))
+					fileNums += ",";
+				fileNums += imageFile.getProductFileId();
+			}
+			product.setFileUrl(fileNums);
+		}
+		// product table에 insert
+		productRepository.save(product);
+	}
+
+	
 	// 결제 완료 현황
 	@Override
 	public List<PaymentDto> findOrdersByFarmerIdAndPage(Long farmerId, String type, PageInfo pageInfo) throws Exception {

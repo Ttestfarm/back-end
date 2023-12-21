@@ -16,15 +16,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
-import com.kosta.farm.dto.CompanyDto;
 import com.kosta.farm.dto.PaymentDto;
 import com.kosta.farm.dto.QuotDelDto;
 import com.kosta.farm.dto.QuotationDto;
+import com.kosta.farm.entity.Product;
 import com.kosta.farm.entity.Quotation;
 import com.kosta.farm.entity.Request;
 import com.kosta.farm.entity.User;
-import com.kosta.farm.service.APIService;
 import com.kosta.farm.service.FarmerService;
 import com.kosta.farm.util.PageInfo;
 
@@ -34,10 +34,7 @@ public class FarmerController {
 	
 	@Autowired
 	private FarmerService farmerService;
-	@Autowired
-	private APIService apiService;
 	
-
 	// 매칭 주문 요청서 보기
 	// farmerId를 받고 farmInterest return
 	@GetMapping("/farmInterest")
@@ -75,14 +72,13 @@ public class FarmerController {
 
 	// 견적서 보내기
 	@PostMapping("/regquot")
-	public ResponseEntity<String> regQuotation(@ModelAttribute Quotation quot, Authentication authentication) {
+	public ResponseEntity<String> regQuotation(@ModelAttribute Quotation quot, List<MultipartFile> images, Authentication authentication) {
 //		User user = (User) authentication.getPrincipal();
 //		Long farmerId= user.getFarmerId();
 		Long farmerId = (long) 1;
 		try {
-			quot.setFarmerId(farmerId);
-			System.out.println(quot);
-//			farmerService.saveQuotation(quot);
+			// 견적서 DB에 저장
+			farmerService.saveQuotation(quot, images);
 			return new ResponseEntity<String>("성공", HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -90,13 +86,19 @@ public class FarmerController {
 		}
 	}
 
-//	// 파머 상품 등록
-//	@PostMapping("regproduct")
-//	public void regProduct(@ModelAttribute RegProductDto dto) {
-//		
-//	}
-//	
-//	
+	// 파머 상품 등록
+	@PostMapping("regproduct")
+	public ResponseEntity<String> regProduct(@ModelAttribute Product product, MultipartFile titleImage, List<MultipartFile> images) {
+		try {
+			farmerService.productEnter(product, titleImage, images);
+			return new ResponseEntity<String>("성공", HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<String>("실패", HttpStatus.BAD_REQUEST);
+		}
+	}
+	
+	
 	// 견적 현황 페이지
 	// 견적서 상태로(0 : 견적서 취소, 1 : 대기중, 2 : 기간 만료, 3 : 결제완료) 견적서 리스트 보여주기
 	@GetMapping("/quotlist/{state}/{page}")
@@ -188,23 +190,6 @@ public class FarmerController {
 			return new ResponseEntity<PaymentDto>(HttpStatus.BAD_REQUEST);
 		}
 	}
-
-	// 택배사 정보 제공
-	@GetMapping("companylist")
-	public ResponseEntity<List<CompanyDto>> companyList(Authentication authentication) {
-//		User user = (User) authentication.getPrincipal();
-//		Long farmerId= user.getFarmerId();
-		Long farmerId = (long) 1;
-		try {
-			List<CompanyDto> comList = apiService.requestCompanyList();
-			return new ResponseEntity<List<CompanyDto>>(comList, HttpStatus.OK);
-		} catch (Exception e) {
-			e.printStackTrace();
-			return new ResponseEntity<List<CompanyDto>>(HttpStatus.BAD_REQUEST);
-		}
-	}
-	
-	
 	
 	// 발송 완료(delivery 생성, 택배사 코드, 운송장번호)
 	@GetMapping("/sendparcel/{receiptId}/{code}/{name}/{invoice}")

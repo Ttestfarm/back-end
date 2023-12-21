@@ -48,15 +48,7 @@ public class Quotation {
 	@Column
 	private String quotationComment; // 추가 설명
 	@Column
-	private String quotationPicture1; // 농산물 사진 5장
-	@Column
-	private String quotationPicture2;
-	@Column
-	private String quotationPicture3;
-	@Column
-	private String quotationPicture4;
-	@Column
-	private String quotationPicture5;
+	private String quotationImages; // 농산물 사진 5장
 	@Column
 	@CreationTimestamp
 	private Timestamp createDate; // 견적서 보낸 날짜

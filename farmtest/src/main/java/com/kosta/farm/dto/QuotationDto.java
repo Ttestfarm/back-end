@@ -8,7 +8,7 @@ import lombok.Data;
 public class QuotationDto {
 	private Long quotationId;
 	private String product;
-	private String quantity;
+	private Integer quantity;
 	private Integer price;
 	private String address2;
 	private String newState;

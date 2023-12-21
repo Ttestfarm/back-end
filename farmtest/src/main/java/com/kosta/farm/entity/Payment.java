@@ -1,6 +1,7 @@
 package com.kosta.farm.entity;
 
 import java.math.BigDecimal;
+import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
@@ -45,7 +46,6 @@ public class Payment {
 	private Long requestId;
 	@Column 
 	private Long quotationId;
-	@Column 
 	private Long deliveryId;
 	
 	@Column // 배송정보
@@ -69,10 +69,21 @@ public class Payment {
 	private String payType; // 결제 방법
 
 	@Column
+	private Date invoiceDate; // 정산예정일 "yyyy-MM-dd" 형식
+	@Column
+	private Integer invoiceCommission; // 수수료
+	@Column
+	private Integer invoicePrice; // 정산금액
+	
+	@Column
+	private String cancelText; // 판매 취소 사유
+	
+	@Column
 	@CreationTimestamp
 	private Timestamp createDate; // 결제 완료 날짜
 	@Column
 	@Builder.Default
     @Enumerated(EnumType.STRING)
-	private PaymentStatus state = PaymentStatus.PAID; // ERROR, PAID, FAILED, READY, SHIPPING, COMPLETED
+	private PaymentStatus state = PaymentStatus.PAID; 
+	// ERROR, PAID(결제완료), FAILED, READY(대기중), CANCEL(판매취소), SHIPPING(배송중), COMPLETED(배송완료), UNSETTLEMENT(미정산), SETTLEMENT(정산완료)
 }

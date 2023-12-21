@@ -36,17 +36,18 @@ public interface FarmerService {
 	// 결제 완료 현황
 	public List<PaymentDto> findOrdersByFarmerIdAndPage(Long farmerId, String type, PageInfo pageInfo) throws Exception;
 	// 결제 완료(매칭, 주문) 상세보기
-//	public OrdersDto OrdersDetailQuotationId(Long farmerId, String receiptId, String type) throws Exception;
+	public PaymentDto OrdersDetailQuotationId(Long farmerId, String receiptId, String type) throws Exception;
 	// 발송 완료 처리
-//	public void insertDeliveryAndInvoice(Long farmerId, Long ordersId, String tCode, String tName, String tInvoice) throws Exception;
+	public void insertDeliveryAndInvoice(Long farmerId, String receiptId, String tCode, String tName, String tInvoice) throws Exception;
 	// 판매 취소 처리
-//	public void deleteOrderState(Long farmerId, Long orderId, String cancelText) throws Exception;
+	public void deleteOrderState(Long farmerId, String receiptId, String cancelText) throws Exception;
 	
 	// 배송 현황 리스트
-//	public List<DeliveryDto> findDeliberyByFarmerIdAndDeliveryState(Long farmerId, String deliveryState, PageInfo pageInfo) throws Exception;
+	public List<PaymentDto> findDeliberyByFarmerIdAndDeliveryState(Long farmerId, String state, PageInfo pageInfo) throws Exception;
 	
 	// 정산 내역
-//	public List<InvoiceDto> findInvoicesByFarmerIdAndDateAndPage(Long farmerId, String date, PageInfo pageInfo) throws Exception;
+	public List<PaymentDto> findInvoicesByFarmerIdAndDateAndPage(Long farmerId, String sDate, String eDate, String state, PageInfo pageInfo) throws Exception;
+	
 	// 파머등록
 //	Farmer registerFarmer(RegFarmerDto request, MultipartFile profileImage) throws Exception;
 	

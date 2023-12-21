@@ -12,31 +12,21 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.kosta.farm.dto.CompanyDto;
-//import com.kosta.farm.dto.DeliveryDto;
-import com.kosta.farm.dto.ErrorResponseDto;
-import com.kosta.farm.dto.FarmerDto;
-import com.kosta.farm.dto.InvoiceDto;
-import com.kosta.farm.dto.OrdersDto;
 import com.kosta.farm.dto.PaymentDto;
 import com.kosta.farm.dto.QuotDelDto;
 import com.kosta.farm.dto.QuotationDto;
-import com.kosta.farm.dto.RegProductDto;
-import com.kosta.farm.entity.Farmer;
 import com.kosta.farm.entity.Quotation;
 import com.kosta.farm.entity.Request;
 import com.kosta.farm.entity.User;
 import com.kosta.farm.service.APIService;
 import com.kosta.farm.service.FarmerService;
 import com.kosta.farm.util.PageInfo;
-import com.kosta.farm.util.QuotationStatus;
 
 @RestController
 @RequestMapping("/farmer")
@@ -44,8 +34,8 @@ public class FarmerController {
 	
 	@Autowired
 	private FarmerService farmerService;
-//	@Autowired
-//	private APIService apiService;
+	@Autowired
+	private APIService apiService;
 	
 
 	// 매칭 주문 요청서 보기
@@ -186,8 +176,9 @@ public class FarmerController {
 	@GetMapping("/orderdetail/{receiptId}/{type}")
 	public ResponseEntity<PaymentDto> orderDetail(Authentication authentication,
 			@PathVariable String receiptId, @PathVariable String type) {
-		User user = (User) authentication.getPrincipal();
-		Long farmerId= user.getFarmerId();
+//		User user = (User) authentication.getPrincipal();
+//		Long farmerId= user.getFarmerId();
+		Long farmerId = (long) 1;
 		try {
 			System.out.println(type);
 			PaymentDto orders = farmerService.OrdersDetailQuotationId(farmerId, receiptId, type);
@@ -198,99 +189,113 @@ public class FarmerController {
 		}
 	}
 
-//	// 택배사 정보 제공
-//	@GetMapping("companylist")
-//	public ResponseEntity<List<CompanyDto>> companyList(Authentication authentication) {
+	// 택배사 정보 제공
+	@GetMapping("companylist")
+	public ResponseEntity<List<CompanyDto>> companyList(Authentication authentication) {
 //		User user = (User) authentication.getPrincipal();
 //		Long farmerId= user.getFarmerId();
-//		try {
-//			List<CompanyDto> comList = apiService.requestCompanyList();
-//			return new ResponseEntity<List<CompanyDto>>(comList, HttpStatus.OK);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			return new ResponseEntity<List<CompanyDto>>(HttpStatus.BAD_REQUEST);
-//		}
-//	}
-//	
-//	// 발송 완료(delivery 생성, 택배사 코드, 운송장번호)
-//	@GetMapping("/sendparcel/{ordersId}/{code}/{name}/{invoice}")
-//	public ResponseEntity<String> delivery(Authentication authentication,
-//			@PathVariable Long ordersId, @PathVariable String code, @PathVariable String name,
-//			@PathVariable String invoice) {
+		Long farmerId = (long) 1;
+		try {
+			List<CompanyDto> comList = apiService.requestCompanyList();
+			return new ResponseEntity<List<CompanyDto>>(comList, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<List<CompanyDto>>(HttpStatus.BAD_REQUEST);
+		}
+	}
+	
+	
+	
+	// 발송 완료(delivery 생성, 택배사 코드, 운송장번호)
+	@GetMapping("/sendparcel/{receiptId}/{code}/{name}/{invoice}")
+	public ResponseEntity<String> delivery(Authentication authentication,
+			@PathVariable String receiptId, @PathVariable String code, @PathVariable String name,
+			@PathVariable String invoice) {
+		User user = (User) authentication.getPrincipal();
+		Long farmerId= user.getFarmerId();
+		try {
+//			System.out.println("1");
+//			System.out.println("id " + ordersId);
+//			System.err.println("code " + code);
+//			System.out.println("invoice " + invoice);
+			farmerService.insertDeliveryAndInvoice(farmerId, receiptId, code, name, invoice);
+			return new ResponseEntity<String>("성공", HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<String>("실패", HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	// 판매 취소
+	@PostMapping("/ordercancel")
+	public ResponseEntity<String> delivery(Authentication authentication,
+			@RequestBody PaymentDto payDto) {
 //		User user = (User) authentication.getPrincipal();
 //		Long farmerId= user.getFarmerId();
-//		try {
-////			System.out.println("1");
-////			System.out.println("id " + ordersId);
-////			System.err.println("code " + code);
-////			System.out.println("invoice " + invoice);
-//			farmerService.insertDeliveryAndInvoice(farmerId, ordersId, code, name, invoice);
-//			return new ResponseEntity<String>("성공", HttpStatus.OK);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			return new ResponseEntity<String>("실패", HttpStatus.BAD_REQUEST);
-//		}
-//	}
-//
-//	// 판매 취소
-//	@PostMapping("/ordercancel")
-//	public ResponseEntity<String> delivery(Authentication authentication,
-//			@RequestBody OrdersDto ordDto) {
+		Long farmerId = (long) 1;
+		try {
+			String receiptId = payDto.getReceiptId();
+			String cancelText = payDto.getCancelText();
+			
+			farmerService.deleteOrderState(farmerId, receiptId, cancelText);
+			return new ResponseEntity<String>("성공", HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<String>("실패", HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	// 배송 현황( SHIPPING(배송중), COMPLETED(배송완료) )
+	@GetMapping("/deliverylist/{state}/{page}")
+	public ResponseEntity<Map<String, Object>> deliveryList(Authentication authentication, 
+			@PathVariable Integer page, @PathVariable String state) {
 //		User user = (User) authentication.getPrincipal();
 //		Long farmerId= user.getFarmerId();
-//		try {
-//			Long ordersId = ordDto.getOrdersId();
-//			String cancelText = ordDto.getCancelText();
-//			
-//			farmerService.deleteOrderState(farmerId, ordersId, cancelText);
-//			return new ResponseEntity<String>("성공", HttpStatus.OK);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			return new ResponseEntity<String>("실패", HttpStatus.BAD_REQUEST);
-//		}
-//	}
-//
-//	// 배송 현황(0: 오류, 1: 배송중, 2: 배송 완료)
-////	@GetMapping("/deliverylist/{state}/{page}")
-////	public ResponseEntity<Map<String, Object>> deliveryList(Authentication authentication, 
-////			@PathVariable Integer page, @PathVariable String state) {
-////		User user = (User) authentication.getPrincipal();
-////		Long farmerId= user.getFarmerId();
-////		try {
-////			if(page == 0) page = 1;
-////			PageInfo pageInfo = new PageInfo(page);
-////			List<DeliveryDto> deliveryList = farmerService.findDeliberyByFarmerIdAndDeliveryState(farmerId, state, pageInfo);
-////			Map<String, Object> res = new HashMap<>();
-////			res.put("pageInfo", pageInfo);
-////			res.put("deliveryList", deliveryList);
-////			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
-////		} catch (Exception e) {
-////			e.printStackTrace();
-////			return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
-////		}
-////	}
-//	
-//	// 정산 내역
-//	@GetMapping("/invoice/{date}/{page}")
-//	public ResponseEntity<Map<String, Object>> InvoiceList(Authentication authentication,
-//			@PathVariable String date, @PathVariable Integer page) {
+		Long farmerId = (long) 1;
+		try {
+			// 처음 요청 시 page = 1로 설정
+			if(page == 0) page = 1; 
+			PageInfo pageInfo = new PageInfo(page);
+			
+			List<PaymentDto> deliveryList = farmerService.findDeliberyByFarmerIdAndDeliveryState(farmerId, state, pageInfo);
+			Map<String, Object> res = new HashMap<>();
+			res.put("pageInfo", pageInfo);
+			res.put("deliveryList", deliveryList);
+			
+			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
+		}
+	}
+	
+	// 정산 내역
+	@GetMapping("/invoice/{date}/{state}/{page}")
+	public ResponseEntity<Map<String, Object>> InvoiceList(Authentication authentication,
+			@PathVariable String date, @PathVariable String state, @PathVariable Integer page) {
 //		User user = (User) authentication.getPrincipal();
 //		Long farmerId= user.getFarmerId();
-//
-//		String[] dates = date.split("~");
-//		String sDate = dates[0];
-//		String eDate = dates[1];
-//		
-//		try {
-//			if(page == 0) page = 1;
-//			PageInfo pageInfo = new PageInfo(page);
-//			
-//			Map<String,Object> res = new HashMap<>();
-//			List<InvoiceDto> invoiceList =  farmerService.findInvoicesByFarmerIdAndDateAndPage(farmerId, date, pageInfo);
-//			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
-//		}
-//	}
+		Long farmerId = (long) 1;
+		// Payment의 invoiceDate(정산예정일)을 구하기 위해 날짜 구분
+		String[] dates = date.split("~");
+		String sDate = dates[0];
+		String eDate = dates[1];
+		
+		try {
+			// 처음 요청 시 page = 1로 설정
+			if(page == 0) page = 1; 
+			PageInfo pageInfo = new PageInfo(page);
+			
+			List<PaymentDto> invoiceList = farmerService.findInvoicesByFarmerIdAndDateAndPage(farmerId, sDate, eDate, state, pageInfo);
+
+			Map<String,Object> res = new HashMap<>();
+			res.put("pageInfo", pageInfo);
+			res.put("invoiceList", invoiceList);
+
+			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
+		}
+	}
 }

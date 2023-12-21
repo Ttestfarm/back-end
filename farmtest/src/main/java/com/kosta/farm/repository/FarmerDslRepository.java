@@ -1,12 +1,14 @@
 package com.kosta.farm.repository;
 
+import java.sql.Date;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
-import com.kosta.farm.dto.PaymentDto;
 import com.kosta.farm.entity.Farmer;
 import com.kosta.farm.entity.Payment;
 import com.kosta.farm.entity.QFarmer;
@@ -157,29 +159,22 @@ public class FarmerDslRepository {
 	}
 
 	// 결제 완료(메칭) 상세 보기
-//	public Tuple findOrderByFarmerIdAndOrderIdIsNotNull(Long farmerId, Long ordersId) {
-//		QPayment pay = QPayment.payment;
-//		QRequest req = QRequest.request;
-//		QQuotation quot = QQuotation.quotation;
-//		
-//		return jpaQueryFactory.select(ord.ordersId,
-//				quot.quotationProduct, quot.quotationQuantity, 
-//				req.name, req.tel, req.address, quot.quotationPrice,
-//				pay.paymentBank, pay.paymentDelivery, pay.state, pay.paymentPrice
-//				, pay.createDate
-//				)
-//				.from(ord)
-//				.innerJoin(quot).on(ord.quotationId.eq(quot.quotationId))
-//				.join(req).on(ord.requestId.eq(req.requestId))
-//				.join(pay).on(ord.paymentId.eq(pay.paymentId))
-//				.where(ord.farmerId.eq(farmerId).and(ord.ordersId.eq(ordersId)))
-//				.fetchOne();
-//	}
+	public Tuple findOrderByFarmerIdAndOrderIdIsNotNull(Long farmerId, String receiptId) {
+		QPayment pay = QPayment.payment;
+		QRequest req = QRequest.request;
+		QQuotation quot = QQuotation.quotation;
+		return jpaQueryFactory.select(pay, quot.quotationProduct, quot.quotationQuantity, 
+				quot.quotationPrice, req.name, req.tel, req.address1, req.address2, req.address3) 
+				.from(pay)
+				.innerJoin(quot).on(pay.quotationId.eq(quot.quotationId))
+				.join(req).on(pay.requestId.eq(req.requestId))
+				.where(pay.farmerId.eq(farmerId).and(pay.receiptId.eq(receiptId)))
+				.fetchOne();
+	}
 	
 	// 결제 완료 (주문) 상세 보기
 	public Payment findOrderByFarmerIdAndOrderIdAndQuotaionIdIsNull(Long farmerId, String receiptId) {
 		QPayment pay = QPayment.payment;
-		
 		return jpaQueryFactory.selectFrom(pay)
 				.where(pay.quotationId.isNull()
 						.and(pay.farmerId.eq(farmerId))
@@ -187,92 +182,77 @@ public class FarmerDslRepository {
 				.fetchOne();
 	}
 	
-//	// 발송 완료 (ordersId, delivery update)
-//	public void insertDeliveryWithOrdersIdAndTCodeAndTInvoice(Long ordersId, String tCode, String tInvoice) {
-//		QDelivery deli = QDelivery.delivery;
-//		jpaQueryFactory.insert(deli)
-//			.set(deli.ordersId, ordersId)
-//			.set(deli.tCode, tCode)
-//			.set(deli.tInvoice, tInvoice)
-//		    .execute();
-//	}
-//	
-//	// 판매 취소(orders state 변경)
-//	public void deleteOrderState(Long ordersId, Long farmerId, String cancelText) {
-//		QOrders ord = QOrders.orders;
-//		jpaQueryFactory.update(ord)
-//			.set(ord.ordersState, "0")
-//			.set(ord.cancelText, cancelText)
-//			.where(ord.farmerId.eq(farmerId)
-//					.and(ord.ordersId.eq(ordersId)))
-//			.execute();
-//	}
-//	
-//	// 판매 취소(payment state 변경)
-//	public void updatePaymentByOrdersId(Long paymentId) {
+	// 발송 완료 처리 *테이블 변경으로 미사용
+//	public void updatePaymentDelivery(String receiptId, String tCode, String tName, String tInvoice) {
 //		QPayment pay = QPayment.payment;
 //		jpaQueryFactory.update(pay)
-//			.set(pay.state, "0")
-//			.where(pay.paymentId.eq(paymentId))
+//			.set(pay.tCode, tCode)
+//			.set(pay.tName, tName)
+//			.set(pay.tInvoice, tInvoice)
+//			.where(pay.receiptId.eq(receiptId))
 //			.execute();
 //	}
-//	
-//	// 배송 현황 리스트
-//	public List<Tuple> findOrdersIdAndDeliveryAndProductAndByDeliveryState(Long farmerId, String deliveryState, PageRequest pageRequest) {
-//		QOrders ord = QOrders.orders;
-//		QDelivery deli = QDelivery.delivery;
-//		QQuotation quot = QQuotation.quotation;
-//		QRequest req = QRequest.request;
-//		QProduct prod = QProduct.product;
+
+	// 정산 데이터 추가 *테이블 변경으로 미사용
+//	public void UpdatePaymentInvoice(String receiptId, Date date, String invoice) {
 //		QPayment pay = QPayment.payment;
-//		QDeliveryInfo info = QDeliveryInfo.deliveryInfo;
-//		
-//		return jpaQueryFactory.select(
-//						deli.deliveryId,
-//						deli.ordersId,
-//						deli.tCode,
-//						deli.tName,
-//						deli.tInvoice,
-//						deli.deliveryState,
-//						new CaseBuilder()
-//							.when(ord.quotationId.isNotNull()).then(quot.quotationProduct)
-//							.otherwise(prod.productName),
-//						new CaseBuilder()
-//							.when(ord.quotationId.isNotNull()).then(quot.quotationQuantity)
-//							.otherwise(prod.productQuantity),
-//						pay.paymentPrice,
-//						new CaseBuilder()
-//						.when(ord.quotationId.isNotNull()).then(req.address)
-//						.otherwise(info.infoAddress)
-//					)
-//				.from(ord)
-//				.join(deli).on(ord.ordersId.eq(deli.ordersId))
-//				.leftJoin(quot).on(ord.quotationId.eq(quot.quotationId))
-//				.leftJoin(prod).on(ord.productId.eq(prod.productId))
-//				.leftJoin(req).on(quot.requestId.eq(req.requestId))
-//				.join(pay).on(ord.paymentId.eq(pay.paymentId))
-//				.leftJoin(info).on(deli.deliveryInfoId.eq(info.deliveryInfoId))
-//				.where(ord.farmerId.eq(farmerId)
-//						.and(deli.deliveryState.eq(deliveryState)))
-//				.orderBy(ord.ordersId.desc())
-//				.offset(pageRequest.getOffset())
-//				.limit(pageRequest.getPageSize())
-//				.fetch();
+//		jpaQueryFactory.update(pay)
+//			.set(pay.invoiceDate, date)
+//			.set(pay.invoiceCommission, )
+//			.set(pay.invoicePrice, invoice)
+//			.where(pay.invoicePrice.eq(receiptId))
+//			.execute();
 //	}
-//	
-//	// 배송 현황 테이블 수
-//	public Long findDeliveryCountByFarmerIdAndDeliveryState(Long farmerId, String deliveryState) {
-//		QOrders ord = QOrders.orders;
-//		QDelivery deli = QDelivery.delivery;
-//		return jpaQueryFactory.select(ord.count())
-//				.from(ord)
-//				.join(deli).on(ord.ordersId.eq(deli.ordersId))
-//				.where(ord.farmerId.eq(farmerId)
-//						.and(deli.deliveryState.eq(deliveryState)))
-//				.fetchOne();
-//	}
-//	
-//	// 정산 테이블 생성
+	
+	// 판매 취소
+	public void updatePaymentStateCANCEL(Long farmerId, String receiptId, String cancelText) {
+		QPayment pay = QPayment.payment;
+		jpaQueryFactory.update(pay)
+			.set(pay.cancelText, cancelText)
+			.set(pay.state, PaymentStatus.CANCEL)
+			
+			.where(pay.farmerId.eq(farmerId)
+					.and(pay.receiptId.eq(receiptId)))
+			.execute();
+	}
+	
+	// 배송 현황 리스트
+	public List<Payment> findOrdersIdAndDeliveryAndProductAndByDeliveryState(Long farmerId, String state, PageRequest pageRequest) {
+		QPayment pay = QPayment.payment;
+		QQuotation quot = QQuotation.quotation;
+		
+		// Payment state의 값을 String 클래로 받아서 enum 형태로 변환 후 비교
+		PaymentStatus stateValue = null;
+		if(state == "SHIPPING") { stateValue = PaymentStatus.valueOf(state);}  // 배송중
+		else {  stateValue = PaymentStatus.valueOf(state); } // 배송완료
+		
+		return jpaQueryFactory.select(pay)
+				.from(pay)
+				.where(pay.farmerId.eq(farmerId)
+						.and(pay.state.eq(stateValue)))
+				.orderBy(pay.receiptId.desc())
+				.offset(pageRequest.getOffset())
+				.limit(pageRequest.getPageSize())
+				.fetch();
+	}
+	
+	// 배송 현황 테이블 수
+	public Long findDeliveryCountByFarmerIdAndDeliveryState(Long farmerId, String state) {
+		QPayment pay = QPayment.payment;
+		
+		// Payment state의 값을 String 클래로 받아서 enum 형태로 변환 후 비교
+		PaymentStatus stateValue = null;
+		if(state == "SHIPPING") { stateValue = PaymentStatus.valueOf(state);}  // 배송중
+		else {  stateValue = PaymentStatus.valueOf(state); } // 배송완료
+		
+		return jpaQueryFactory.select(pay.count())
+				.from(pay)
+				.where(pay.farmerId.eq(farmerId)
+						.and(pay.state.eq(stateValue)))
+				.fetchOne();
+	}
+	
+	// 정산 테이블 생성 *테이블 변경으로 미사용
 //	public void insertInvoice(Long farmerId, Long ordersId, Date date) {
 //		QInvoice in = QInvoice.invoice;
 //		QPayment pay = QPayment.payment;
@@ -296,23 +276,46 @@ public class FarmerDslRepository {
 //			.set(in.invoicePrice, result.get(1, Long.class))
 //			.execute();
 //	}
-//	
-////	정산 내역 리스트
-////	public List<Tuple> findOrdersIdAndDeliveryAndProductAndByDeliveryState(Long farmerId, String deliveryState, PageRequest pageRequest) {
-////		QDelivery deli = QDelivery.delivery;
-////		return jpaQueryFactory.select(deli)
-////
-////	}
-//	
-//	// 정산 내역 리스트 수 
-//	public Long invoiceCountByState(Long farmerId, String deliveryState) {
-//		QOrders ord = QOrders.orders;
-//		QDelivery deli = QDelivery.delivery;
-//		return jpaQueryFactory.select(ord.count())
-//				.from(ord)
-//				.join(deli).on(ord.ordersId.eq(deli.ordersId))
-//				.where(ord.farmerId.eq(farmerId)
-//						.and(deli.deliveryState.eq(deliveryState)))
-//				.fetchOne();
-//	}
+	
+//	정산 내역 리스트
+	public List<Payment> findOrdersIdAndDeliveryAndProductAndByDeliveryState(Long farmerId, String sDate, String eDate, String state, PageRequest pageRequest) throws ParseException {
+		QPayment pay = QPayment.payment;
+		
+		// state를 String 클래스로 받아서 enum 클래스로 변환 후 Payment.state 비교
+		PaymentStatus stateValue = null;
+		if(state == "UNSETTLEMENT") { stateValue = PaymentStatus.valueOf(state);}  // 배송중
+		else {  stateValue = PaymentStatus.valueOf(state); } // 배송완료
+		
+		// String으로 받은 날짜(sDate, eDate)를 payment의 invoiceDate와 비교를 위해 Data 형식으로 변환 작업
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		Date startDate = (Date) dateFormat.parse(sDate);
+        Date endDate = (Date) dateFormat.parse(eDate);
+        
+		return jpaQueryFactory.selectFrom(pay)
+				.where(pay.farmerId.eq(farmerId)
+						.and(pay.invoiceDate.between(startDate, endDate))
+						.and(pay.state.eq(stateValue)))
+				.orderBy(pay.createDate.desc())
+				.offset(pageRequest.getOffset())
+				.limit(pageRequest.getPageSize())
+				.fetch();
+
+	}
+	
+	// 정산 내역 리스트 수 
+	public Long invoiceCountByState(Long farmerId, String state) {
+		QPayment pay = QPayment.payment;
+		
+		// Payment state의 값을 String 클래로 받아서 enum 형태로 변환 후 비교
+		PaymentStatus stateValue = null;
+		if(state == "UNSETTLEMENT") { stateValue = PaymentStatus.valueOf(state);}  // 배송중
+		else {  stateValue = PaymentStatus.valueOf(state); } // 배송완료
+	
+		return jpaQueryFactory.select(pay.count())
+				.from(pay)
+				.where(pay.farmerId.eq(farmerId) // farmerId, state
+						.and(pay.state.eq(stateValue)))
+				.fetchOne();
+	}
+	
 }

@@ -1,16 +1,11 @@
 package com.kosta.farm.dto;
 
-import java.sql.Timestamp;
+import java.sql.Date;
 
 import javax.persistence.Column;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-
-import org.hibernate.annotations.CreationTimestamp;
 
 import com.kosta.farm.util.PaymentStatus;
 
-import lombok.Builder;
 import lombok.Data;
 
 @Data
@@ -35,11 +30,19 @@ public class PaymentDto {
 	private String product; // 품목
 	private Integer price; // 가격
 	private Integer count; // 수량
+	
 	private String deliveryprice; // 배송비
-	private String amount; // 총 결제 가격
+	private String amount; // 총 결제 금액
 	private String payType; // 결제 방법
+	
+	private Date invoiceDate; // 정산예정일
+	private Integer invoiceCommission; // 수수료
+	private Integer invoicePrice; // 정산금액
 
-	private Timestamp createDate; // 결제 완료 날짜
+	private String cancelText; // 판매 취소 사유
+	
+	private String createDate; // 결제 완료 날짜
 	private PaymentStatus state; // ERROR, PAID, FAILED, READY, SHIPPING, COMPLETED
 
+	
 }

@@ -1,5 +1,10 @@
 package com.kosta.farm.service;
 
+import java.lang.StackWalker.Option;
+import java.sql.Date;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +28,7 @@ import com.kosta.farm.repository.PaymentRepository;
 import com.kosta.farm.repository.QuotationRepository;
 import com.kosta.farm.repository.RequestRepository;
 import com.kosta.farm.util.PageInfo;
+import com.kosta.farm.util.PaymentStatus;
 import com.querydsl.core.Tuple;
 
 import lombok.RequiredArgsConstructor;
@@ -171,164 +177,186 @@ public class FarmerServiceImpl implements FarmerService {
 		return payList;
 	}
 	
-//	// 결제 완료(매칭) 상세 보기
-//	public PaymentDto OrdersDetailQuotationId(Long farmerId, String receiptId, String type) throws Exception{
-//		Tuple tuple = null;
-//		PaymentDto payment = new PaymentDto();
-//		if(type.equals("1")) {
-//			tuple = farmerDslRepository.findOrderByFarmerIdAndOrderIdIsNotNull(farmerId, receiptId);
-//		} else if(type.equals("2")) {
-//			Payment temp = farmerDslRepository.findOrderByFarmerIdAndOrderIdAndQuotaionIdIsNull(farmerId, receiptId);
-//			payment.setReceiptId(temp.getReceiptId());
-//
-//		}
-//		payment.setProduct(tuple.get(1, String.class));
-//		payment.setQuantity(tuple.get(2, String.class));
-//		payment.setName(tuple.get(3, String.class));
-//		payment.setTel(tuple.get(4, String.class));
-//		payment.setAddress(tuple.get(5, String.class));
-//		payment.setPrice(tuple.get(6, Integer.class));
-//		payment.setPaymentBank(tuple.get(7, String.class));
-//		payment.setDelivery(tuple.get(8, Integer.class));
-//		payment.setPaymentState(tuple.get(9, String.class));
-//		payment.setPaymentPrice(tuple.get(10, Integer.class));
-//		
-//		Timestamp timestamp = tuple.get(11, Timestamp.class);
-//		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-//        String dateString = dateFormat.format(timestamp);        
-//        payment.setDate(dateString);
-//		
-//		return orders;
-//	}
+	// 결제 완료(매칭) 상세 보기
+	public PaymentDto OrdersDetailQuotationId(Long farmerId, String receiptId, String type) throws Exception{
+		PaymentDto payment = new PaymentDto();
+		if(type.equals("1")) {
+			Tuple t = farmerDslRepository.findOrderByFarmerIdAndOrderIdIsNotNull(farmerId, receiptId);
+			Payment temp = t.get(0, Payment.class);
+			payment.setReceiptId(temp.getReceiptId());
+			payment.setPayType(temp.getPayType());
+			payment.setDeliveryprice(temp.getDeliveryprice()); // 배송비
+			payment.setAmount(temp.getAmount()); // 총 금액
+			
+			payment.setProduct(t.get(1, String.class));
+			payment.setCount(t.get(2, Integer.class));
+			payment.setPrice(t.get(3, Integer.class)); // 품목 가격
+			
+			payment.setBuyerName(t.get(4, String.class));
+			payment.setBuyerTel(t.get(5, String.class));
+			payment.setBuyerAddress(t.get(6, String.class) + t.get(7, String.class) + t.get(8, String.class));
+			
+			Timestamp timestamp = temp.getCreateDate();
+			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+			String dateString = dateFormat.format(timestamp);        
+			payment.setCreateDate(dateString);
+			
+		} else if(type.equals("2")) {
+			Payment temp = farmerDslRepository.findOrderByFarmerIdAndOrderIdAndQuotaionIdIsNull(farmerId, receiptId);
+			payment.setReceiptId(temp.getReceiptId());
+			payment.setPayType(temp.getPayType());
+			payment.setDeliveryprice(temp.getDeliveryprice()); // 배송비
+			payment.setAmount(temp.getAmount()); // 총 금액
+			
+			payment.setProduct(temp.getProduct());
+			payment.setCount(temp.getCount());
+			payment.setPrice(temp.getPrice());
+			
+			payment.setBuyerName(temp.getBuyerName());
+			payment.setBuyerTel(temp.getBuyerTel());
+			payment.setBuyerAddress(temp.getBuyerAddress());
+			
+			payment.setState(temp.getState());
+			
+			Timestamp timestamp = temp.getCreateDate();
+			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+			String dateString = dateFormat.format(timestamp);        
+			payment.setCreateDate(dateString);
+		}
+		
+		return payment;
+	}
 
-//	// 발송 완료 처리
-//	@Transactional
-//	public void insertDeliveryAndInvoice(Long farmerId, Long ordersId, String tCode, String tName, String tInvoice) throws Exception {
-////		System.out.println("2");
-////		System.out.println("id " + ordersId);
-////		System.err.println("tCode " + tCode);
-////		System.out.println("tInvoice " + tInvoice);
-//		deliveryRepository.save(Delivery.builder()
-//				.ordersId(ordersId)
-//				.tCode(tCode)
-//				.tName(tName)
-//				.tInvoice(tInvoice)
-//				.build()
-//				);
-//		
-//		LocalDate currentDate = LocalDate.now();
-//
-//        int year = currentDate.getYear();
-//        int month = currentDate.getMonthValue();
-//        int day = currentDate.getDayOfMonth();
-//
-//        // 20일 전이면 현재 월의 25일로 설정
-//        // 19일 이후면 다음 달의 25일로 설정
-//         if (day < 20) {
-//            currentDate = currentDate.withDayOfMonth(25);
-//        } else {
-//            currentDate = currentDate.plusMonths(1).withDayOfMonth(25);
-//        }
-//        String temp = currentDate+"";
-//        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-//        Date date = (Date) dateFormat.parse(temp);
-//        
-////        invoiceRepository.save(Invoice.builder()
-////        		 .farmerId(farmerId)
-////        		 .orderId(ordersId)
-////        		 .invoiceDate(date)
-////        		 .invoiceCommission(3) // 매칭 3, 주문 5 구분
-////        		 .invoicePrice(null) // payment id
-////        		 );
-////		farmerDslRepository.insertDeliveryWithOrdersIdAndTCodeAndTInvoice(ordersId, tCode, tInvoice);
-//	}
-//	
-//	// 판매 취소
-//	@Transactional
-//	public void deleteOrderState(Long farmerId, Long ordersId, String cancelText) throws Exception {
-//		// Orders State 변경
-//		farmerDslRepository.deleteOrderState(ordersId, farmerId, cancelText);
-//		
-//		// Payment State 변경
-//		Orders ord = ordersRepository.findById(ordersId).get();
-//		Long paymentId = ord.getPaymentId();
-//		farmerDslRepository.updatePaymentByOrdersId(paymentId);
-//	}
-//
-//	// 배송 현황 리스트
-////	@Override
-////	public List<DeliveryDto> findDeliberyByFarmerIdAndDeliveryState(Long farmerId, String deliveryState,
-////			PageInfo pageInfo) throws Exception {
-////		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 10); // 첫번째 값 : 페이지 번호, 두 번째 값 : 페이지 크기
-////		List<Tuple> tuples = null;
-////		List<DeliveryDto> deliveryList = new ArrayList<>();
-////		Long allCount = null;
-////		
-////		tuples = farmerDslRepository.findOrdersIdAndDeliveryAndProductAndByDeliveryState(farmerId, deliveryState, pageRequest);
-////		for(Tuple t : tuples) {
-////				DeliveryDto dto = new DeliveryDto();
-////				Long deliveryId = t.get(0, Long.class);
-////				System.out.println(deliveryState);
-////				Long ordersId = t.get(1, Long.class);
-////				String tCode = t.get(2, String.class);
-////				String tName = t.get(3, String.class);
-////				String tInvoice = t.get(4, String.class);
-////				String state = t.get(5, String.class);
-////				String product = t.get(6, String.class);
-////				String quantity = t.get(7, String.class);
-////				Integer price = t.get(8, Integer.class);
-////				String address = t.get(9, String.class);
-////				
-////				dto.setDeliveryId(deliveryId);
-////				dto.setOrdersId(ordersId);
-////				dto.setTCode(tCode);
-////				dto.setTName(tName);
-////				dto.setTInvoice(tInvoice);
-////				dto.setDeliveryState(state);
-////				dto.setProduct(product);
-////				dto.setQuantity(quantity);
-////				dto.setPrice(price);
-////				dto.setAddress(address);
-////				System.out.println(dto);
-////				deliveryList.add(dto);
-////		}
-////		allCount = farmerDslRepository.findDeliveryCountByFarmerIdAndDeliveryState(farmerId, deliveryState);
-////		System.out.println("allCount " + allCount);
-////		
-////		Integer allPage = (int)(Math.ceil(allCount.doubleValue()/pageRequest.getPageSize()));
-////		Integer startPage = (pageInfo.getCurPage()-1)/10*10+1;
-////		Integer endPage = Math.min(startPage+10-1, allPage);
-////		
-////		pageInfo.setAllPage(allPage);
-////		pageInfo.setStartPage(startPage);
-////		pageInfo.setEndPage(endPage);
-////		
-////		return deliveryList;
-////	}
-//	
-//	// 정산내역
-//	public List<InvoiceDto> findInvoicesByFarmerIdAndDateAndPage(Long farmerId, String date, PageInfo pageInfo) throws Exception{
-//		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 10); // 첫번째 값 : 페이지 번호, 두 번째 값 : 페이지 크기
-//		List<Tuple> tuples = null;
-//		List<InvoiceDto> invoiceList = new ArrayList<>();
-//		Long allCount = null;
-//		
-////		tuples = farmerDslRepository.findOrdersIdAndDeliveryAndProductAndByDeliveryState(farmerId, , pageRequest);
-////		for(Tuple t : tuples) {
-////				
-////		}
-////		allCount = farmerDslRepository.findDeliveryCountByFarmerIdAndDeliveryState(farmerId, deliveryState);
-////		
-////		Integer allPage = (int)(Math.ceil(allCount.doubleValue()/pageRequest.getPageSize()));
-////		Integer startPage = (pageInfo.getCurPage()-1)/10*10+1;
-////		Integer endPage = Math.min(startPage+10-1, allPage);
-////		
-////		pageInfo.setAllPage(allPage);
-////		pageInfo.setStartPage(startPage);
-////		pageInfo.setEndPage(endPage);
-////		
-//		return invoiceList;
-//	}
+	// 발송 완료 처리
+	@Transactional
+	public void insertDeliveryAndInvoice(Long farmerId, String receiptId, String tCode, String tName, String tInvoice) throws Exception {
+//		System.out.println("2");
+//		System.out.println("id " + ordersId);
+//		System.err.println("tCode " + tCode);
+//		System.out.println("tInvoice " + tInvoice);
+		// payment 테이블에 배송 정보 저장
+		Payment payment = paymentRepository.findById(receiptId).get();
+		payment.setTCode(tCode);
+		payment.setTName(tName);
+		payment.setTInvoice(tInvoice);
+		
+//		farmerDslRepository.updatePayment(receiptId, tCode, tName, tInvoice);
+		
+		LocalDate currentDate = LocalDate.now();
+
+        int year = currentDate.getYear();
+        int month = currentDate.getMonthValue();
+        int day = currentDate.getDayOfMonth();
+
+        // 20일 전이면 현재 월의 25일로 설정
+        // 19일 이후면 다음 달의 25일로 설정
+         if (day < 20) {
+            currentDate = currentDate.withDayOfMonth(25);
+        } else {
+            currentDate = currentDate.plusMonths(1).withDayOfMonth(25);
+        }
+         
+        String temp = currentDate+"";
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date date = (Date) dateFormat.parse(temp);
+        // 정산 예정일
+        payment.setInvoiceDate(date);
+        
+        if(payment.getQuotationId().equals(null)) {
+        	// matching
+        	payment.setInvoiceCommission(5);
+        	double amount = Double.parseDouble(payment.getAmount());
+        	Integer money = (int) Math.floor(amount - (amount * 0.05));
+        	payment.setInvoicePrice(money); // 정산금액 setter
+        } else {
+        	// product
+        	payment.setInvoiceCommission(3);
+        	double amount = Double.parseDouble(payment.getAmount());
+        	Integer money = (int) Math.floor(amount - (amount * 0.03));
+        	payment.setInvoicePrice(money); // 정산금액 setter
+        }
+        
+        // state 배송중(SHIPPING) 변경
+        payment.setState(PaymentStatus.SHIPPING);
+        
+        // 변경 내용 저장
+        paymentRepository.save(payment);
+	}
+	
+	// 판매 취소
+	@Transactional
+	public void deleteOrderState(Long farmerId, String receiptId, String cancelText) throws Exception {
+		// payment state 변경 (CANCEL) 및 cancelText (취소 사유) 추가
+		farmerDslRepository.updatePaymentStateCANCEL(farmerId, receiptId, cancelText);
+	}
+
+	// 배송 현황 리스트
+	@Override
+	public List<PaymentDto> findDeliberyByFarmerIdAndDeliveryState(Long farmerId, String state,
+			PageInfo pageInfo) throws Exception {
+		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 10); // 첫번째 값 : 페이지 번호, 두 번째 값 : 페이지 크기
+		List<PaymentDto> deliveryList = new ArrayList<>();
+		Long allCount = null;
+		
+		List<Payment> payList = farmerDslRepository.findOrdersIdAndDeliveryAndProductAndByDeliveryState(farmerId, state, pageRequest);
+		for(Payment p : payList) {
+				PaymentDto dto = new PaymentDto();
+				
+				dto.setReceiptId(p.getReceiptId());
+				
+				dto.setTCode(p.getTCode());
+				dto.setTName(p.getTName());
+				dto.setTInvoice(p.getTInvoice());
+				
+				dto.setBuyerName(p.getBuyerName());
+				dto.setBuyerTel(p.getBuyerTel());
+				dto.setBuyerAddress(p.getBuyerAddress());
+				
+				dto.setProduct(p.getProduct());
+				dto.setCount(p.getCount());
+				dto.setPrice(p.getPrice());
+				
+				dto.setState(p.getState());
+				
+				deliveryList.add(dto);
+		}
+		allCount = farmerDslRepository.findDeliveryCountByFarmerIdAndDeliveryState(farmerId, state);
+		System.out.println("allCount " + allCount);
+		
+		Integer allPage = (int)(Math.ceil(allCount.doubleValue()/pageRequest.getPageSize()));
+		Integer startPage = (pageInfo.getCurPage()-1)/10*10+1;
+		Integer endPage = Math.min(startPage+10-1, allPage);
+		
+		pageInfo.setAllPage(allPage);
+		pageInfo.setStartPage(startPage);
+		pageInfo.setEndPage(endPage);
+		
+		return deliveryList;
+	}
+	
+	// 정산내역
+	public List<PaymentDto> findInvoicesByFarmerIdAndDateAndPage(Long farmerId, String sDate, String eDate, String state, PageInfo pageInfo) throws Exception{
+		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 10); // 첫번째 값 : 페이지 번호, 두 번째 값 : 페이지 크기
+		List<Payment> payList = null;
+		List<PaymentDto> invoiceList = new ArrayList<>();
+		Long allCount = null;
+		
+		payList = farmerDslRepository.findOrdersIdAndDeliveryAndProductAndByDeliveryState(farmerId, sDate, eDate, state, pageRequest);
+		for(Payment p : payList) {
+				
+		}
+		allCount = farmerDslRepository.findDeliveryCountByFarmerIdAndDeliveryState(farmerId, state);
+		
+		Integer allPage = (int)(Math.ceil(allCount.doubleValue()/pageRequest.getPageSize()));
+		Integer startPage = (pageInfo.getCurPage()-1)/10*10+1;
+		Integer endPage = Math.min(startPage+10-1, allPage);
+		
+		pageInfo.setAllPage(allPage);
+		pageInfo.setStartPage(startPage);
+		pageInfo.setEndPage(endPage);
+		
+		return invoiceList;
+	}
 //	
 //	// 파머등록
 //	@Override

@@ -36,7 +36,7 @@ import com.kosta.farm.repository.InvoiceRepository;
 import com.kosta.farm.repository.OrdersRepository;
 import com.kosta.farm.repository.QuotationRepository;
 import com.kosta.farm.repository.RequestRepository;
-import com.kosta.farm.unti.PageInfo;
+import com.kosta.farm.util.PageInfo;
 import com.querydsl.core.Tuple;
 
 import lombok.RequiredArgsConstructor;

@@ -56,6 +56,14 @@ public class Orders { // order> orders로 대체 entity 생성 오류 때문에
 	private Integer ordersPrice; //주문 가격
 	@Column
 	private String cancelText; // 판매 취소 사유
+	
+	// delivery 저장
+	@Column
+	private String name; // 수령인
+	@Column
+	private String teㅣ; // 전화번호
+	@Column
+	private String address; // 주소 
 	@Column
 	@CreationTimestamp
 	private Timestamp createDate;

@@ -33,7 +33,7 @@ import com.kosta.farm.entity.User;
 import com.kosta.farm.repository.OrdersRepository;
 import com.kosta.farm.service.APIService;
 import com.kosta.farm.service.FarmerService;
-import com.kosta.farm.unti.PageInfo;
+import com.kosta.farm.util.PageInfo;
 
 @RestController
 @RequestMapping("/farmer")
@@ -99,7 +99,7 @@ public class FarmerController {
 		User user = (User) authentication.getPrincipal();
 		Long farmerId= user.getFarmerId();
 		try {
-			PageInfo pageInfo = new PageInfo(page);
+			PageInfo pageInfo = PageInfo.builder().curPage(page).build();
 			List<QuotationDto> quotList = farmerService.findQuotationByFarmerIdAndStateAndPage(farmerId, state, pageInfo);
 			Map<String, Object> res = new HashMap<>();
 			res.put("pageInfo", pageInfo);
@@ -143,7 +143,7 @@ public class FarmerController {
 		User user = (User) authentication.getPrincipal();
 		Long farmerId= user.getFarmerId();
 		try {
-			PageInfo pageInfo = new PageInfo(page);
+			PageInfo pageInfo = PageInfo.builder().curPage(page).build();
 			List<OrdersDto> ordersList = farmerService.findOrdersByFarmerIdAndPage(farmerId, type, pageInfo);
 			Map<String, Object> res = new HashMap<>();
 			res.put("pageInfo", pageInfo);
@@ -231,7 +231,7 @@ public class FarmerController {
 		Long farmerId= user.getFarmerId();
 		try {
 			if(page == 0) page = 1;
-			PageInfo pageInfo = new PageInfo(page);
+			PageInfo pageInfo = PageInfo.builder().curPage(page).build();
 			List<DeliveryDto> deliveryList = farmerService.findDeliberyByFarmerIdAndDeliveryState(farmerId, state, pageInfo);
 			Map<String, Object> res = new HashMap<>();
 			res.put("pageInfo", pageInfo);
@@ -256,7 +256,7 @@ public class FarmerController {
 		
 		try {
 			if(page == 0) page = 1;
-			PageInfo pageInfo = new PageInfo(page);
+			PageInfo pageInfo = PageInfo.builder().curPage(page).build();
 			
 			Map<String,Object> res = new HashMap<>();
 			List<InvoiceDto> invoiceList =  farmerService.findInvoicesByFarmerIdAndDateAndPage(farmerId, date, pageInfo);

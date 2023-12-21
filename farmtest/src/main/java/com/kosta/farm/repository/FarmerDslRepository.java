@@ -8,7 +8,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
 import com.kosta.farm.entity.QDelivery;
-import com.kosta.farm.entity.QDeliveryInfo;
 import com.kosta.farm.entity.QInvoice;
 import com.kosta.farm.entity.QOrders;
 import com.kosta.farm.entity.QPayment;
@@ -245,39 +244,38 @@ public class FarmerDslRepository {
 		QRequest req = QRequest.request;
 		QProduct prod = QProduct.product;
 		QPayment pay = QPayment.payment;
-		QDeliveryInfo info = QDeliveryInfo.deliveryInfo;
 		
-		return jpaQueryFactory.select(
-						deli.deliveryId,
-						deli.ordersId,
-						deli.tCode,
-						deli.tName,
-						deli.tInvoice,
-						deli.deliveryState,
-						new CaseBuilder()
-							.when(ord.quotationId.isNotNull()).then(quot.quotationProduct)
-							.otherwise(prod.productName),
-						new CaseBuilder()
-							.when(ord.quotationId.isNotNull()).then(quot.quotationQuantity)
-							.otherwise(prod.productQuantity),
-						pay.paymentPrice,
-						new CaseBuilder()
-						.when(ord.quotationId.isNotNull()).then(req.address)
-						.otherwise(info.infoAddress)
-					)
-				.from(ord)
-				.join(deli).on(ord.ordersId.eq(deli.ordersId))
-				.leftJoin(quot).on(ord.quotationId.eq(quot.quotationId))
-				.leftJoin(prod).on(ord.productId.eq(prod.productId))
-				.leftJoin(req).on(quot.requestId.eq(req.requestId))
-				.join(pay).on(ord.paymentId.eq(pay.paymentId))
-				.leftJoin(info).on(deli.deliveryInfoId.eq(info.deliveryInfoId))
-				.where(ord.farmerId.eq(farmerId)
-						.and(deli.deliveryState.eq(deliveryState)))
-				.orderBy(ord.ordersId.desc())
-				.offset(pageRequest.getOffset())
-				.limit(pageRequest.getPageSize())
-				.fetch();
+		return null;
+//		return jpaQueryFactory.select(
+//						deli.deliveryId,
+//						deli.ordersId,
+//						deli.tCode,
+//						deli.tName,
+//						deli.tInvoice,
+//						deli.deliveryState,
+//						new CaseBuilder()
+//							.when(ord.quotationId.isNotNull()).then(quot.quotationProduct)
+//							.otherwise(prod.productName),
+//						new CaseBuilder()
+//							.when(ord.quotationId.isNotNull()).then(quot.quotationQuantity)
+//							.otherwise(prod.productQuantity),
+//						pay.paymentPrice,
+//						new CaseBuilder()
+//						.when(ord.quotationId.isNotNull()).then(req.address)
+//						.otherwise(info.infoAddress)
+//					)
+//				.from(ord)
+//				.join(deli).on(ord.ordersId.eq(deli.ordersId))
+//				.leftJoin(quot).on(ord.quotationId.eq(quot.quotationId))
+//				.leftJoin(prod).on(ord.productId.eq(prod.productId))
+//				.leftJoin(req).on(quot.requestId.eq(req.requestId))
+//				.join(pay).on(ord.paymentId.eq(pay.paymentId))
+//				.where(ord.farmerId.eq(farmerId)
+//						.and(deli.deliveryState.eq(deliveryState)))
+//				.orderBy(ord.ordersId.desc())
+//				.offset(pageRequest.getOffset())
+//				.limit(pageRequest.getPageSize())
+//				.fetch();
 	}
 	
 	// 배송 현황 테이블 수

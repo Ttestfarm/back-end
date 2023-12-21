@@ -13,7 +13,7 @@ import com.kosta.farm.dto.RegFarmerDto;
 import com.kosta.farm.entity.Farmer;
 import com.kosta.farm.entity.Quotation;
 import com.kosta.farm.entity.Request;
-import com.kosta.farm.unti.PageInfo;
+import com.kosta.farm.util.PageInfo;
 
 public interface FarmerService {
 	// 매칭 주문 요청서 보기

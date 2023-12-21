@@ -202,4 +202,11 @@ public class UserServiceImpl implements UserService {
 
 	}
 
+	// 파머등록시 기본전화번호 체크하면 userTel 업데이트
+	@Override
+	public void updateUserTel(User user, String newTel) throws Exception {
+		user.setUserTel(newTel);
+		userRepository.save(user);
+	}
+
 }

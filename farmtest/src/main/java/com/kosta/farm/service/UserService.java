@@ -25,4 +25,6 @@ public interface UserService {
   void updateUserInfoAfterRegFarmer(User user, Long farmerId) throws Exception;
   
   void certifiedTelNumber(String telNumber, String certifyNumber) throws Exception;
+  
+  void updateUserTel(User user, String newTel) throws Exception;
 }

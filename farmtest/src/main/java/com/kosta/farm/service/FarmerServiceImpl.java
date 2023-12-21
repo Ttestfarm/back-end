@@ -41,6 +41,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class FarmerServiceImpl implements FarmerService {
 
+	private final UserService userService;
+
 	// Repository
 	private final FarmerRepository farmerRepository;
 	private final QuotationRepository quotationRepository;
@@ -429,66 +431,98 @@ public class FarmerServiceImpl implements FarmerService {
 
 		return invoiceList;
 	}
-	//
-	// // 파머등록
-	// @Override
-	// public Farmer registerFarmer(RegFarmerDto request, MultipartFile
-	// profileImage) throws Exception {
-	//
-	// Farmer farmer = Farmer.builder()
-	// .farmName(request.getFarmName())
-	// .farmTel(request.getFarmTel())
-	// .farmAddress(request.getFarmAddress())
-	// .farmAddressDetail(request.getFarmAddressDetail())
-	// .registrationNum(request.getRegistrationNum())
-	// .farmBank(request.getFarmBank())
-	// .farmAccountNum(request.getFarmAccountNum())
-	// .build();
-	//
-	// // 관심품목 입력받아서 # 기준으로 파싱하여 각각 저장
-	// String[] interests = request.getFarmInterest().replaceAll("^\\s*#*",
-	// "").split("#");
-	// int numInterests = Math.min(interests.length, 5); // 최대 5개의 관심사로 제한
-	//
-	// farmer.setFarmInterest1(numInterests > 0 ? interests[0].trim() : null);
-	// farmer.setFarmInterest2(numInterests > 1 ? interests[1].trim() : null);
-	// farmer.setFarmInterest3(numInterests > 2 ? interests[2].trim() : null);
-	// farmer.setFarmInterest4(numInterests > 3 ? interests[3].trim() : null);
-	// farmer.setFarmInterest5(numInterests > 4 ? interests[4].trim() : null);
-	//
-	// Farmer savedFarmer = farmerRepository.save(farmer);
-	//
-	// if (profileImage != null && !profileImage.isEmpty()) {
-	// String dir = "C:/Users/USER/upload";
-	//
-	// // 파일명 설정
-	// String fileName = "profile_image_" + savedFarmer.getFarmerId() + "."
-	// + StringUtils.getFilenameExtension(profileImage.getOriginalFilename());
-	//
-	// // 파일 저장 경로 설정
-	// String filePath = Paths.get(dir, fileName).toString();
-	//
-	// // 파일 저장
-	// profileImage.transferTo(new File(filePath));
-	//
-	// savedFarmer.setFarmPixurl(filePath);
-	// }
-	//
-	// return savedFarmer;
-	// }
-	//
-	// // 파머아이디로 파머 가져오기
-	// @Override
-	// public Farmer getFarmerById(Long farmerId) throws Exception {
-	// Optional<Farmer> farmerOptional = farmerRepository.findById(farmerId);
-	// return farmerOptional.orElse(null);
-	// }
-	//
-	// // 파머 정보 저장
-	// @Override
-	// @Transactional
-	// public Farmer saveFarmer(Farmer farmer) throws Exception {
-	// return farmerRepository.save(farmer);
-	// }
+
+	// 파머등록
+	@Override
+	public Farmer registerFarmer(RegFarmerDto request, MultipartFile farmPixurl) throws Exception {
+
+		Farmer farmer = Farmer.builder()
+				.farmName(request.getFarmName())
+				.farmTel(request.getFarmTel())
+				.farmAddress(request.getFarmAddress())
+				.farmAddressDetail(request.getFarmAddressDetail())
+				.registrationNum(request.getRegistrationNum())
+				.farmBank(request.getFarmBank())
+				.farmAccountNum(request.getFarmAccountNum())
+				.build();
+
+		// 관심품목 입력받아서 # 기준으로 파싱하여 각각 저장
+		String[] interests = request.getFarmInterest().replaceAll("^\\s*#*", "").split("#");
+		int numInterests = Math.min(interests.length, 5); // 최대 5개의 관심사로 제한
+
+		farmer.setFarmInterest1(numInterests > 0 ? interests[0].trim() : null);
+		farmer.setFarmInterest2(numInterests > 1 ? interests[1].trim() : null);
+		farmer.setFarmInterest3(numInterests > 2 ? interests[2].trim() : null);
+		farmer.setFarmInterest4(numInterests > 3 ? interests[3].trim() : null);
+		farmer.setFarmInterest5(numInterests > 4 ? interests[4].trim() : null);
+
+		Farmer savedFarmer = farmerRepository.save(farmer);
+
+		// if(telSelected) {
+		// userService.updateUserTel(loginUser, request.getFarmTel());
+		// }
+
+		if (farmPixurl != null && !farmPixurl.isEmpty()) {
+			String dir = "C:/Users/USER/upload";
+
+			// 파일명 설정
+			String fileName = "profile_image_" + savedFarmer.getFarmerId() + "."
+					+ StringUtils.getFilenameExtension(farmPixurl.getOriginalFilename());
+
+			// 파일 저장 경로 설정
+			String filePath = Paths.get(dir, fileName).toString();
+
+			// 파일 저장
+			farmPixurl.transferTo(new File(filePath));
+
+			savedFarmer.setFarmPixurl(filePath);
+		}
+
+		return savedFarmer;
+	}
+
+	@Override
+	public Farmer modifyFarmer(ModifyFarmDto request, MultipartFile farmPixurl) throws Exception {
+		Long farmerId = request.getFarmerId();
+		// FarmerRepository를 사용하여 farmerId로 기존 Farmer 객체를 가져옴
+		Farmer farmer = farmerRepository.findById(farmerId).orElse(null);
+
+		// Farmer 객체의 필드를 업데이트
+		farmer.setFarmName(request.getFarmName());
+		farmer.setFarmTel(request.getFarmTel());
+		farmer.setFarmAddress(request.getFarmAddress());
+		farmer.setFarmAddressDetail(request.getFarmAddressDetail());
+		farmer.setRegistrationNum(request.getRegistrationNum());
+		farmer.setFarmBank(request.getFarmBank());
+		farmer.setFarmAccountNum(request.getFarmAccountNum());
+
+		// 관심품목 입력받아서 # 기준으로 파싱하여 각각 저장
+		String[] interests = request.getFarmInterest().replaceAll("^\\s*#*", "").split("#");
+		int numInterests = Math.min(interests.length, 5); // 최대 5개의 관심사로 제한
+
+		farmer.setFarmInterest1(numInterests > 0 ? interests[0].trim() : null);
+		farmer.setFarmInterest2(numInterests > 1 ? interests[1].trim() : null);
+		farmer.setFarmInterest3(numInterests > 2 ? interests[2].trim() : null);
+		farmer.setFarmInterest4(numInterests > 3 ? interests[3].trim() : null);
+		farmer.setFarmInterest5(numInterests > 4 ? interests[4].trim() : null);
+
+		if (farmPixurl != null && !farmPixurl.isEmpty()) {
+			String dir = "C:/Users/USER/upload";
+
+			// 파일명 설정
+			String fileName = "profile_image_" + farmer.getFarmerId() + "."
+					+ StringUtils.getFilenameExtension(farmPixurl.getOriginalFilename());
+
+			// 파일 저장 경로 설정
+			String filePath = Paths.get(dir, fileName).toString();
+			System.out.println("filePath: " + filePath);
+			// 파일 저장
+			farmPixurl.transferTo(new File(filePath));
+
+			farmer.setFarmPixurl(filePath);
+		}
+		Farmer modifiedFarmer = farmerRepository.save(farmer);
+		return modifiedFarmer;
+	}
 
 }

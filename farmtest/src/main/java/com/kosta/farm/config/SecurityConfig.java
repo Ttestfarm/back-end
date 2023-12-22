@@ -14,8 +14,6 @@ import org.springframework.web.filter.CorsFilter;
 import com.kosta.farm.config.jwt.JwtTokenFilter;
 import com.kosta.farm.config.oauth2.OAuth2LoginSuccessHandler;
 import com.kosta.farm.config.oauth2.PrincipalOAuth2UserService;
-//import com.kosta.farm.config.oauth2.OAuth2LoginSuccessHandler;
-//import com.kosta.farm.config.oauth2.PrincipalOauth2UserService;
 import com.kosta.farm.service.UserService;
 
 import lombok.RequiredArgsConstructor;

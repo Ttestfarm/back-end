@@ -452,7 +452,6 @@ public class FarmerServiceImpl implements FarmerService {
 			String fileName = "profile_image_" + savedFarmer.getFarmerId() + "."
 					+ StringUtils.getFilenameExtension(farmPixurl.getOriginalFilename());
 
-
 			// 파일 저장 경로 설정
 			String filePath = Paths.get(dir, fileName).toString();
 

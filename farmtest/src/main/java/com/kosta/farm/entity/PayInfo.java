@@ -41,14 +41,6 @@ public class PayInfo {
 	private Long quotationId; //견적서 아이디
     
 	//프론트에서 받아오는 수령인 및 제품 정보
-	@Column
-	private String productName;
-	@Column
-	private String buyerTel;
-	@Column
-	private String buyerName;
-	@Column
-	private String buyerAddress;
     @Column
     private String paymentMethod; //결제 방법
     @Column(nullable = true)
@@ -86,7 +78,6 @@ public class PayInfo {
     private String pgTid;
     private LocalDateTime failedAt; // 결제 실패 일시
 	
-}
 	// 정산
 	@Column
 	private Date invoiceDate; // 정산예정일 "yyyy-MM-dd" 형식

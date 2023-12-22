@@ -9,14 +9,20 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Builder.Default;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Invoice {
 	@Id @GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Long invoiceId;
@@ -24,18 +30,18 @@ public class Invoice {
 	@Column
 	private Long farmerId;
 	@Column
-	private Long orderId;
+	private String receiptId;
 	@Column
-	private Date invocieDate1; // 정산예정일
+	private Date invoiceDate; // 정산예정일
 	@Column
-	private Date invocieDate2; // 정산완료일
+	private Integer invoiceCommission; // 수수료
 	@Column
-	private Long invocieCommission; // 수수료
-	@Column
-	private Long invociePrice; // 가격
+	private Integer invoicePrice; // 가격
 	@Column
 	@CreationTimestamp
 	private Timestamp createDate;
 	@Column
-	private String invoiceState; // 정산진행중, 정산완료, 정산오류
+	@ColumnDefault("1")
+	@Builder.Default
+	private String invoiceState = "1"; // 정산진행중, 정산완료, 정산오류
 }

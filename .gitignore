@@ -155,4 +155,8 @@ farmtest/.gradle/8.4/executionHistory/executionHistory.lock
 farmtest/.gradle/8.4/fileHashes/fileHashes.bin
 farmtest/.gradle/8.4/fileHashes/fileHashes.lock
 farmtest/.gradle/8.4/fileHashes/resourceHashesCache.bin
+<<<<<<< HEAD
 farmtest/.gradle/buildOutputCleanup/buildOutputCleanup.lock
+=======
+farmtest/.gradle/buildOutputCleanup/buildOutputCleanup.lock
+>>>>>>> 49edef382681aabb7ce741ba7a07c83a9192cffe

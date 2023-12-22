@@ -27,7 +27,7 @@ import lombok.NoArgsConstructor;
 public class Review {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long ReviewId;
+	private Long reviewId;
 	@Column
 	private Integer rating; //별점
 	@Column
@@ -43,5 +43,7 @@ public class Review {
 	private Long farmerId;
 	@Column
 	private Long userId;
+	@Column
+	private String receiptId;
 	
 }

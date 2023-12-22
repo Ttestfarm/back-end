@@ -4,6 +4,8 @@ import java.sql.Timestamp;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -11,6 +13,8 @@ import javax.persistence.Id;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+
+import com.kosta.farm.util.UserRole;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -49,11 +53,12 @@ public class User {
 	@Column
 	private String providerId;
 	@Column
-	private String userRoles; // user, farmer, admin
+	@Enumerated(EnumType.STRING)
+	private UserRole userRole; // ROLE_USER, ROLE_FARMER, ROLE_ADMIN
 	@CreationTimestamp
 	@Column
 	private Timestamp createDate;
-	@Column
-	private boolean userState; // 탈퇴 : 0 , ? : 1
+	@Builder.Default
+	private boolean userState = true; // 탈퇴: false, 유효한 유저: true
 
 }

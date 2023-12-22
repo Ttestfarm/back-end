@@ -7,191 +7,284 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
-import com.kosta.farm.dto.DeliveryDto;
-import com.kosta.farm.dto.OrdersDto;
+import com.kosta.farm.dto.PaymentDto;
 import com.kosta.farm.dto.QuotDelDto;
 import com.kosta.farm.dto.QuotationDto;
+import com.kosta.farm.entity.Product;
 import com.kosta.farm.entity.Quotation;
 import com.kosta.farm.entity.Request;
+import com.kosta.farm.entity.User;
 import com.kosta.farm.service.FarmerService;
-import com.kosta.farm.unti.PageInfo;
+import com.kosta.farm.util.PageInfo;
 
 @RestController
 @RequestMapping("/farmer")
 public class FarmerController {
+
 	@Autowired
 	private FarmerService farmerService;
-	
-	// 팜 정보 관리
-	
+
 	// 매칭 주문 요청서 보기
-	
 	// farmerId를 받고 farmInterest return
 	@GetMapping("/farmInterest")
-	public ResponseEntity<List<String>> farmInterest (@RequestParam Long farmerId) {
+	public ResponseEntity<Map<String, Object>> farmInterest(Authentication authentication) {
+		// User user = (User) authentication.getPrincipal();
+		// Long farmerId= user.getFarmerId();
+		Long farmerId = (long) 1;
 		try {
+			Map<String, Object> res = new HashMap<>();
 			List<String> interestList = farmerService.findFarmInterestByFarmerId(farmerId);
-			return new ResponseEntity<List<String>>(interestList, HttpStatus.OK);
-		} catch (Exception e) {
-			e.printStackTrace();
-			return new ResponseEntity<List<String>>(HttpStatus.BAD_REQUEST);
-		}
-	}
-	
-	// 관심 농산물인 요청서 리스트 보기
-	@GetMapping("/requestlist")
-	public ResponseEntity<List<Request>> requestList(@RequestParam Long farmerId,
-			@RequestParam String farmInterest) {
-		try {
-			System.out.println(farmerId);
-			System.out.println(farmInterest);
-			List<Request> reqList = farmerService.findRequestsByFarmInterest(farmerId ,farmInterest);			
-			System.out.println(reqList);
-			return new ResponseEntity<List<Request>>(reqList, HttpStatus.OK);
-		} catch (Exception e) {
-			e.printStackTrace();
-			return new ResponseEntity<List<Request>>(HttpStatus.BAD_REQUEST);
-		}
-	}
-	
-	// 견적서 보내기
-	@PostMapping("/regquot")
-	public ResponseEntity<String> regQuotation(@RequestBody Quotation quot) {
-		try {
-			return new ResponseEntity<String>("성공" ,HttpStatus.OK);
-		} catch (Exception e) {
-			e.printStackTrace();
-			return new ResponseEntity<String>("실패", HttpStatus.BAD_REQUEST);
-		}
-	}
-	
-	// 견적 현황 페이지
-	// 견적서 상태로(0 : 견적서 취소, 1 : 대기중, 2 : 기간 만료, 3 : 결제완료) 견적서 리스트 보여주기
-	@GetMapping("/quotlist/{page}/{farmerId}/{state}")
-	public ResponseEntity<Map<String, Object>> quotList(@PathVariable Integer page, 
-			@PathVariable Long farmerId, @PathVariable String state) {
-		try {
-			PageInfo pageInfo = new PageInfo(page);
-			List<QuotationDto> quotList = farmerService.findQuotationByFarmerIdAndStateAndPage(farmerId, state, pageInfo);
-			Map<String, Object> res = new HashMap<>();
-			res.put("pageInfo", pageInfo);
-			res.put("quotList", quotList);
-			return new ResponseEntity<Map<String,Object>>(res, HttpStatus.OK);
-		} catch (Exception e) {
-			e.printStackTrace();
-			return new ResponseEntity<Map<String,Object>>(HttpStatus.BAD_REQUEST);
-		}
-	}
-	
-	// 견적서 취소
-	@PatchMapping("/quotdelete")
-	public ResponseEntity<String> quotdelete(@RequestBody QuotDelDto dto) {
-		try {
-			farmerService.updateQuotationByFarmerIdAndRequestIds(dto.getFarmerId(), dto.getIds());
-			return new ResponseEntity<String>(HttpStatus.OK);
-		} catch (Exception e) {
-			e.printStackTrace();
-			return new ResponseEntity<String>(HttpStatus.BAD_REQUEST);
-		}
-	}
-	
-	// 견적서 상세보기
-	@GetMapping("/quotdetail")
-	public ResponseEntity<Quotation> quotdetail(@PathVariable Long quotId) {
-		try {
-			Quotation quot = farmerService.findQuotationByQuotationId(quotId);
-			return new ResponseEntity<Quotation>(quot, HttpStatus.OK);
-		} catch (Exception e) {
-			e.printStackTrace();
-			return new ResponseEntity<Quotation>(HttpStatus.BAD_REQUEST);
-		}
-	}
-	
-	// 결제 완료 페이지
-	@GetMapping("/orderlist/{page}/{farmerId}/{type}")
-	public ResponseEntity<Map<String, Object>> orderList(@PathVariable Integer page, 
-			@PathVariable Long farmerId, @PathVariable String type) {
-		try {
-			PageInfo pageInfo = new PageInfo(page);
-			List<OrdersDto> orderList = farmerService.findOrdersByFarmerIdAndPage(farmerId, type, pageInfo);
-			Map<String, Object> res = new HashMap<>();
-			res.put("pageInfo", pageInfo);
-			res.put("orderList", orderList);
-			return new ResponseEntity<Map<String,Object>>(res, HttpStatus.OK);
-		} catch (Exception e) {
-			e.printStackTrace();
-			return new ResponseEntity<Map<String,Object>>(HttpStatus.BAD_REQUEST);
-		}
-	}
-	
-	// 결제 완료(매칭, 주문) 상세 보기
-	@GetMapping("/orderdetail/{farmerId}/{ordersId}/{type}")
-	public ResponseEntity<OrdersDto> orderDetail(@PathVariable Long farmerId,
-			@PathVariable Long ordersId, @PathVariable String type) {
-		try {
-			OrdersDto dto = null;
-			if(type.equals("0")) { // 매칭
-				dto = farmerService.OrdersDetailQuotationId(farmerId, ordersId);
-			} else if(type.equals("1")){ // 주문
-				dto = farmerService.OrdersDetailNotQuotationId(farmerId, ordersId);
-			}
-			return new ResponseEntity<OrdersDto>(dto, HttpStatus.OK);
-		} catch (Exception e) {
-			e.printStackTrace();
-			return new ResponseEntity<OrdersDto>(HttpStatus.BAD_REQUEST);
-		}
-	}
-
-	// 발송 완료 order 상태 변화, delivery 생성, 택배사 코드, 운송장번호
-	@GetMapping("/orderdelivery/{ordersId}/{tCode}/{tInvoice}")
-	public ResponseEntity<String> delivery(@PathVariable Long ordersId, @PathVariable String tCode, @PathVariable String tInvioce) {
-		try {
-			farmerService.updateDelivery(ordersId, tCode, tInvioce);
-			return new ResponseEntity<String>("성공", HttpStatus.OK);
-		} catch (Exception e) {
-			e.printStackTrace();
-			return new ResponseEntity<String>("실패", HttpStatus.BAD_REQUEST);
-		}
-	}
-	
-	// 판매 취소
-	@GetMapping("/ordercancel/{farmerId}/{ordersId}")
-	public ResponseEntity<String> delivery(@PathVariable Long farmerId, @PathVariable Long ordersId) {
-		try {
-			farmerService.updateOrderState(farmerId, ordersId);
-			return new ResponseEntity<String>("성공", HttpStatus.OK);
-		} catch (Exception e) {
-			e.printStackTrace();
-			return new ResponseEntity<String>("실패", HttpStatus.BAD_REQUEST);
-		}
-	}
-	
-	// 배송 현황(배송중, 배송완료) deliveryState
-	@GetMapping("/deliverylist/{page}/{deliveryState}/{farmerId}")
-	public ResponseEntity<Map<String, Object>> deliveryList(@PathVariable Integer page,
-			@PathVariable String deliveryState, @PathVariable Long farmerId) {
-		try {
-			PageInfo pageInfo = new PageInfo(page);
-			List<OrdersDto> deliveryList = farmerService.findOrdersByFarmerIdAndPage(farmerId, deliveryState, pageInfo);
-			Map<String, Object> res = new HashMap<>();
-			res.put("pageInfo", pageInfo);
-			res.put("orderList", deliveryList);
+			List<Request> reqList = farmerService.findRequestsByFarmInterest(farmerId, interestList.get(0));
+			res.put("interestList", interestList);
+			res.put("reqList", reqList);
 			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
 		}
 	}
-	
+
+	// 관심 농산물인 요청서 리스트 보기
+	@GetMapping("/requestlist")
+	public ResponseEntity<List<Request>> requestList(@RequestParam String farmInterest, Authentication authentication) {
+		// User user = (User) authentication.getPrincipal();
+		// Long farmerId= user.getFarmerId();
+		Long farmerId = (long) 1;
+		try {
+			List<Request> reqList = farmerService.findRequestsByFarmInterest(farmerId, farmInterest);
+			return new ResponseEntity<List<Request>>(reqList, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<List<Request>>(HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	// 견적서 보내기
+	@PostMapping("/regquot")
+	public ResponseEntity<String> regQuotation(@ModelAttribute Quotation quot, List<MultipartFile> images,
+			Authentication authentication) {
+		// User user = (User) authentication.getPrincipal();
+		// Long farmerId= user.getFarmerId();
+		Long farmerId = (long) 1;
+		try {
+			// 견적서 DB에 저장
+			farmerService.saveQuotation(quot, images);
+			return new ResponseEntity<String>("성공", HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<String>("실패", HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	// 파머 상품 등록
+	@PostMapping("regproduct")
+	public ResponseEntity<String> regProduct(@ModelAttribute Product product, MultipartFile titleImage,
+			List<MultipartFile> images) {
+		try {
+			farmerService.productEnter(product, titleImage, images);
+			return new ResponseEntity<String>("성공", HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<String>("실패", HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	// 견적 현황 페이지
+	// 견적서 상태로(0 : 견적서 취소, 1 : 대기중, 2 : 기간 만료, 3 : 결제완료) 견적서 리스트 보여주기
+	@GetMapping("/quotlist/{state}/{page}")
+	public ResponseEntity<Map<String, Object>> quotList(@PathVariable String state,
+			@PathVariable Integer page, Authentication authentication) {
+		// User user = (User) authentication.getPrincipal();
+		// Long farmerId= user.getFarmerId();
+		Long farmerId = (long) 1;
+		try {
+			PageInfo pageInfo = PageInfo.builder().curPage(page).build();
+			List<QuotationDto> quotList = farmerService.findQuotationByFarmerIdAndStateAndPage(farmerId, state, pageInfo);
+			// System.out.println(quotList.get(0).getAddress2());
+			Map<String, Object> res = new HashMap<>();
+			res.put("pageInfo", pageInfo);
+			res.put("quotList", quotList);
+			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	// 견적서 취소
+	@PostMapping("/quotdelete")
+	public ResponseEntity<String> quotdelete(@RequestBody QuotDelDto dto, Authentication authentication) {
+		// User user = (User) authentication.getPrincipal();
+		// Long farmerId= user.getFarmerId();
+		Long farmerId = (long) 1;
+		dto.setFarmerId(farmerId);
+		try {
+			farmerService.updateQuotationByFarmerIdAndRequestIds(dto.getFarmerId(), dto.getIds());
+			return new ResponseEntity<String>("성공", HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<String>("실패", HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	// 견적서 상세보기
+	@GetMapping("/quotdetail/{quotationId}")
+	public ResponseEntity<Quotation> quotdetail(@PathVariable Long quotationId,
+			Authentication authentication) {
+		// User user = (User) authentication.getPrincipal();
+		// Long farmerId= user.getFarmerId();
+		Long farmerId = (long) 1;
+		try {
+			Quotation quot = farmerService.findQuotationByQuotationId(farmerId, quotationId);
+			System.out.println(quot);
+			return new ResponseEntity<Quotation>(quot, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Quotation>(HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	// 결제 완료 페이지
+	@GetMapping("/orderlist/{type}/{page}")
+	public ResponseEntity<Map<String, Object>> orderList(Authentication authentication,
+			@PathVariable String type, @PathVariable Integer page) {
+		// User user = (User) authentication.getPrincipal();
+		// Long farmerId= user.getFarmerId();
+		Long farmerId = (long) 1;
+		try {
+			PageInfo pageInfo = new PageInfo(page);
+			List<PaymentDto> ordersList = farmerService.findOrdersByFarmerIdAndPage(farmerId, type, pageInfo);
+			Map<String, Object> res = new HashMap<>();
+			res.put("pageInfo", pageInfo);
+			res.put("ordersList", ordersList);
+			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	// 결제 완료(매칭, 주문) 상세 보기
+	@GetMapping("/orderdetail/{receiptId}/{type}")
+	public ResponseEntity<PaymentDto> orderDetail(Authentication authentication,
+			@PathVariable String receiptId, @PathVariable String type) {
+		// User user = (User) authentication.getPrincipal();
+		// Long farmerId= user.getFarmerId();
+		Long farmerId = (long) 1;
+		try {
+			System.out.println(type);
+			PaymentDto orders = farmerService.OrdersDetailQuotationId(farmerId, receiptId, type);
+			return new ResponseEntity<PaymentDto>(orders, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<PaymentDto>(HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	// 발송 완료(delivery 생성, 택배사 코드, 운송장번호)
+	@GetMapping("/sendparcel/{receiptId}/{code}/{name}/{invoice}")
+	public ResponseEntity<String> delivery(Authentication authentication,
+			@PathVariable String receiptId, @PathVariable String code, @PathVariable String name,
+			@PathVariable String invoice) {
+		User user = (User) authentication.getPrincipal();
+		Long farmerId = user.getFarmerId();
+		try {
+			// System.out.println("1");
+			// System.out.println("id " + ordersId);
+			// System.err.println("code " + code);
+			// System.out.println("invoice " + invoice);
+			farmerService.insertDeliveryAndInvoice(farmerId, receiptId, code, name, invoice);
+			return new ResponseEntity<String>("성공", HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<String>("실패", HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	// 판매 취소
+	@PostMapping("/ordercancel")
+	public ResponseEntity<String> delivery(Authentication authentication,
+			@RequestBody PaymentDto payDto) {
+		// User user = (User) authentication.getPrincipal();
+		// Long farmerId= user.getFarmerId();
+		Long farmerId = (long) 1;
+		try {
+			String receiptId = payDto.getReceiptId();
+			String cancelText = payDto.getCancelText();
+
+			farmerService.deleteOrderState(farmerId, receiptId, cancelText);
+			return new ResponseEntity<String>("성공", HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<String>("실패", HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	// 배송 현황( SHIPPING(배송중), COMPLETED(배송완료) )
+	@GetMapping("/deliverylist/{state}/{page}")
+	public ResponseEntity<Map<String, Object>> deliveryList(Authentication authentication,
+			@PathVariable Integer page, @PathVariable String state) {
+		// User user = (User) authentication.getPrincipal();
+		// Long farmerId= user.getFarmerId();
+		Long farmerId = (long) 1;
+		try {
+			// 처음 요청 시 page = 1로 설정
+			if (page == 0)
+				page = 1;
+			PageInfo pageInfo = new PageInfo(page);
+
+			List<PaymentDto> deliveryList = farmerService.findDeliberyByFarmerIdAndDeliveryState(farmerId, state, pageInfo);
+			Map<String, Object> res = new HashMap<>();
+			res.put("pageInfo", pageInfo);
+			res.put("deliveryList", deliveryList);
+
+			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
+		}
+	}
+
 	// 정산 내역
-	
+	@GetMapping("/invoice/{date}/{state}/{page}")
+	public ResponseEntity<Map<String, Object>> InvoiceList(Authentication authentication,
+			@PathVariable String date, @PathVariable String state, @PathVariable Integer page) {
+		// User user = (User) authentication.getPrincipal();
+		// Long farmerId= user.getFarmerId();
+		Long farmerId = (long) 1;
+		// Payment의 invoiceDate(정산예정일)을 구하기 위해 날짜 구분
+		String[] dates = date.split("~");
+		String sDate = dates[0];
+		String eDate = dates[1];
+
+		try {
+			// 처음 요청 시 page = 1로 설정
+			if (page == 0)
+				page = 1;
+			PageInfo pageInfo = new PageInfo(page);
+
+			List<PaymentDto> invoiceList = farmerService.findInvoicesByFarmerIdAndDateAndPage(farmerId, sDate, eDate, state,
+					pageInfo);
+
+			Map<String, Object> res = new HashMap<>();
+			res.put("pageInfo", pageInfo);
+			res.put("invoiceList", invoiceList);
+
+			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
+		}
+	}
 }

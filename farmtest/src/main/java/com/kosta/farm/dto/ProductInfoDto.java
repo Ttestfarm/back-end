@@ -4,6 +4,6 @@ import lombok.Data;
 
 @Data
 public class ProductInfoDto {
-	private String ProductName;
-	private Long thumbNail; 
+   private String ProductName;
+   private Long thumbNail;
 }

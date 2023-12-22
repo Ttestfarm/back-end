@@ -26,6 +26,6 @@ public class RequestDto {
 	private String address3;
 	private RequestStatus state = RequestStatus.REQUEST;
 	private String userName;
-	private Date createDate; //자동
+	private Date createDate; // 자동
 
 }

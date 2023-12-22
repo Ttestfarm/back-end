@@ -8,8 +8,6 @@ public interface UserService {
 
 	void join(JoinRequestDto request) throws Exception;
 
-	boolean checkEmail(String userEmail) throws Exception;
-
 	User login(LoginRequestDto request) throws Exception;
 
 	User getLoginUserByUserId(Long userId) throws Exception;
@@ -23,7 +21,9 @@ public interface UserService {
 	User findUserPassword(String userName, String userEmail) throws Exception;
 
 	String makeTempPassword() throws Exception;
-
+	
+	public boolean checkEmail(String userEmail) throws Exception;
+	
 	void updatePassword(Long userId, String newPassword) throws Exception;
 
 	void sendTempPasswordEmail(String userEmail, String tempPassword) throws Exception;
@@ -32,5 +32,5 @@ public interface UserService {
 
 	void certifiedTelNumber(String telNumber, String certifyNumber) throws Exception;
 
-//	User findByEmail(String buyerEmail);
+	void updateUserTel(User user, String newTel) throws Exception;
 }

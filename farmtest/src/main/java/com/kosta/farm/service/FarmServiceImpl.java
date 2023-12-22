@@ -29,7 +29,6 @@ import com.kosta.farm.entity.Farmerfollow;
 import com.kosta.farm.entity.FileVo;
 import com.kosta.farm.entity.PayInfo;
 import com.kosta.farm.entity.Product;
-import com.kosta.farm.entity.ProductFile;
 import com.kosta.farm.entity.Quotation;
 import com.kosta.farm.entity.Request;
 import com.kosta.farm.entity.Review;
@@ -158,8 +157,12 @@ public class FarmServiceImpl implements FarmService {
 		Request Nrequest = Request.builder().requestProduct(request.getRequestProduct())
 				.requestDate(request.getRequestDate()).requestMessage(request.getRequestMessage())
 				.requestQuantity(request.getRequestQuantity()).address1(request.getAddress1()).userId(request.getUserId())
+<<<<<<< HEAD
 				.tel(request.getTel())
 				.state(RequestStatus.REQUEST).build();
+=======
+				.tel(request.getTel()).state(RequestStatus.REQUEST).build();
+>>>>>>> 3853f8eb56a8875605801ab079fe1d5827a70e4f
 		Request add = requestRepository.save(Nrequest);
 		return add;
 	}
@@ -227,30 +230,30 @@ public class FarmServiceImpl implements FarmService {
 		String dir = "c:/jisu/upload/";
 		String fileNums = "";
 		if (thumbNail != null && !thumbNail.isEmpty()) {
-			ProductFile imageFile = ProductFile.builder().directory(dir).fileName(thumbNail.getOriginalFilename())
+			FileVo imageFile = FileVo.builder().directory(dir).fileName(thumbNail.getOriginalFilename())
 					.size(thumbNail.getSize()).build();
 			productFileRepository.save(imageFile);
-			File uploadFile = new File(dir + imageFile.getProductFileId());
+			File uploadFile = new File(dir + imageFile.getFileId());
 			thumbNail.transferTo(uploadFile);
-			product.setThumbNail(imageFile.getProductFileId());
+			product.setThumbNail(imageFile.getFileId());
 		}
 
 		if (files != null && files.size() != 0) {
 
 			for (MultipartFile file : files) {
 				// primgfiletable에 insert
-				ProductFile imageFile = ProductFile.builder().directory(dir).fileName(file.getOriginalFilename())
-						.size(file.getSize()).build();
-				productFileRepository.save(imageFile);
-
-				// upload 폴더에 upload
-				File uploadFile = new File(dir + imageFile.getProductFileId());
-				file.transferTo(uploadFile);
+//				FileVo imageFile = FileVo.builder().directory(dir).fileName(file.getOriginalFilename())
+//						.size(file.getSize()).build();
+//				productFileRepository.save(imageFile);
+//
+//				// upload 폴더에 upload
+//				FileVo uploadFile = new FileVo(dir + imageFile.getFileId());
+//				file.transferTo(uploadFile);
 
 				// file 번호 목록 만들기
 				if (!fileNums.equals(""))
 					fileNums += ",";
-				fileNums += imageFile.getProductFileId();
+//				fileNums += imageFile.getFileId();
 			}
 			product.setFileUrl(fileNums);
 		}
@@ -467,7 +470,7 @@ public class FarmServiceImpl implements FarmService {
 				Quotation quote = oQuote.get();
 				QuotationInfoDto quoteInfo = new QuotationInfoDto();
 				quoteInfo.setQuotationProduct(quote.getQuotationProduct());
-				quoteInfo.setQuotationPicture(quote.getQuotationPicture());
+				quoteInfo.setQuotationPicture(quote.getQuotationImages());
 				return quoteInfo;
 			} else {
 				return null;

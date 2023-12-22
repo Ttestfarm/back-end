@@ -17,7 +17,8 @@ import lombok.Data;
 @Data
 @Builder
 public class FileVo {
-	@Id @GeneratedValue(strategy=GenerationType.IDENTITY)
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long FileId;
 	@Column
 	private String fileName;

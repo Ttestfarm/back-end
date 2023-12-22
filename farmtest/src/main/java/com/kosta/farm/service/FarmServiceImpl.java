@@ -157,12 +157,7 @@ public class FarmServiceImpl implements FarmService {
 		Request Nrequest = Request.builder().requestProduct(request.getRequestProduct())
 				.requestDate(request.getRequestDate()).requestMessage(request.getRequestMessage())
 				.requestQuantity(request.getRequestQuantity()).address1(request.getAddress1()).userId(request.getUserId())
-<<<<<<< HEAD
-				.tel(request.getTel())
-				.state(RequestStatus.REQUEST).build();
-=======
 				.tel(request.getTel()).state(RequestStatus.REQUEST).build();
->>>>>>> 3853f8eb56a8875605801ab079fe1d5827a70e4f
 		Request add = requestRepository.save(Nrequest);
 		return add;
 	}

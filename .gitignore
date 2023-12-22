@@ -1,5 +1,5 @@
-# Created by https://www.toptal.com/developers/gitignore/api/java,eclipse
-# Edit at https://www.toptal.com/developers/gitignore?templates=java,eclipse
+# Created by https://www.toptal.com/developers/gitignore/api/windows,gradle,java,eclipse
+# Edit at https://www.toptal.com/developers/gitignore?templates=windows,gradle,java,eclipse
 
 ### Eclipse ###
 .metadata
@@ -13,12 +13,6 @@ local.properties
 .settings/
 .loadpath
 .recommenders
-*.bin
-*.lock
-.gradle
-application.properties
-Servers/
-.classpath
 
 # External tool builders
 .externalToolBuilders/
@@ -99,4 +93,70 @@ Servers/
 hs_err_pid*
 replay_pid*
 
-# End of https://www.toptal.com/developers/gitignore/api/java,eclipse
+### Windows ###
+# Windows thumbnail cache files
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+
+# Dump file
+*.stackdump
+
+# Folder config file
+[Dd]esktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+# Windows Installer files
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+
+# Windows shortcuts
+*.lnk
+
+### Gradle ###
+.gradle
+**/build/
+!src/**/build/
+
+# Ignore Gradle GUI config
+gradle-app.setting
+
+# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
+!gradle-wrapper.jar
+
+# Avoid ignore Gradle wrappper properties
+!gradle-wrapper.properties
+
+# Cache of project
+.gradletasknamecache
+
+# Eclipse Gradle plugin generated files
+# Eclipse Core
+.project
+# JDT-specific (Eclipse Java Development Tools)
+.classpath
+
+### Gradle Patch ###
+# Java heap dump
+*.hprof
+
+# End of https://www.toptal.com/developers/gitignore/api/windows,gradle,java,eclipse
+farmtest/farmtest.iml
+farmtest/.gradle/file-system.probe
+farmtest/.gradle/file-system.probe
+farmtest/.gradle/8.4/executionHistory/executionHistory.bin
+farmtest/.gradle/8.4/executionHistory/executionHistory.lock
+farmtest/.gradle/8.4/fileHashes/fileHashes.bin
+farmtest/.gradle/8.4/fileHashes/fileHashes.lock
+farmtest/.gradle/8.4/fileHashes/resourceHashesCache.bin
+<<<<<<< HEAD
+farmtest/.gradle/buildOutputCleanup/buildOutputCleanup.lock
+=======
+farmtest/.gradle/buildOutputCleanup/buildOutputCleanup.lock
+>>>>>>> 49edef382681aabb7ce741ba7a07c83a9192cffe

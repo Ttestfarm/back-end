@@ -424,8 +424,8 @@ public class FarmServiceImpl implements FarmService {
 	}
 
 	@Override
-	public Long requestCountByState(String requestState) throws Exception {
-		List<Request> requests = requestRepository.findByRequestState(requestState);
+	public Long requestCountByState(RequestStatus state) throws Exception {
+		List<Request> requests = requestRepository.findByState(state);
 		return (long) requests.size();
 	}
 

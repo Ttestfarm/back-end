@@ -237,13 +237,13 @@ public class FarmServiceImpl implements FarmService {
 
 			for (MultipartFile file : files) {
 				// primgfiletable에 insert
-//				FileVo imageFile = FileVo.builder().directory(dir).fileName(file.getOriginalFilename())
-//						.size(file.getSize()).build();
-//				productFileRepository.save(imageFile);
-//
-//				// upload 폴더에 upload
-//				FileVo uploadFile = new FileVo(dir + imageFile.getFileId());
-//				file.transferTo(uploadFile);
+				FileVo imageFile = FileVo.builder().directory(dir).fileName(file.getOriginalFilename())
+						.size(file.getSize()).build();
+				productFileRepository.save(imageFile);
+
+				// upload 폴더에 upload
+				File uploadFile = new File(dir + imageFile.getFileId());
+				file.transferTo(uploadFile);
 
 				// file 번호 목록 만들기
 				if (!fileNums.equals(""))

@@ -3,6 +3,8 @@ package com.kosta.farm.dto;
 import java.sql.Date;
 import java.sql.Timestamp;
 
+import com.kosta.farm.util.RequestStatus;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -22,7 +24,7 @@ public class RequestDto {
 	private String address1;
 	private String address2;
 	private String address3;
-	private String requestState;
+	private RequestStatus state = RequestStatus.REQUEST;
 	private String userName;
 	private Date createDate; // 자동
 

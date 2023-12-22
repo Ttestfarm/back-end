@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -37,7 +38,6 @@ import com.kosta.farm.util.PaymentStatus;
 import com.querydsl.core.Tuple;
 import com.siot.IamportRestClient.response.Payment;
 
-import antlr.StringUtils;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -466,6 +466,7 @@ public class FarmerServiceImpl implements FarmerService {
 			// 파일명 설정
 			String fileName = "profile_image_" + savedFarmer.getFarmerId() + "."
 					+ StringUtils.getFilenameExtension(farmPixurl.getOriginalFilename());
+
 
 			// 파일 저장 경로 설정
 			String filePath = Paths.get(dir, fileName).toString();

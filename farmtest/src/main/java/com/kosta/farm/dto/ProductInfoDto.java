@@ -5,5 +5,5 @@ import lombok.Data;
 @Data
 public class ProductInfoDto {
    private String ProductName;
-   private Long thumbNail; 
+   private Long thumbNail;
 }

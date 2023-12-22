@@ -33,7 +33,7 @@ public class QInvoice extends EntityPathBase<Invoice> {
 
     public final StringPath invoiceState = createString("invoiceState");
 
-    public final NumberPath<Long> orderId = createNumber("orderId", Long.class);
+    public final StringPath receiptId = createString("receiptId");
 
     public QInvoice(String variable) {
         super(Invoice.class, forVariable(variable));

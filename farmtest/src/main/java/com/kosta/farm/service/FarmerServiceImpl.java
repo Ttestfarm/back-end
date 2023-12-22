@@ -8,56 +8,56 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kosta.farm.dto.DeliveryDto;
-import com.kosta.farm.dto.InvoiceDto;
 import com.kosta.farm.dto.ModifyFarmDto;
-import com.kosta.farm.dto.OrdersDto;
+import com.kosta.farm.dto.PaymentDto;
 import com.kosta.farm.dto.QuotationDto;
 import com.kosta.farm.dto.RegFarmerDto;
-import com.kosta.farm.entity.Delivery;
 import com.kosta.farm.entity.Farmer;
-import com.kosta.farm.entity.Invoice;
-import com.kosta.farm.entity.Orders;
+import com.kosta.farm.entity.FileVo;
+import com.kosta.farm.entity.PayInfo;
+import com.kosta.farm.entity.Product;
 import com.kosta.farm.entity.Quotation;
 import com.kosta.farm.entity.Request;
-import com.kosta.farm.repository.DeliveryRepository;
 import com.kosta.farm.repository.FarmerDslRepository;
 import com.kosta.farm.repository.FarmerRepository;
-import com.kosta.farm.repository.InvoiceRepository;
-import com.kosta.farm.repository.OrdersRepository;
+import com.kosta.farm.repository.FileVoRepository;
+import com.kosta.farm.repository.PayInfoRepository;
+import com.kosta.farm.repository.ProductRepository;
 import com.kosta.farm.repository.QuotationRepository;
-import com.kosta.farm.repository.RequestRepository;
-import com.kosta.farm.repository.UserRepository;
-import com.kosta.farm.unti.PageInfo;
+import com.kosta.farm.util.PageInfo;
+import com.kosta.farm.util.PaymentStatus;
 import com.querydsl.core.Tuple;
+import com.siot.IamportRestClient.response.Payment;
 
+import antlr.StringUtils;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class FarmerServiceImpl implements FarmerService {
-	
+
 	private final UserService userService;
-	
+
 	// Repository
 	private final FarmerRepository farmerRepository;
-	private final RequestRepository requestRepository;
-	private final DeliveryRepository deliveryRepository;
-	private final OrdersRepository ordersRepository;
 	private final QuotationRepository quotationRepository;
-	private final InvoiceRepository invoiceRepository;
+	private final FileVoRepository fileVoRepository;
+	private final PayInfoRepository payInfoRepository;
+	private final ProductRepository productRepository;
 	// DSL
 	private final FarmerDslRepository farmerDslRepository;
 	private final ObjectMapper objectMapper;
+
+	@Value("$(upload.paht)")
+	private String dir;
 
 	// ** 매칭 주문 요청서 보기 **
 	// 파머 관신 농산물 조회
@@ -83,32 +83,60 @@ public class FarmerServiceImpl implements FarmerService {
 	}
 
 	// ** 견적서 **
-	@Override // 견적서 양식 (보내기 이벤트)-> 견적서 저장
-	public void saveQuotation(Quotation quotation) throws Exception {
+	// 견적서 보내기(저장)
+	@Override
+	public void saveQuotation(Quotation quotation, List<MultipartFile> images) throws Exception {
+		String fileNums = "";
+
+		if (images != null && images.size() != 0) {
+
+			for (MultipartFile img : images) {
+				// primgfiletable에 insert
+				FileVo imageFile = FileVo.builder().directory(dir).fileName(img.getOriginalFilename())
+						.size(img.getSize()).build();
+				fileVoRepository.save(imageFile);
+
+				// upload 폴더에 upload
+				File uploadFile = new File(dir + imageFile.getFileId());
+				img.transferTo(uploadFile);
+
+				// file 번호 목록 만들기
+				if (!fileNums.equals(""))
+					fileNums += ",";
+				fileNums += imageFile.getFileId();
+			}
+			quotation.setQuotationImages(fileNums);
+		}
+		// 견적서 DB에 저장
 		quotationRepository.save(quotation);
 	}
 
 	// ** 견적 현황 페이지 **
-	// 파머페이지 견적현황 state : 0 : 견적서 취소, 1 : 대기중, 2 : 기간 만료, 3 : 결제완료
+	// 견적서현황 state : CANCEL, READY, EXPIRED, COMPLETED
 	@Override
 	public List<QuotationDto> findQuotationByFarmerIdAndStateAndPage(Long farmerId, String state, PageInfo pageInfo)
 			throws Exception {
 		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 10); // 첫번째 값 : 페이지 번호, 두 번째 값 : 페이지 크기
+		System.out.println("here1");
 		List<Tuple> tuples = farmerDslRepository.findQuotationByFarmerIdAndStateAndPaging(farmerId, state, pageRequest);
+		System.out.println(tuples.size());
 		List<QuotationDto> quotList = new ArrayList<>();
 
 		for (Tuple t : tuples) {
 			QuotationDto dto = new QuotationDto();
 			Quotation quot = t.get(0, Quotation.class);
-			String address = t.get(1, String.class);
+			String address2 = t.get(1, String.class);
 
 			dto.setQuotationId(quot.getQuotationId());
-			dto.setProduct(quot.getQuotationProduct());
-			dto.setQuantity(quot.getQuotationQuantity());
-			dto.setPrice(quot.getQuotationPrice());
-			dto.setAddress(address);
-			dto.setState(quot.getQuotationState());
+			dto.setQuotationProduct(quot.getQuotationProduct());
+			dto.setQuotationQuantity(quot.getQuotationQuantity());
+			dto.setQuotationPrice(quot.getQuotationPrice());
+
+			dto.setAddress2(address2);
+			dto.setNewState(quot.getState().name());
+
 			quotList.add(dto);
+			System.out.println(dto);
 		}
 
 		Long allCount = farmerDslRepository.findQuotationCountByFarmerId(farmerId, state);
@@ -137,58 +165,80 @@ public class FarmerServiceImpl implements FarmerService {
 		return farmerDslRepository.findQuotationByQuotationId(farmerId, quotationId);
 	}
 
+	// 파머 상품 등록
+	public void productEnter(Product product, MultipartFile titleImage, List<MultipartFile> images) throws Exception {
+		String fileNums = "";
+
+		if (titleImage != null && !titleImage.isEmpty()) {
+			FileVo imageFile = FileVo.builder().directory(dir).fileName(titleImage.getOriginalFilename())
+					.size(titleImage.getSize()).build();
+			fileVoRepository.save(imageFile);
+
+			File uploadFile = new File(dir + imageFile.getFileId());
+			titleImage.transferTo(uploadFile);
+			product.setThumbNail(imageFile.getFileId());
+		}
+
+		if (images != null && images.size() != 0) {
+
+			for (MultipartFile img : images) {
+				// primgfiletable에 insert
+				FileVo imageFile = FileVo.builder().directory(dir).fileName(img.getOriginalFilename())
+						.size(img.getSize()).build();
+				fileVoRepository.save(imageFile);
+
+				// upload 폴더에 upload
+				File uploadFile = new File(dir + imageFile.getFileId());
+				img.transferTo(uploadFile);
+
+				// file 번호 목록 만들기
+				if (!fileNums.equals(""))
+					fileNums += ",";
+				fileNums += imageFile.getFileId();
+			}
+			product.setFileUrl(fileNums);
+		}
+		// product table에 insert
+		productRepository.save(product);
+	}
+
 	// 결제 완료 현황
 	@Override
-	public List<OrdersDto> findOrdersByFarmerIdAndPage(Long farmerId, String type, PageInfo pageInfo) throws Exception {
+	public List<PaymentDto> findOrdersByFarmerIdAndPage(Long farmerId, String type, PageInfo pageInfo) throws Exception {
 		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 10); // 첫번째 값 : 페이지 번호, 두 번째 값 : 페이지 크기
-		List<Tuple> tuples = null;
-		List<OrdersDto> ordList = new ArrayList<>();
+		List<PaymentDto> payList = new ArrayList<>();
 		Long allCount = null;
 		if (type.equals("1")) { // 매칭 주문
-			tuples = farmerDslRepository.findOrdersQuotByFarmerIdAndPaging(farmerId, pageRequest);
+			List<Tuple> tuples = farmerDslRepository.findOrdersQuotByFarmerIdAndPaging(farmerId, pageRequest);
 			for (Tuple t : tuples) {
-				OrdersDto dto = new OrdersDto();
-				Long ordersId = t.get(0, Long.class);
-				String product = t.get(1, String.class);
-				String quantity = t.get(2, String.class);
-				Integer price = t.get(3, Integer.class);
-				String name = t.get(4, String.class);
-				String tel = t.get(5, String.class);
-				String address = t.get(6, String.class);
-				dto.setOrdersId(ordersId);
-				dto.setProduct(product);
-				dto.setQuantity(quantity);
-				dto.setPrice(price);
-				dto.setName(name);
-				dto.setTel(tel);
-				dto.setAddress(address);
-				ordList.add(dto);
+				PaymentDto dto = new PaymentDto();
+				dto.setReceiptId(t.get(0, String.class));
+				dto.setProduct(t.get(1, String.class));
+				dto.setCount(t.get(2, Integer.class));
+				dto.setPrice(t.get(3, Integer.class));
+				dto.setBuyerName(t.get(4, String.class));
+				dto.setBuyerTel(t.get(5, String.class));
+				dto.setBuyerAddress(t.get(6, String.class) + t.get(7, String.class) + t.get(8, String.class));
+				payList.add(dto);
 			}
 			allCount = farmerDslRepository.findOrdersCountByFarmerIdAndQuotationIsNotNull(farmerId);
+
 		} else if (type.equals("2")) { // 받은 주문
-			tuples = farmerDslRepository.findOrdersByFarmerIdAndPaging(farmerId, pageRequest);
-			for (Tuple t : tuples) {
-				OrdersDto dto = new OrdersDto();
-				Long ordersId = t.get(0, Long.class);
-				String product = t.get(1, String.class);
-				String quantity = t.get(2, String.class);
-				Integer price = t.get(3, Integer.class);
-				String name = t.get(4, String.class);
-				String tel = t.get(5, String.class);
-				String address = t.get(6, String.class);
-
-				dto.setOrdersId(ordersId);
-				dto.setProduct(product);
-				dto.setQuantity(quantity);
-				dto.setPrice(price);
-				dto.setName(name);
-				dto.setTel(tel);
-				dto.setAddress(address);
-				ordList.add(dto);
-
+			List<PayInfo> tempList = farmerDslRepository.findOrdersByFarmerIdAndPaging(farmerId, pageRequest);
+			for (PayInfo pay : tempList) {
+				PaymentDto dto = new PaymentDto();
+				dto.setReceiptId(pay.getReceiptId());
+				dto.setProduct(pay.getProductName());
+				dto.setCount(pay.getCount());
+				dto.setPrice(pay.getProductPrice());
+				dto.setBuyerName(pay.getBuyerName());
+				dto.setBuyerTel(pay.getBuyerTel());
+				dto.setBuyerAddress(pay.getBuyerAddress());
+				payList.add(dto);
 			}
 			allCount = farmerDslRepository.findOrdersCountByFarmerIdAndQuotationIsNotNull(farmerId);
 		}
+
 		Integer allPage = (int) (Math.ceil(allCount.doubleValue() / pageRequest.getPageSize()));
 		Integer startPage = (pageInfo.getCurPage() - 1) / 10 * 10 + 1;
 		Integer endPage = Math.min(startPage + 10 - 1, allPage);
@@ -197,52 +247,74 @@ public class FarmerServiceImpl implements FarmerService {
 		pageInfo.setStartPage(startPage);
 		pageInfo.setEndPage(endPage);
 
-		return ordList;
+		return payList;
 	}
 
 	// 결제 완료(매칭) 상세 보기
-	public OrdersDto OrdersDetailQuotationId(Long farmerId, Long ordersId, String type) throws Exception {
-		Tuple tuple = null;
-		OrdersDto orders = new OrdersDto();
+	public PaymentDto OrdersDetailQuotationId(Long farmerId, String receiptId, String type) throws Exception {
+		PaymentDto payment = new PaymentDto();
 		if (type.equals("1")) {
-			tuple = farmerDslRepository.findOrderByFarmerIdAndOrderIdIsNotNull(farmerId, ordersId);
+			Tuple t = farmerDslRepository.findOrderByFarmerIdAndOrderIdIsNotNull(farmerId, receiptId);
+			PayInfo temp = t.get(0, PayInfo.class);
+			payment.setReceiptId(temp.getReceiptId());
+			payment.setPayType(temp.getPayType());
+			payment.setDeliveryprice(temp.getDeliveryprice()); // 배송비
+			payment.setAmount(temp.getAmount()); // 총 금액
+
+			payment.setProduct(t.get(1, String.class));
+			payment.setCount(t.get(2, Integer.class));
+			payment.setPrice(t.get(3, Integer.class)); // 품목 가격
+
+			payment.setBuyerName(t.get(4, String.class));
+			payment.setBuyerTel(t.get(5, String.class));
+			payment.setBuyerAddress(t.get(6, String.class) + t.get(7, String.class) + t.get(8, String.class));
+
+			Timestamp timestamp = temp.getPaidAt();
+			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+			String dateString = dateFormat.format(timestamp);
+			payment.setCreateDate(dateString);
+
 		} else if (type.equals("2")) {
-			tuple = farmerDslRepository.findOrderByFarmerIdAndOrderIdAndQuotaionIdIsNull(farmerId, ordersId);
+			PayInfo temp = farmerDslRepository.findOrderByFarmerIdAndOrderIdAndQuotaionIdIsNull(farmerId, receiptId);
+			payment.setReceiptId(temp.getReceiptId());
+			payment.setPayType(temp.getPayType());
+			payment.setDeliveryprice(temp.getDeliveryprice()); // 배송비
+			payment.setAmount(temp.getAmount()); // 총 금액
+
+			payment.setProduct(temp.getProduct());
+			payment.setCount(temp.getCount());
+			payment.setPrice(temp.getPrice());
+
+			payment.setBuyerName(temp.getBuyerName());
+			payment.setBuyerTel(temp.getBuyerTel());
+			payment.setBuyerAddress(temp.getBuyerAddress());
+
+			payment.setState(temp.getState());
+
+			Timestamp timestamp = temp.getCreateDate();
+			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+			String dateString = dateFormat.format(timestamp);
+			payment.setCreateDate(dateString);
 		}
-		orders.setOrdersId(tuple.get(0, Long.class));
-		orders.setProduct(tuple.get(1, String.class));
-		orders.setQuantity(tuple.get(2, String.class));
-		orders.setName(tuple.get(3, String.class));
-		orders.setTel(tuple.get(4, String.class));
-		orders.setAddress(tuple.get(5, String.class));
-		orders.setPrice(tuple.get(6, Integer.class));
-		orders.setPaymentBank(tuple.get(7, String.class));
-		orders.setDelivery(tuple.get(8, Integer.class));
-		orders.setPaymentState(tuple.get(9, String.class));
-		orders.setPaymentPrice(tuple.get(10, Integer.class));
 
-		Timestamp timestamp = tuple.get(11, Timestamp.class);
-		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-		String dateString = dateFormat.format(timestamp);
-		orders.setDate(dateString);
-
-		return orders;
+		return payment;
 	}
 
 	// 발송 완료 처리
 	@Transactional
-	public void insertDeliveryAndInvoice(Long farmerId, Long ordersId, String tCode, String tName, String tInvoice)
+	public void insertDeliveryAndInvoice(Long farmerId, String receiptId, String tCode, String tName, String tInvoice)
 			throws Exception {
 		// System.out.println("2");
 		// System.out.println("id " + ordersId);
 		// System.err.println("tCode " + tCode);
 		// System.out.println("tInvoice " + tInvoice);
-		deliveryRepository.save(Delivery.builder()
-				.ordersId(ordersId)
-				.tCode(tCode)
-				.tName(tName)
-				.tInvoice(tInvoice)
-				.build());
+		// payment 테이블에 배송 정보 저장
+		PayInfo payment = paymentRepository.findById(receiptId).get();
+		payment.setTCode(tCode);
+		payment.setTName(tName);
+		payment.setTInvoice(tInvoice);
+
+		// farmerDslRepository.updatePayment(receiptId, tCode, tName, tInvoice);
 
 		LocalDate currentDate = LocalDate.now();
 
@@ -257,72 +329,73 @@ public class FarmerServiceImpl implements FarmerService {
 		} else {
 			currentDate = currentDate.plusMonths(1).withDayOfMonth(25);
 		}
+
 		String temp = currentDate + "";
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 		Date date = (Date) dateFormat.parse(temp);
+		// 정산 예정일
+		payment.setInvoiceDate(date);
 
-		// invoiceRepository.save(Invoice.builder()
-		// .farmerId(farmerId)
-		// .orderId(ordersId)
-		// .invoiceDate(date)
-		// .invoiceCommission(3) // 매칭 3, 주문 5 구분
-		// .invoicePrice(null) // payment id
-		// );
-		// farmerDslRepository.insertDeliveryWithOrdersIdAndTCodeAndTInvoice(ordersId,
-		// tCode, tInvoice);
+		if (payment.getQuotationId().equals(null)) {
+			// matching
+			payment.setInvoiceCommission(5);
+			double amount = Double.parseDouble(payment.getAmount());
+			Integer money = (int) Math.floor(amount - (amount * 0.05));
+			payment.setInvoicePrice(money); // 정산금액 setter
+		} else {
+			// product
+			payment.setInvoiceCommission(3);
+			double amount = Double.parseDouble(payment.getAmount());
+			Integer money = (int) Math.floor(amount - (amount * 0.03));
+			payment.setInvoicePrice(money); // 정산금액 setter
+		}
+
+		// state 배송중(SHIPPING) 변경
+		payment.setState(PaymentStatus.SHIPPING);
+
+		// 변경 내용 저장
+		paymentRepository.save(payment);
 	}
 
 	// 판매 취소
 	@Transactional
-	public void deleteOrderState(Long farmerId, Long ordersId, String cancelText) throws Exception {
-		// Orders State 변경
-		farmerDslRepository.deleteOrderState(ordersId, farmerId, cancelText);
-
-		// Payment State 변경
-		Orders ord = ordersRepository.findById(ordersId).get();
-		Long paymentId = ord.getPaymentId();
-		farmerDslRepository.updatePaymentByOrdersId(paymentId);
+	public void deleteOrderState(Long farmerId, String receiptId, String cancelText) throws Exception {
+		// payment state 변경 (CANCEL) 및 cancelText (취소 사유) 추가
+		farmerDslRepository.updatePaymentStateCANCEL(farmerId, receiptId, cancelText);
 	}
 
 	// 배송 현황 리스트
 	@Override
-	public List<DeliveryDto> findDeliberyByFarmerIdAndDeliveryState(Long farmerId, String deliveryState,
+	public List<PaymentDto> findDeliberyByFarmerIdAndDeliveryState(Long farmerId, String state,
 			PageInfo pageInfo) throws Exception {
 		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 10); // 첫번째 값 : 페이지 번호, 두 번째 값 : 페이지 크기
-		List<Tuple> tuples = null;
-		List<DeliveryDto> deliveryList = new ArrayList<>();
+		List<PaymentDto> deliveryList = new ArrayList<>();
 		Long allCount = null;
 
-		tuples = farmerDslRepository.findOrdersIdAndDeliveryAndProductAndByDeliveryState(farmerId, deliveryState,
+		List<Payment> payList = farmerDslRepository.findOrdersIdAndDeliveryAndProductAndByDeliveryState(farmerId, state,
 				pageRequest);
-		for (Tuple t : tuples) {
-			DeliveryDto dto = new DeliveryDto();
-			Long deliveryId = t.get(0, Long.class);
-			System.out.println(deliveryState);
-			Long ordersId = t.get(1, Long.class);
-			String tCode = t.get(2, String.class);
-			String tName = t.get(3, String.class);
-			String tInvoice = t.get(4, String.class);
-			String state = t.get(5, String.class);
-			String product = t.get(6, String.class);
-			String quantity = t.get(7, String.class);
-			Integer price = t.get(8, Integer.class);
-			String address = t.get(9, String.class);
+		for (Payment p : payList) {
+			PaymentDto dto = new PaymentDto();
 
-			dto.setDeliveryId(deliveryId);
-			dto.setOrdersId(ordersId);
-			dto.setTCode(tCode);
-			dto.setTName(tName);
-			dto.setTInvoice(tInvoice);
-			dto.setDeliveryState(state);
-			dto.setProduct(product);
-			dto.setQuantity(quantity);
-			dto.setPrice(price);
-			dto.setAddress(address);
-			System.out.println(dto);
+			dto.setReceiptId(p.getReceiptId());
+
+			dto.setTCode(p.getTCode());
+			dto.setTName(p.getTName());
+			dto.setTInvoice(p.getTInvoice());
+
+			dto.setBuyerName(p.getBuyerName());
+			dto.setBuyerTel(p.getBuyerTel());
+			dto.setBuyerAddress(p.getBuyerAddress());
+
+			dto.setProduct(p.getProduct());
+			dto.setCount(p.getCount());
+			dto.setPrice(p.getPrice());
+
+			dto.setState(p.getState());
+
 			deliveryList.add(dto);
 		}
-		allCount = farmerDslRepository.findDeliveryCountByFarmerIdAndDeliveryState(farmerId, deliveryState);
+		allCount = farmerDslRepository.findDeliveryCountByFarmerIdAndDeliveryState(farmerId, state);
 		System.out.println("allCount " + allCount);
 
 		Integer allPage = (int) (Math.ceil(allCount.doubleValue() / pageRequest.getPageSize()));
@@ -337,32 +410,28 @@ public class FarmerServiceImpl implements FarmerService {
 	}
 
 	// 정산내역
-	public List<InvoiceDto> findInvoicesByFarmerIdAndDateAndPage(Long farmerId, String date, PageInfo pageInfo)
-			throws Exception {
+	public List<PaymentDto> findInvoicesByFarmerIdAndDateAndPage(Long farmerId, String sDate, String eDate, String state,
+			PageInfo pageInfo) throws Exception {
 		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 10); // 첫번째 값 : 페이지 번호, 두 번째 값 : 페이지 크기
-		List<Tuple> tuples = null;
-		List<InvoiceDto> invoiceList = new ArrayList<>();
+		List<Payment> payList = null;
+		List<PaymentDto> invoiceList = new ArrayList<>();
 		Long allCount = null;
 
-		// tuples =
-		// farmerDslRepository.findOrdersIdAndDeliveryAndProductAndByDeliveryState(farmerId,
-		// , pageRequest);
-		// for(Tuple t : tuples) {
-		//
-		// }
-		// allCount =
-		// farmerDslRepository.findDeliveryCountByFarmerIdAndDeliveryState(farmerId,
-		// deliveryState);
-		//
-		// Integer allPage =
-		// (int)(Math.ceil(allCount.doubleValue()/pageRequest.getPageSize()));
-		// Integer startPage = (pageInfo.getCurPage()-1)/10*10+1;
-		// Integer endPage = Math.min(startPage+10-1, allPage);
-		//
-		// pageInfo.setAllPage(allPage);
-		// pageInfo.setStartPage(startPage);
-		// pageInfo.setEndPage(endPage);
-		//
+		payList = farmerDslRepository.findOrdersIdAndDeliveryAndProductAndByDeliveryState(farmerId, sDate, eDate, state,
+				pageRequest);
+		for (Payment p : payList) {
+
+		}
+		allCount = farmerDslRepository.findDeliveryCountByFarmerIdAndDeliveryState(farmerId, state);
+
+		Integer allPage = (int) (Math.ceil(allCount.doubleValue() / pageRequest.getPageSize()));
+		Integer startPage = (pageInfo.getCurPage() - 1) / 10 * 10 + 1;
+		Integer endPage = Math.min(startPage + 10 - 1, allPage);
+
+		pageInfo.setAllPage(allPage);
+		pageInfo.setStartPage(startPage);
+		pageInfo.setEndPage(endPage);
+
 		return invoiceList;
 	}
 
@@ -370,16 +439,11 @@ public class FarmerServiceImpl implements FarmerService {
 	@Override
 	public Farmer registerFarmer(RegFarmerDto request, MultipartFile farmPixurl) throws Exception {
 
-		Farmer farmer = Farmer.builder()
-				.farmName(request.getFarmName())
-				.farmTel(request.getFarmTel())
-				.farmAddress(request.getFarmAddress())
-				.farmAddressDetail(request.getFarmAddressDetail())
-				.registrationNum(request.getRegistrationNum())
-				.farmBank(request.getFarmBank())
-				.farmAccountNum(request.getFarmAccountNum())
-				.build();
-		
+		Farmer farmer = Farmer.builder().farmName(request.getFarmName()).farmTel(request.getFarmTel())
+				.farmAddress(request.getFarmAddress()).farmAddressDetail(request.getFarmAddressDetail())
+				.registrationNum(request.getRegistrationNum()).farmBank(request.getFarmBank())
+				.farmAccountNum(request.getFarmAccountNum()).build();
+
 		// 관심품목 입력받아서 # 기준으로 파싱하여 각각 저장
 		String[] interests = request.getFarmInterest().replaceAll("^\\s*#*", "").split("#");
 		int numInterests = Math.min(interests.length, 5); // 최대 5개의 관심사로 제한
@@ -391,11 +455,11 @@ public class FarmerServiceImpl implements FarmerService {
 		farmer.setFarmInterest5(numInterests > 4 ? interests[4].trim() : null);
 
 		Farmer savedFarmer = farmerRepository.save(farmer);
-		
-//		if(telSelected) {
-//			userService.updateUserTel(loginUser, request.getFarmTel());
-//		}
-		
+
+		// if(telSelected) {
+		// userService.updateUserTel(loginUser, request.getFarmTel());
+		// }
+
 		if (farmPixurl != null && !farmPixurl.isEmpty()) {
 			String dir = "C:/Users/USER/upload";
 

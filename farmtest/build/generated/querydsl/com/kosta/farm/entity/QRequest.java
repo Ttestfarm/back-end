@@ -19,11 +19,15 @@ public class QRequest extends EntityPathBase<Request> {
 
     public static final QRequest request = new QRequest("request");
 
-    public final StringPath address = createString("address");
+    public final StringPath address1 = createString("address1");
+
+    public final StringPath address2 = createString("address2");
+
+    public final StringPath address3 = createString("address3");
 
     public final BooleanPath choiceState = createBoolean("choiceState");
 
-    public final DateTimePath<java.sql.Timestamp> createDate = createDateTime("createDate", java.sql.Timestamp.class);
+    public final DatePath<java.sql.Date> createDate = createDate("createDate", java.sql.Date.class);
 
     public final StringPath name = createString("name");
 
@@ -37,7 +41,7 @@ public class QRequest extends EntityPathBase<Request> {
 
     public final StringPath requestQuantity = createString("requestQuantity");
 
-    public final StringPath requestState = createString("requestState");
+    public final EnumPath<com.kosta.farm.util.RequestStatus> state = createEnum("state", com.kosta.farm.util.RequestStatus.class);
 
     public final StringPath tel = createString("tel");
 

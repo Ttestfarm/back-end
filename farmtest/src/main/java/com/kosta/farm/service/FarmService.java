@@ -7,7 +7,6 @@ import javax.servlet.ServletOutputStream;
 
 import org.springframework.web.multipart.MultipartFile;
 
-import com.kosta.farm.dto.FarmerDto;
 import com.kosta.farm.dto.FarmerInfoDto;
 import com.kosta.farm.dto.OrderHistoryDto;
 import com.kosta.farm.dto.ProductInfoDto;
@@ -22,10 +21,11 @@ import com.kosta.farm.entity.Quotation;
 import com.kosta.farm.entity.Request;
 import com.kosta.farm.entity.Review;
 import com.kosta.farm.util.PageInfo;
+import com.kosta.farm.util.RequestStatus;
 import com.querydsl.core.Tuple;
 
 public interface FarmService {
-	// 상품 등록???????
+	// 상품 등록
 	Long productEnter(Product product, MultipartFile thmbnail, List<MultipartFile> file) throws Exception;
 
 	// 리뷰 등록
@@ -101,10 +101,10 @@ public interface FarmService {
 	// 모든 농부들의 별점 평균
 	Double avgTotalRating() throws Exception;
 
-	// 모든 requestcount state이 1인거
-	Long requestCountByState(String requestState) throws Exception;
-	// requestCount state이 2인거?
+	// 모든 requestcount을 state별로
+	Long requestCountByState(RequestStatus state) throws Exception;
 
+	
 	Map<String, Object> quoteWithFarmerByRequestId(Long requestId) throws Exception;
 
 	ProductInfoDto getProductInfoFromOrder(PayInfo payInfo) throws Exception;

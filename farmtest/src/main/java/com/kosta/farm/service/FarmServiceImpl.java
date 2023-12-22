@@ -46,6 +46,7 @@ import com.kosta.farm.repository.RequestRepository;
 import com.kosta.farm.repository.ReviewRepository;
 import com.kosta.farm.repository.UserRepository;
 import com.kosta.farm.util.PageInfo;
+import com.kosta.farm.util.RequestStatus;
 import com.querydsl.core.Tuple;
 
 import lombok.RequiredArgsConstructor;
@@ -157,7 +158,8 @@ public class FarmServiceImpl implements FarmService {
 		Request Nrequest = Request.builder().requestProduct(request.getRequestProduct())
 				.requestDate(request.getRequestDate()).requestMessage(request.getRequestMessage())
 				.requestQuantity(request.getRequestQuantity()).address1(request.getAddress1()).userId(request.getUserId())
-				.tel(request.getTel()).requestState("1").build();
+				.tel(request.getTel())
+				.state(RequestStatus.REQUEST).build();
 		Request add = requestRepository.save(Nrequest);
 		return add;
 	}
@@ -424,8 +426,8 @@ public class FarmServiceImpl implements FarmService {
 	}
 
 	@Override
-	public Long requestCountByState(String requestState) throws Exception {
-		List<Request> requests = requestRepository.findByRequestState(requestState);
+	public Long requestCountByState(RequestStatus state) throws Exception {
+		List<Request> requests = requestRepository.findByState(state);
 		return (long) requests.size();
 	}
 

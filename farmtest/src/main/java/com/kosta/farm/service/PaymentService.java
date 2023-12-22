@@ -5,6 +5,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.math.BigDecimal;
 import java.net.URL;
 import java.util.Map;
 
@@ -79,11 +80,11 @@ public class PaymentService {
 		return token;
 	}
 
-	public Boolean paymentInfo(String imp_uid, String access_token, PayInfo payInfo) throws IOException {
+	public Boolean paymentInfo(String receiptId, String access_token, PayInfo payInfo) throws IOException {
 
 	    HttpsURLConnection conn = null;
 	    
-	    URL url = new URL("https://api.iamport.kr/payments/" + imp_uid);
+	    URL url = new URL("https://api.iamport.kr/payments/" + receiptId);
 	 
 	    conn = (HttpsURLConnection) url.openConnection();
 	 
@@ -101,7 +102,7 @@ public class PaymentService {
 	    conn.disconnect();
 	    
 	    if(response.getResponse().getAmount() != payInfo.getAmount().intValue()) {
-	    	paymentCancel(access_token, imp_uid, response.getResponse().getAmount(),"금액불일치" );
+	    	paymentCancel(access_token, receiptId, response.getResponse().getAmount(),"금액불일치" );
 	    	return false;
 	    }
 	    return true;
@@ -109,13 +110,10 @@ public class PaymentService {
 	
 	
 	
-	public void paymentCancel(String access_token, String imp_uid, int amount, String reason) throws IOException  {
+	public void paymentCancel(String access_token, String receiptId, Integer amount, String reason) throws IOException  {
 		System.out.println("결제 취소");
-		
 		System.out.println(access_token);
-		
-		System.out.println(imp_uid);
-		
+		System.out.println(receiptId);
 		HttpsURLConnection conn = null;
 		URL url = new URL("https://api.iamport.kr/payments/cancel");
  
@@ -132,7 +130,7 @@ public class PaymentService {
 		JsonObject json = new JsonObject();
  
 		json.addProperty("reason", reason);
-		json.addProperty("imp_uid", imp_uid);
+		json.addProperty("imp_uid", receiptId);
 		json.addProperty("amount", amount);
 		json.addProperty("checksum", amount);
  

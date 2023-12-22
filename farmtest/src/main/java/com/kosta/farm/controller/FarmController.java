@@ -34,6 +34,7 @@ import com.kosta.farm.entity.User;
 import com.kosta.farm.repository.ProductRepository;
 import com.kosta.farm.service.FarmService;
 import com.kosta.farm.util.PageInfo;
+import com.kosta.farm.util.RequestStatus;
 
 @RestController
 public class FarmController {
@@ -44,8 +45,7 @@ public class FarmController {
 
 	// 리뷰 작성하기 완성? 다시 확인해보기
 	@PostMapping("/buylist")
-	public ResponseEntity<String> insertReview(
-			@ModelAttribute ReviewDto review, MultipartFile reviewpixUrl) {
+	public ResponseEntity<String> insertReview(@ModelAttribute ReviewDto review, MultipartFile reviewpixUrl) {
 		try {
 			farmService.addReview(review.getReceiptId(), reviewpixUrl, review.getRating(), review.getContent());
 			return ResponseEntity.ok("리뷰 작성이 완료되었습니다");
@@ -53,8 +53,8 @@ public class FarmController {
 			e.printStackTrace();
 			return ResponseEntity.badRequest().body("리뷰작성 실패 " + e.getMessage());
 		}
-
 	}
+
 	// 상품 등록 이거도 나머지 완성해야함
 	@PostMapping("/farmer/regprod")
 	public ResponseEntity<Integer> regProduct(@ModelAttribute Product product, MultipartFile mainFile,
@@ -70,18 +70,13 @@ public class FarmController {
 	}
 
 	// 거의 완성 이거 한번 붙여보기
-	@PostMapping("/matching/{userId}") // 요청서 작성하기
+	@PostMapping("/matching/requestForm") // 요청서 작성하기
 	public ResponseEntity<String> writeRequest(
-			@PathVariable Long userId,
-			@ModelAttribute RequestDto request 
-//			Authentication authentication
-	) {
-//		User user = (User) authentication.getPrincipal();
-//		Long userId = user.getUserId();
+//			@PathVariable Long userId,
+			@ModelAttribute RequestDto request, Authentication authentication) {
+		User user = (User) authentication.getPrincipal();
+		Long userId = user.getUserId();
 		try {
-//			String tel = user.getUserTel();
-//			String address = user.getAddress1() + user.getAddress2() + user.getAddress3();
-//			// 만약 저기서 adderss를 입력 안햇으면 불러와야함
 			request.setUserId(userId);
 			Request req = farmService.addRequest(request);
 			return ResponseEntity.ok("요청서를 등록했습니다 : " + req);
@@ -121,6 +116,7 @@ public class FarmController {
 		}
 
 	}
+
 //
 ////    User loginUser = userService.getLoginUserByUserEmail(auth.getName());
 	@GetMapping("/findfarmer/{farmerId}") // default 기본페이지 디테일
@@ -207,13 +203,13 @@ public class FarmController {
 			PageInfo pageInfo = PageInfo.builder().curPage(page).build();
 			List<RequestDto> matchingList = farmService.requestListByPage(pageInfo);
 			Double average = farmService.avgTotalRating();
-			Long matchingProgress = farmService.requestCountByState("1");
+			Long matchingProgress = farmService.requestCountByState(RequestStatus.REQUEST);
 			// 매칭중 requeststate1
-			Long foundMatching = farmService.requestCountByState("2");
+			Long foundMatching = farmService.requestCountByState(RequestStatus.MATCHED);
 			// 매칭완료 requeststate2
 			Map<String, Object> res = new HashMap<>();
 			res.put("matchingList", matchingList);
-			res.put("average",Math.round(average*100.0)/100.0);
+			res.put("average", Math.round(average * 100.0) / 100.0);
 			res.put("matchingProgress", matchingProgress);
 			res.put("foundMatching", foundMatching);
 			res.put("pageInfo", pageInfo);
@@ -231,8 +227,8 @@ public class FarmController {
 	public ResponseEntity<Map<String, Object>> getFollowingFarmersByUserId(Authentication authentication,
 			@RequestParam(required = false, name = "page", defaultValue = "1") Integer page
 //			@PathVariable(required = false) Integer page
-			
-			)
+
+	)
 
 //			,
 	{
@@ -257,6 +253,7 @@ public class FarmController {
 			return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
 		}
 	}
+
 //
 	@GetMapping("/user") // 받은 매칭 견적 list
 	public ResponseEntity<Map<String, Object>> matchingList(
@@ -303,8 +300,6 @@ public class FarmController {
 				String receiptId = payInfo.getReceiptId();
 				OrderHistoryDto orderHistory = new OrderHistoryDto();
 				orderHistory.setPayInfo(payInfo);
-//			    Product productInfo = farmService.getProductInfoFromOrder(orders); // getProductInfo()를 통해 Product 정보 가져오기
-//			    orderHistory.setProductInfo(productInfo); // OrderHistoryDto에 Product 정보 설정
 				// order에 따른 리뷰
 				Review findreview = findReviewForOrder(reviewList, receiptId);
 				if (findreview != null) {
@@ -333,12 +328,13 @@ public class FarmController {
 
 	private Review findReviewForOrder(List<Review> reviewList, String receiptId) {
 		for (Review review : reviewList) {
-			if (review.getReceiptId().equals(receiptId)){
+			if (review.getReceiptId().equals(receiptId)) {
 				return review;
 			}
 		}
 		return null; // 리뷰가 없으면 null로 반환
 	}
+
 	@GetMapping("/user/{requestId}") // 받은 매칭 견적에서 견적서 자세히 보기
 	public ResponseEntity<Map<String, Object>> matchingListDetail(@PathVariable Long requestId) {
 		try {
@@ -351,9 +347,5 @@ public class FarmController {
 		}
 
 	}
-
-
-
-
 
 }

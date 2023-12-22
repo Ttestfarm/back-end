@@ -28,6 +28,9 @@ public class PublicServiceImpl implements PublicService {
 	@Value("$(upload.paht)")
 	private String uploadPath;
 	
+	@Value("${swetter.apiKey}")
+	String serviceKey = "";
+	
 	@Override
 	public void readImage(Integer num, OutputStream out) throws Exception {
 		FileInputStream fis = new FileInputStream(uploadPath + num);
@@ -39,10 +42,7 @@ public class PublicServiceImpl implements PublicService {
 	@Override
 	public List<CompanyDto> requestCompanyList() throws Exception {
 		StringBuilder sb = new StringBuilder("http://info.sweettracker.co.kr/api/v1/companylist?");
-		
-//		@Value("${swetter.apiKey}")
-		String serviceKey = "";
-		
+
 		sb.append(URLDecoder.decode("t_key="+serviceKey, "UTF-8"));
 		
 		URL url = new URL(sb.toString()); // http://info.sweettracker.co.kr/api/v1/companylist?t_key=

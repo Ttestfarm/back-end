@@ -45,7 +45,7 @@ public class QPayInfo extends EntityPathBase<PayInfo> {
 
     public final DatePath<java.sql.Date> invoiceDate = createDate("invoiceDate", java.sql.Date.class);
 
-    public final NumberPath<Integer> invoicePrice = createNumber("invoicePrice", Integer.class);
+    public final StringPath invoicePrice = createString("invoicePrice");
 
     public final StringPath ordersId = createString("ordersId");
 

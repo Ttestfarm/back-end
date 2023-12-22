@@ -1,8 +1,7 @@
 package com.kosta.farm.dto;
 
+import java.math.BigDecimal;
 import java.sql.Date;
-
-import javax.persistence.Column;
 
 import com.kosta.farm.util.PaymentStatus;
 
@@ -16,7 +15,6 @@ public class PaymentDto {
 	private Long productId;
 	private Long requestId;
 	private Long quotationId;
-	private Long deliveryId;
 
 	private String buyerName;
 	private String buyerTel;
@@ -26,21 +24,21 @@ public class PaymentDto {
 	private String tName; // 택배사 이름
 	private String tInvoice; // 송장번호
 	
-	private String product; // 품목
-	private Integer price; // 가격
+	private String productName; // 품목
+	private Integer productPrice; // 가격
 	private Integer count; // 수량
 	
-	private String deliveryprice; // 배송비
-	private String amount; // 총 결제 금액
-	private String payType; // 결제 방법
+	private Integer paymentDelivery; // 배송비
+	private BigDecimal amount; // 총 결제 금액
+	private String pgType; // 결제 방법
 	
 	private Date invoiceDate; // 정산예정일
 	private Integer invoiceCommission; // 수수료
-	private Integer invoicePrice; // 정산금액
+	private String invoicePrice; // 정산금액
 
 	private String cancelText; // 판매 취소 사유
 	
-	private String createDate; // 결제 완료 날짜
+	private String paidAt; // 결제 완료 날짜
 	private PaymentStatus state; // ERROR, PAID, FAILED, READY, SHIPPING, COMPLETED
 
 	

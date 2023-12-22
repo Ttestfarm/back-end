@@ -87,7 +87,7 @@ public class PayInfo {
 	@Column
 	private Integer invoiceCommission; // 수수료
 	@Column
-	private Integer invoicePrice; // 정산금액
+	private String invoicePrice; // 정산금액
 	
 	// 판매 취소
 	@Column

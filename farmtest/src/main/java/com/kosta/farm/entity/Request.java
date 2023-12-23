@@ -40,7 +40,7 @@ public class Request {
 	@Column
 	private String requestQuantity; // 요청 물량
 	@Column
-	private Date requestDate; // 요청 날짜
+	private String requestDate; // 요청 날짜
 	@Column
 	private String requestMessage; // 요청메세지
 	@Column
@@ -55,8 +55,8 @@ public class Request {
 	private String address2;
 	@Column
 	private String address3;
-	@CreationTimestamp
 	@Column
+	@CreationTimestamp
 	private Date createDate; // 자동
 	@Column
 	@Builder.Default

@@ -88,23 +88,6 @@ public class FarmServiceImpl implements FarmService {
 		return farmerList;
 	}
 
-	@Override // 파머 서치리스트 sorting 추가
-	public List<FarmerInfoDto> farmerSearchList(String keyword, String sortType, PageInfo pageInfo) throws Exception {
-		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 8, Sort.by(Sort.Direction.DESC, sortType));
-		Page<Farmer> pages = farmerRepository
-
-				.findByFarmInterest1ContainingOrFarmInterest2ContainingOrFarmInterest3ContainingOrFarmInterest4ContainingOrFarmInterest5Containing(
-						keyword, keyword, keyword, keyword, keyword, pageRequest);
-
-		pageInfo.setAllPage(pages.getTotalPages()); // 나머지가 필요 없다 b/c 무한 스크롤 현재 페이지랑 마지막 페이지만 필요하단
-		List<FarmerInfoDto> farmerDtoList = new ArrayList<>();
-		for (Farmer farmer : pages.getContent()) {
-			farmerDtoList.add(farmer.toDto());
-		}
-
-		return farmerDtoList;
-	}
-
 	@Override
 	public List<FarmerInfoDto> findfarmerDetail(Long farmerId) throws Exception {
 		List<Farmer> detail = farmerRepository.findListByFarmerId(farmerId);
@@ -116,23 +99,9 @@ public class FarmServiceImpl implements FarmService {
 		return farmerDtoList;
 	}
 
-	@Override // 파머리스트 sorting으로
-	public List<FarmerInfoDto> findFarmersWithSorting(String sortType, PageInfo pageInfo) throws Exception {
-		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 16,
-				Sort.by(Sort.Direction.DESC, sortType).and(Sort.by(Sort.Direction.DESC, "farmerId")));
-		Page<Farmer> pages = farmerRepository.findAll(pageRequest);
-		pageInfo.setAllPage(pages.getTotalPages());
-		// 나머지가 필요 없다 b/c 무한 스크롤 현재 페이지랑 마지막 페이지만 필요하다
-		List<FarmerInfoDto> farmerDtoList = new ArrayList<>();
-		for (Farmer farmer : pages.getContent()) {
-			farmerDtoList.add(farmer.toDto());
-		}
-		return farmerDtoList;
-	}
-
 	@Override
 	public List<Farmerfollow> getFollowingFarmersByUserId(Long userId, PageInfo pageInfo) throws Exception {
-		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 2,
+		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 9,
 				Sort.by(Sort.Direction.DESC, "farmerFollowId").and(Sort.by(Sort.Direction.DESC, "farmerId")));
 		Page<Farmerfollow> pages = farmerfollowRepository.findByUserId(userId, pageRequest);
 		pageInfo.setAllPage(pages.getTotalPages());
@@ -149,19 +118,18 @@ public class FarmServiceImpl implements FarmService {
 ////				Sort.by(Sort.Direction.DESC, "farmerfollowId").and(Sort.by(Sort.Direction.DESC, "farmerId")));
 //		return farmerfollowRepository.findByUserId(userId);
 //	}
-	
 
 	// 요청서 쓰기
 	@Override
 	public Request addRequest(RequestDto request) throws Exception {
 		Request Nrequest = Request.builder().requestProduct(request.getRequestProduct())
 				.requestDate(request.getRequestDate()).requestMessage(request.getRequestMessage())
-				.requestQuantity(request.getRequestQuantity()).address1(request.getAddress1()).userId(request.getUserId())
+				.requestQuantity(request.getRequestQuantity()).address1(request.getAddress1())
+				.address2(request.getAddress2()).address3(request.getAddress3()).userId(request.getUserId())
 				.tel(request.getTel()).state(RequestStatus.REQUEST).build();
 		Request add = requestRepository.save(Nrequest);
 		return add;
 	}
-
 	@Override // 리뷰 작성하기 ordersId에 해당하면 리뷰를 쓸 수 있다 근데 하나의 주문에 하나의 review만 쓸 수 있다 리뷰가 추가되면 파머
 	// rating field 업데이트
 	public void addReview(String receiptId, MultipartFile reviewpixUrl, Integer rating, String content)
@@ -294,7 +262,6 @@ public class FarmServiceImpl implements FarmService {
 	public List<Product> getProductListByFarmer(Long farmerId, PageInfo pageInfo) throws Exception {
 		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 3,
 				Sort.by(Sort.Direction.DESC, "productId"));
-		// 몇개씩 넣을지 고민
 		Page<Product> pages = productRepository.findProductByFarmerId(farmerId, pageRequest);
 		pageInfo.setAllPage(pages.getTotalPages());
 		int startPage = (pageInfo.getCurPage() - 1) / 10 * 10 + 1;
@@ -337,7 +304,7 @@ public class FarmServiceImpl implements FarmService {
 
 	}
 
-	@Override // 이미 했으면 지워진다
+	@Override // 이미 팔로우 했으면 지워진다
 	public Boolean selectedFarmerfollow(Long userId, Long farmerId) throws Exception {
 		Long cnt = farmDslRepository.findIsFarmerfollow(userId, farmerId);
 		if (cnt < 1)
@@ -358,13 +325,6 @@ public class FarmServiceImpl implements FarmService {
 		return farmerRepository.findById(farmerId).get();
 	}
 
-	@Override // 매칭 메인페이지
-	@Transactional
-	public List<RequestDto> requestListByPage(PageInfo pageInfo) throws Exception {
-
-		return farmDslRepository.requestListWithNameByPage(pageInfo);
-	}
-
 //	PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 3,
 //			Sort.by(Sort.Direction.DESC, "requestId"));
 //	Page<Request> pages = requestRepository.findAll(pageRequest);
@@ -374,6 +334,7 @@ public class FarmServiceImpl implements FarmService {
 //		requestList.add(request);
 //	}
 //	return requestList;
+
 	// 유저별로 리퀘스트쓴거
 	@Override // 노 스크롤 노페이지네이션
 	public List<Request> requestListByUser(Long userId) throws Exception {
@@ -390,7 +351,7 @@ public class FarmServiceImpl implements FarmService {
 		return quoteRepository.findQuoteByRequestId(requestId);
 	}
 
-	@Override // order랑 review를 가져오기 이거 안됨 오늘 해야함
+	@Override // order랑 review를 가져오기
 	public List<PayInfo> getOrdersandReviewByUser(Long userId) throws Exception {
 		return farmDslRepository.findPayInfowithReviewByUserId(userId);
 
@@ -412,24 +373,6 @@ public class FarmServiceImpl implements FarmService {
 	}
 
 	@Override
-	public Double avgTotalRating() throws Exception {
-		List<Farmer> farmers = farmerRepository.findAll();
-		double totalRating = 0;
-		Integer numberofFarmers = farmers.size();
-		for (Farmer farmer : farmers) {
-			totalRating += farmer.getRating();
-		}
-		return numberofFarmers > 0 ? totalRating / numberofFarmers : 0;
-
-	}
-
-	@Override
-	public Long requestCountByState(RequestStatus state) throws Exception {
-		List<Request> requests = requestRepository.findByState(state);
-		return (long) requests.size();
-	}
-
-	@Override
 	public Map<String, Object> quoteWithFarmerByRequestId(Long requestId) throws Exception {
 		return farmDslRepository.findQuotationsWithFarmerByRequestId(requestId);
 	}
@@ -439,7 +382,6 @@ public class FarmServiceImpl implements FarmService {
 		String receiptId = payInfo.getReceiptId();
 		Long productId = payInfo.getProductId();
 		Product product = productRepository.findById(productId).get();
-
 		// Product로부터 필요한 정보를 가져와 ProductInfoDto에 설정
 		if (product != null) {
 			ProductInfoDto productInfo = new ProductInfoDto();
@@ -479,13 +421,13 @@ public class FarmServiceImpl implements FarmService {
 
 	@Override
 	public OrderHistoryDto getOrderDetails(String recieptId) throws Exception {
-		PayInfo payInfo= payInfoRepository.findById(recieptId).get();
+		PayInfo payInfo = payInfoRepository.findById(recieptId).get();
 		OrderHistoryDto orderHistoryDto = new OrderHistoryDto();
 		orderHistoryDto.setPayInfo(payInfo);
 		return null;
 	}
 
-	@Override
+	@Override //payment정보 저장하기
 	public void savePaymentInfo(PayInfo payInfo) throws Exception {
 		payInfoRepository.save(payInfo);
 		Product product = null;
@@ -495,11 +437,10 @@ public class FarmServiceImpl implements FarmService {
 			if (currentStock == (null) || (currentStock < payInfo.getCount())) {
 				throw new Exception("상품의 재고가 부족합니다. 현재 재고 수량: " + currentStock);
 			} else {
-				product.setProductStock(currentStock-payInfo.getCount());
+				product.setProductStock(currentStock - payInfo.getCount());
 				productRepository.save(product);
 			}
-		} 
+		}
 	}
-
 
 }

@@ -10,11 +10,25 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
 
 import com.kosta.farm.dto.CompanyDto;
+import com.kosta.farm.dto.FarmerInfoDto;
+import com.kosta.farm.dto.RequestDto;
+import com.kosta.farm.entity.Farmer;
+import com.kosta.farm.entity.Request;
+import com.kosta.farm.repository.FarmDslRepository;
+import com.kosta.farm.repository.FarmerRepository;
+import com.kosta.farm.repository.RequestRepository;
+import com.kosta.farm.util.PageInfo;
+import com.kosta.farm.util.RequestStatus;
 import com.nimbusds.jose.shaded.json.JSONArray;
 import com.nimbusds.jose.shaded.json.JSONObject;
 import com.nimbusds.jose.shaded.json.parser.JSONParser;
@@ -24,8 +38,11 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class PublicServiceImpl implements PublicService {
-	
-	@Value("$(upload.paht)")
+	private final FarmDslRepository farmDslRepository;
+	private final RequestRepository requestRepository;
+	private final FarmerRepository farmerRepository;
+
+	@Value("$(upload.path)")
 	private String uploadPath;
 	
 	@Value("${swetter.apiKey}")
@@ -87,5 +104,59 @@ public class PublicServiceImpl implements PublicService {
 	    }
 		
 		return comList;
+	}
+
+	@Override
+	@Transactional
+	public List<RequestDto> requestListByPage(PageInfo pageInfo) throws Exception {
+		return farmDslRepository.requestListWithNameByPage(pageInfo);
+	}
+	
+	@Override
+	public Long requestCountByState(RequestStatus state) throws Exception {
+		List<Request> requests = requestRepository.findByState(state);
+		return (long) requests.size();
+	}
+	
+	@Override
+	public Double avgTotalRating() throws Exception {
+		List<Farmer> farmers = farmerRepository.findAll();
+		double totalRating = 0;
+		Integer numberofFarmers = farmers.size();
+		for (Farmer farmer : farmers) {
+			totalRating += farmer.getRating();
+		}
+		return numberofFarmers > 0 ? totalRating / numberofFarmers : 0;
+
+	}
+	
+	@Override // 파머리스트 sorting으로
+	public List<FarmerInfoDto> findFarmersWithSorting(String sortType, PageInfo pageInfo) throws Exception {
+		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 16,
+				Sort.by(Sort.Direction.DESC, sortType).and(Sort.by(Sort.Direction.DESC, "farmerId")));
+		Page<Farmer> pages = farmerRepository.findAll(pageRequest);
+		pageInfo.setAllPage(pages.getTotalPages());
+		// 나머지가 필요 없다 b/c 무한 스크롤 현재 페이지랑 마지막 페이지만 필요하다
+		List<FarmerInfoDto> farmerDtoList = new ArrayList<>();
+		for (Farmer farmer : pages.getContent()) {
+			farmerDtoList.add(farmer.toDto());
+		}
+		return farmerDtoList;
+	}
+	
+	@Override // 파머 서치리스트 sorting 추가
+	public List<FarmerInfoDto> farmerSearchList(String keyword, String sortType, PageInfo pageInfo) throws Exception {
+		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 8, Sort.by(Sort.Direction.DESC, sortType));
+		Page<Farmer> pages = farmerRepository
+
+				.findByFarmInterest1ContainingOrFarmInterest2ContainingOrFarmInterest3ContainingOrFarmInterest4ContainingOrFarmInterest5Containing(
+						keyword, keyword, keyword, keyword, keyword, pageRequest);
+		pageInfo.setAllPage(pages.getTotalPages()); // 나머지가 필요 없다 b/c 무한 스크롤 현재 페이지랑 마지막 페이지만 필요하단
+		List<FarmerInfoDto> farmerDtoList = new ArrayList<>();
+		for (Farmer farmer : pages.getContent()) {
+			farmerDtoList.add(farmer.toDto());
+		}
+
+		return farmerDtoList;
 	}
 }

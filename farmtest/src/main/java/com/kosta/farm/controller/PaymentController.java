@@ -33,9 +33,8 @@ public class PaymentController {
 			@RequestBody PayInfo payInfo)
 			throws IOException {
 		User user = (User) authentication.getPrincipal();
-		System.out.println(user);
 		Long userId = user.getUserId();
-
+System.out.println(userId);
 		String token = paymentService.getToken();
 
 		System.out.println("토큰 : " + token);

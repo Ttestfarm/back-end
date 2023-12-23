@@ -32,7 +32,7 @@ public class PayInfo {
     @Column
     private Long userId; // userId 참조
     @Column
-    private Long farmerId;
+    private Long farmerId; //농부 참조
     @Column
     private Long productId;
 	@Column
@@ -43,7 +43,7 @@ public class PayInfo {
 	//프론트에서 받아오는 수령인 및 제품 정보
     @Column
     private String paymentMethod; //결제 방법
-    @Column(nullable = true)
+    @Column(nullable = false)
     private BigDecimal amount; // 결제 금액
     @Column(nullable = true)
     private String status;

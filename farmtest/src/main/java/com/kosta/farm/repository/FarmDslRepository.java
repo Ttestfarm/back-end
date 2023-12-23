@@ -186,14 +186,8 @@ public class FarmDslRepository {
             .on(request.requestId.eq(quotation.requestId)).where(request.requestId.eq(requestId)).fetch();
 
    }
-//
-//   public List<Orders> findOrderswithReviewByUserId(Long userId) {
-//      QOrders orders = QOrders.orders;
-//      QReview review = QReview.review;
-//      return jpaQueryFactory.select(orders).from(orders).leftJoin(review).on(orders.ordersId.eq(review.ordersId))
-//            .where(orders.userId.eq(userId)).fetch();
-//   }
-//
+   
+//   public List<Tuple> getQuoteandReqInfoBy
 
    public List<PayInfo> findPayInfowithReviewByUserId(Long userId){
       QPayInfo payInfo= QPayInfo.payInfo;
@@ -208,15 +202,6 @@ public class FarmDslRepository {
 
    }
 
-   // 파머의 카테고리 이름 가져오기? ㄴㄴ farminterest 검색하기
-   public List<Tuple> getFarmersByCategory(String categoryName) {
-      QFarmer farmer = QFarmer.farmer;
-      QCategory category = QCategory.category;
-      QProduct product = QProduct.product;
-      return jpaQueryFactory.select(farmer, category.categoryName).from(product).join(farmer)
-            .on(product.farmerId.eq(farmer.farmerId)).join(category).on(product.categoryId.eq(category.categoryId))
-            .where(category.categoryName.eq(categoryName)).fetch();
-   }
    
    
 

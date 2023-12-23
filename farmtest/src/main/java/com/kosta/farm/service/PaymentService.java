@@ -22,7 +22,7 @@ import lombok.Data;
 
 @Service
 public class PaymentService {
-	
+	//토큰생성
 	@Value("${imp_key}")
 	private String impKey;
 
@@ -79,7 +79,7 @@ public class PaymentService {
 
 		return token;
 	}
-
+	//결제정보 불러오기
 	public Boolean paymentInfo(String imp_uid, String access_token, PayInfo payInfo) throws IOException {
 
 	    HttpsURLConnection conn = null;
@@ -113,7 +113,7 @@ public class PaymentService {
 	public void paymentCancel(String access_token, String imp_uid, Integer amount, String reason) throws IOException  {
 		System.out.println("결제 취소");
 		System.out.println(access_token);
-		System.out.println(imp_uid);
+		System.out.println("imp_uid = " + imp_uid);
 		HttpsURLConnection conn = null;
 		URL url = new URL("https://api.iamport.kr/payments/cancel");
  

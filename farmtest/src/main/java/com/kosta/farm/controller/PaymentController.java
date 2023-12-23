@@ -3,6 +3,7 @@ package com.kosta.farm.controller;
 import java.io.IOException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -14,27 +15,31 @@ import com.kosta.farm.entity.PayInfo;
 import com.kosta.farm.entity.User;
 import com.kosta.farm.service.FarmService;
 import com.kosta.farm.service.PaymentService;
+import com.siot.IamportRestClient.IamportClient;
+import com.siot.IamportRestClient.exception.IamportResponseException;
+import com.siot.IamportRestClient.response.IamportResponse;
+import com.siot.IamportRestClient.response.Payment;
 
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @RestController
 public class PaymentController {
+
 	@Autowired
 	private PaymentService paymentService;
 	@Autowired
 	private FarmService farmService;
 	
 	
+
 	// 카드 결제 성공 후
 	@PostMapping("/processPayment")
-	public ResponseEntity<String> processPayment(
-			Authentication authentication, 
-			@RequestBody PayInfo payInfo)
+	public ResponseEntity<String> processPayment(Authentication authentication, @RequestBody PayInfo payInfo)
 			throws IOException {
 		User user = (User) authentication.getPrincipal();
 		Long userId = user.getUserId();
-System.out.println(userId);
+		System.out.println(userId);
 		String token = paymentService.getToken();
 
 		System.out.println("토큰 : " + token);
@@ -44,9 +49,9 @@ System.out.println(userId);
 			Boolean paySuccess = paymentService.paymentInfo(payInfo.getReceiptId(), token, payInfo);
 			System.out.println(payInfo);
 			payInfo.setUserId(userId);
-			if(paySuccess) farmService.savePaymentInfo(payInfo);
+			if (paySuccess)
+				farmService.savePaymentInfo(payInfo);
 			return new ResponseEntity<>("주문이 완료되었습니다", HttpStatus.OK);
-
 		} catch (Exception e) {
 			e.printStackTrace();
 //			paymentService.payMentCancel(token, orderInfo.getImpUid(), amount, "결제 에러");
@@ -54,4 +59,5 @@ System.out.println(userId);
 		}
 
 	}
+
 }

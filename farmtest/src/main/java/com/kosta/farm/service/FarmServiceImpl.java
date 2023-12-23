@@ -10,6 +10,7 @@ import java.util.Optional;
 import javax.servlet.ServletOutputStream;
 import javax.transaction.Transactional;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -22,6 +23,7 @@ import com.kosta.farm.dto.FarmerInfoDto;
 import com.kosta.farm.dto.OrderHistoryDto;
 import com.kosta.farm.dto.ProductInfoDto;
 import com.kosta.farm.dto.QuotationInfoDto;
+import com.kosta.farm.dto.QuotePayDto;
 import com.kosta.farm.dto.RequestDto;
 import com.kosta.farm.dto.ReviewDto;
 import com.kosta.farm.entity.Farmer;
@@ -67,6 +69,13 @@ public class FarmServiceImpl implements FarmService {
 	private final UserService userService;
 	private final FileVoRepository fileVoRepository;
 	private final PayInfoRepository payInfoRepository;
+	private final RefundService refundService;
+
+	@Value("${imp_key}")
+	private String impKey;
+
+	@Value("${imp_secret}")
+	private String impSecret;
 
 	@Override // 이건 페이지네이션을 지원
 	public List<Farmer> farmerListByPage(PageInfo pageInfo) throws Exception {
@@ -130,6 +139,7 @@ public class FarmServiceImpl implements FarmService {
 		Request add = requestRepository.save(Nrequest);
 		return add;
 	}
+
 	@Override // 리뷰 작성하기 ordersId에 해당하면 리뷰를 쓸 수 있다 근데 하나의 주문에 하나의 review만 쓸 수 있다 리뷰가 추가되면 파머
 	// rating field 업데이트
 	public void addReview(String receiptId, MultipartFile reviewpixUrl, Integer rating, String content)
@@ -427,7 +437,7 @@ public class FarmServiceImpl implements FarmService {
 		return null;
 	}
 
-	@Override //payment정보 저장하기
+	@Override // payment정보 저장하기
 	public void savePaymentInfo(PayInfo payInfo) throws Exception {
 		payInfoRepository.save(payInfo);
 		Product product = null;
@@ -441,6 +451,23 @@ public class FarmServiceImpl implements FarmService {
 				productRepository.save(product);
 			}
 		}
+	}
+
+	@Override
+	public QuotePayDto getQuoteWithRequestInfoById(Long quotationId) throws Exception {
+		Quotation quote = quoteRepository.findById(quotationId).orElse(null);
+		if (quote != null) {
+			Long requestId = quote.getRequestId(); // 견적서가 참조하는 요청서id
+            // 요청서 정보 조회
+            Request request = requestRepository.findById(requestId).orElse(null);
+
+            if (request != null) {
+                // QuotePayDto에 견적서 정보와 요청서 정보를 담아 반환
+                return new QuotePayDto(quote, request);
+            }
+
+		}
+		return null; //둘다 존재하지 않으면 null;
 	}
 
 }

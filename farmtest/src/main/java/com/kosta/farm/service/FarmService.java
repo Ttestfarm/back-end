@@ -11,6 +11,7 @@ import com.kosta.farm.dto.FarmerInfoDto;
 import com.kosta.farm.dto.OrderHistoryDto;
 import com.kosta.farm.dto.ProductInfoDto;
 import com.kosta.farm.dto.QuotationInfoDto;
+import com.kosta.farm.dto.QuotePayDto;
 import com.kosta.farm.dto.RequestDto;
 import com.kosta.farm.dto.ReviewDto;
 import com.kosta.farm.entity.Farmer;
@@ -97,5 +98,6 @@ public interface FarmService {
 	OrderHistoryDto getOrderDetails(String receiptId) throws Exception;
 
 	void savePaymentInfo(PayInfo paymentInfo) throws Exception;
-
+	
+	QuotePayDto getQuoteWithRequestInfoById(Long quotationId) throws Exception;
 }

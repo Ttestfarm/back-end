@@ -22,6 +22,7 @@ import com.kosta.farm.dto.FarmerInfoDto;
 import com.kosta.farm.dto.OrderHistoryDto;
 import com.kosta.farm.dto.ProductInfoDto;
 import com.kosta.farm.dto.QuotationInfoDto;
+import com.kosta.farm.dto.QuotePayDto;
 import com.kosta.farm.dto.RequestDto;
 import com.kosta.farm.dto.RequestWithQuotationCountDTO;
 import com.kosta.farm.dto.ReviewDto;
@@ -29,6 +30,7 @@ import com.kosta.farm.entity.Farmer;
 import com.kosta.farm.entity.Farmerfollow;
 import com.kosta.farm.entity.PayInfo;
 import com.kosta.farm.entity.Product;
+import com.kosta.farm.entity.Quotation;
 import com.kosta.farm.entity.Request;
 import com.kosta.farm.entity.Review;
 import com.kosta.farm.entity.User;
@@ -206,11 +208,9 @@ public class FarmController {
 
 	// 구매내역 불러오기 하기 후기도 같이 불러옴
 	@GetMapping("/buylist")
-	public ResponseEntity<Map<String, Object>> buyList(
-//			Authentication authentication
-			@RequestParam Long userId) {
-//		User user = (User) authentication.getPrincipal();
-//		Long userId = user.getUserId();
+	public ResponseEntity<Map<String, Object>> buyList(Authentication authentication) {
+		User user = (User) authentication.getPrincipal();
+		Long userId = user.getUserId();
 		try {
 			Map<String, Object> res = new HashMap<>();
 			List<PayInfo> buyList = farmService.getOrdersListByUser(userId);
@@ -255,7 +255,7 @@ public class FarmController {
 		return null; // 리뷰가 없으면 null로 반환
 	}
 
-	@GetMapping("/user/{requestId}") // 받은 매칭 견적에서 견적서 자세히 보기
+	@GetMapping("/user/{requestId}") // 받은 매칭 견적에서 견적서리스트 자세히 보기
 	public ResponseEntity<Map<String, Object>> matchingListDetail(@PathVariable Long requestId) {
 		try {
 			Map<String, Object> res = farmService.quoteWithFarmerByRequestId(requestId);
@@ -266,6 +266,21 @@ public class FarmController {
 
 		}
 
+	}
+
+	@GetMapping("user/request/{quotationId}") // 받은 매칭 견적서에서 견적서 checkout..?
+	public ResponseEntity<Map<String, Object>> quoteDetail(Authentication authentication,
+			@PathVariable Long quotationId) {
+		try {
+
+			Map<String, Object> res = new HashMap<>();
+			QuotePayDto quote = farmService.getQuoteWithRequestInfoById(quotationId);
+			res.put("quote", quote);
+			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
+		}
 	}
 
 }

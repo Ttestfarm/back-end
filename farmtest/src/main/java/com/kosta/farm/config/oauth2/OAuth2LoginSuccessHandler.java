@@ -41,7 +41,8 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 			Authentication authentication) throws IOException, ServletException {
 
 		PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
-		String jwtToken = JWT.create().withSubject(principalDetails.getUsername())
+		String jwtToken = JWT.create()
+				.withSubject(principalDetails.getUsername())
 				.withExpiresAt(new Date(System.currentTimeMillis() + expireTime))
 				.withClaim("id", principalDetails.getUser().getUserId())
 				.withClaim("username", principalDetails.getUser().getUserEmail()).sign(Algorithm.HMAC512(secretKey));

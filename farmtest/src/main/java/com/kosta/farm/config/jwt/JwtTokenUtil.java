@@ -24,7 +24,6 @@ public class JwtTokenUtil {
 
 	// Claims에서 userEmail 꺼내기
 	public static String getUserEmail(String token, String secretKey) {
-
 		return extractClaims(token, secretKey).get("username").toString();
 	}
 

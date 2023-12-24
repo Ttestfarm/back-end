@@ -46,6 +46,8 @@ public class Quotation {
 	@Column
 	private Integer quotationPrice; // 가격
 	@Column
+	private Integer quotationDelivery; // 배송비
+	@Column
 	private String quotationComment; // 추가 설명
 	@Column
 	private String quotationImages; // 농산물 사진 5장

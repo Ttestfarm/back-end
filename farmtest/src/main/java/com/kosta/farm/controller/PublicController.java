@@ -51,7 +51,7 @@ public class PublicController {
 		}
 	}
 	
-	@GetMapping("/matching") // 매칭 메인 페이지를 보여준다
+	@GetMapping("/matching") // 매칭 메인 페이지를 보여준다 무한스크롤
 	public ResponseEntity<Map<String, Object>> matching(
 			@RequestParam(required = false, name = "page", defaultValue = "1") Integer page) {
 		try {

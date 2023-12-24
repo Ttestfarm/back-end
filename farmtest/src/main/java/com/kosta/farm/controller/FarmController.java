@@ -30,7 +30,6 @@ import com.kosta.farm.entity.Farmer;
 import com.kosta.farm.entity.Farmerfollow;
 import com.kosta.farm.entity.PayInfo;
 import com.kosta.farm.entity.Product;
-import com.kosta.farm.entity.Quotation;
 import com.kosta.farm.entity.Request;
 import com.kosta.farm.entity.Review;
 import com.kosta.farm.entity.User;
@@ -148,12 +147,9 @@ public class FarmController {
 	}
 
 	// 유저의 파머찜리스트
-//	@GetMapping({"/user/followlist", "/user/followlist/{page}"})
 	@GetMapping("/user/followlist")
 	public ResponseEntity<Map<String, Object>> getFollowingFarmersByUserId(Authentication authentication,
 			@RequestParam(required = false, name = "page", defaultValue = "1") Integer page
-//			@PathVariable(required = false) Integer page
-
 	)
 
 	{
@@ -180,7 +176,7 @@ public class FarmController {
 	}
 
 //
-	@GetMapping("/user") // 마이페이지 메인 받은 매칭 견적 list
+	@GetMapping("/user") // 마이페이지 메인 받은 매칭 견적 list 무한스크롤
 	public ResponseEntity<Map<String, Object>> matchingList(Authentication authentication) {
 		User user = (User) authentication.getPrincipal();
 		Long userId = user.getUserId();
@@ -206,14 +202,24 @@ public class FarmController {
 
 	}
 
-	// 구매내역 불러오기 하기 후기도 같이 불러옴
-	@GetMapping("/buylist")
-	public ResponseEntity<Map<String, Object>> buyList(Authentication authentication) {
-		User user = (User) authentication.getPrincipal();
-		Long userId = user.getUserId();
+	// 구매내역 불러오기 하기 후기도 같이 불러옴 무한스크롤 필터기능?
+	@GetMapping("/buylist/{userId}")
+	public ResponseEntity<Map<String, Object>> buyList(
+//			@RequestParam(required = false, name = "filterType") String filterType,
+//			@RequestParam(required = false, name = "page", defaultValue = "1") Integer page,
+//			Authentication authentication
+			@PathVariable Long userId
+			
+			) {
+//		User user = (User) authentication.getPrincipal();
+//		Long userId = user.getUserId();
 		try {
+//			PageInfo pageInfo = PageInfo.builder().curPage(page).build();
 			Map<String, Object> res = new HashMap<>();
 			List<PayInfo> buyList = farmService.getOrdersListByUser(userId);
+			System.out.println(buyList);
+			System.out.println("여기요"+ userId);
+			
 			List<OrderHistoryDto> OrdersWithReview = new ArrayList<>();
 			List<Review> reviewList = farmService.getReviewListByUser(userId);
 			for (PayInfo payInfo : buyList) {
@@ -225,19 +231,21 @@ public class FarmController {
 				if (findreview != null) {
 					orderHistory.setReview(findreview);
 				}
-				// 주문에 대한 상품 정보(ProductInfoDto) 가져오기
-				ProductInfoDto productInfo = farmService.getProductInfoFromOrder(payInfo);
-				if (productInfo != null) {
-					orderHistory.setProductInfo(productInfo);
-				}
-				// 주문에 대한 견적 정보(QuotationInfoDto) 가져오기
-				QuotationInfoDto quotationInfo = farmService.getQuotationInfoFromOrder(payInfo);
-				if (quotationInfo != null) {
-					orderHistory.setQuotationInfo(quotationInfo);
-				}
+//				 주문에 대한 상품 정보(ProductInfoDto) 가져오기 이거 고쳐야하네
+//				ProductInfoDto productInfo = farmService.getProductInfoFromOrder(payInfo);
+//				if (productInfo != null) {
+//					orderHistory.setProductInfo(productInfo);
+//				}
+//				 주문에 대한 견적 정보(QuotationInfoDto) 가져오기
+//				QuotationInfoDto quotationInfo = farmService.getQuotationInfoFromOrder(payInfo);
+//				if (quotationInfo != null) {
+//					orderHistory.setQuotationInfo(quotationInfo);
+//				} 
+				
 				OrdersWithReview.add(orderHistory);
 			}
 			res.put("OrdersWithReview", OrdersWithReview);
+//			res.put("pageInfo", pageInfo);
 			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -245,7 +253,6 @@ public class FarmController {
 
 		}
 	}
-
 	private Review findReviewForOrder(List<Review> reviewList, String receiptId) {
 		for (Review review : reviewList) {
 			if (review.getReceiptId().equals(receiptId)) {
@@ -267,7 +274,6 @@ public class FarmController {
 		}
 
 	}
-
 	@GetMapping("user/request/{quotationId}") // 받은 매칭 견적서에서 견적서 checkout..?
 	public ResponseEntity<Map<String, Object>> quoteDetail(Authentication authentication,
 			@PathVariable Long quotationId) {

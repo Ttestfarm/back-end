@@ -121,13 +121,6 @@ public class FarmServiceImpl implements FarmService {
 		return farmerfollowList;
 	}
 
-//	@Override
-//	public List<Farmerfollow> getFollowingFarmersByUserId(Long userId) throws Exception {
-////		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 9,
-////				Sort.by(Sort.Direction.DESC, "farmerfollowId").and(Sort.by(Sort.Direction.DESC, "farmerId")));
-//		return farmerfollowRepository.findByUserId(userId);
-//	}
-
 	// 요청서 쓰기
 	@Override
 	public Request addRequest(RequestDto request) throws Exception {
@@ -335,20 +328,11 @@ public class FarmServiceImpl implements FarmService {
 		return farmerRepository.findById(farmerId).get();
 	}
 
-//	PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 3,
-//			Sort.by(Sort.Direction.DESC, "requestId"));
-//	Page<Request> pages = requestRepository.findAll(pageRequest);
-//	pageInfo.setAllPage(pages.getTotalPages());
-//	List<Request> requestList = new ArrayList<>();
-//	for (Request request : pages.getContent()) {
-//		requestList.add(request);
-//	}
-//	return requestList;
-
 	// 유저별로 리퀘스트쓴거
-	@Override // 노 스크롤 노페이지네이션
+	@Override
 	public List<Request> requestListByUser(Long userId) throws Exception {
-		return requestRepository.findRequestByUserId(userId);
+//		return requestRepository.findRequestByUserId(userId);
+		return requestRepository.findRequestByUserIdOrderByRequestIdDesc(userId);
 	}
 
 	@Override // 유저별로 오더리스트 가져오기
@@ -458,16 +442,16 @@ public class FarmServiceImpl implements FarmService {
 		Quotation quote = quoteRepository.findById(quotationId).orElse(null);
 		if (quote != null) {
 			Long requestId = quote.getRequestId(); // 견적서가 참조하는 요청서id
-            // 요청서 정보 조회
-            Request request = requestRepository.findById(requestId).orElse(null);
+			// 요청서 정보 조회
+			Request request = requestRepository.findById(requestId).orElse(null);
 
-            if (request != null) {
-                // QuotePayDto에 견적서 정보와 요청서 정보를 담아 반환
-                return new QuotePayDto(quote, request);
-            }
+			if (request != null) {
+				// QuotePayDto에 견적서 정보와 요청서 정보를 담아 반환
+				return new QuotePayDto(quote, request);
+			}
 
 		}
-		return null; //둘다 존재하지 않으면 null;
+		return null; // 둘다 존재하지 않으면 null;
 	}
 
 }

@@ -52,6 +52,9 @@ public interface FarmService {
 
 	List<PayInfo> getOrdersandReviewByUser(Long userId) throws Exception;
 
+//	List<PayInfo> getCompletedOrdersByUser(Long userId) throws Exception;
+//	List<PayInfo> getProcessingOrdersByUser(Long userId) throws Exception;
+
 	// 요청서 등록
 	Request addRequest(RequestDto request) throws Exception;
 
@@ -81,7 +84,7 @@ public interface FarmService {
 	void readImage(Integer num, ServletOutputStream outputStream) throws Exception;
 
 	List<Request> requestListByUser(Long userId) throws Exception;
-
+	
 	List<Quotation> quoteListByRequest(Long requestId) throws Exception;
 
 	List<Tuple> quoteandRequestListByRequestId(Long requestId) throws Exception;
@@ -98,6 +101,6 @@ public interface FarmService {
 	OrderHistoryDto getOrderDetails(String receiptId) throws Exception;
 
 	void savePaymentInfo(PayInfo paymentInfo) throws Exception;
-	
+
 	QuotePayDto getQuoteWithRequestInfoById(Long quotationId) throws Exception;
 }

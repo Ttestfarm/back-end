@@ -72,11 +72,11 @@ public class PayInfo {
 	private String buyerAddress;
 
     @CreationTimestamp
-    private LocalDateTime createAt;
+    private Date createAt;
     private Date paidAt; // 결제 완료 일시
     private String pgType;
     private String pgTid;
-    private LocalDateTime failedAt; // 결제 실패 일시
+    private Date failedAt; // 결제 실패 일시
 	
 	// 정산
 	@Column

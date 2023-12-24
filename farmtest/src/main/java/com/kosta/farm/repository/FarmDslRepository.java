@@ -12,12 +12,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kosta.farm.dto.ProductInfoDto;
 import com.kosta.farm.dto.RequestDto;
 import com.kosta.farm.entity.Farmer;
 import com.kosta.farm.entity.Farmerfollow;
 import com.kosta.farm.entity.PayInfo;
 import com.kosta.farm.entity.Product;
-import com.kosta.farm.entity.QCategory;
 import com.kosta.farm.entity.QFarmer;
 import com.kosta.farm.entity.QFarmerfollow;
 import com.kosta.farm.entity.QPayInfo;
@@ -140,6 +140,13 @@ public class FarmDslRepository {
         }
       return list;
    }
+   
+//   public List<ProductInfoDto> productInfo(Long productId) throws Exception{
+//	   QProduct product= QProduct.product;
+//	   ProductInfoDto productInfo = new JPAQuery<>(entityManager)
+//	   
+//   }
+   
    public Map<String, Object> findQuotationsWithFarmerByRequestId(Long requestId) {
       QQuotation quotation = QQuotation.quotation;
       QFarmer farmer = QFarmer.farmer;
@@ -186,14 +193,8 @@ public class FarmDslRepository {
             .on(request.requestId.eq(quotation.requestId)).where(request.requestId.eq(requestId)).fetch();
 
    }
-//
-//   public List<Orders> findOrderswithReviewByUserId(Long userId) {
-//      QOrders orders = QOrders.orders;
-//      QReview review = QReview.review;
-//      return jpaQueryFactory.select(orders).from(orders).leftJoin(review).on(orders.ordersId.eq(review.ordersId))
-//            .where(orders.userId.eq(userId)).fetch();
-//   }
-//
+   
+//   public List<Tuple> getQuoteandReqInfoBy
 
    public List<PayInfo> findPayInfowithReviewByUserId(Long userId){
       QPayInfo payInfo= QPayInfo.payInfo;
@@ -208,15 +209,6 @@ public class FarmDslRepository {
 
    }
 
-   // 파머의 카테고리 이름 가져오기? ㄴㄴ farminterest 검색하기
-   public List<Tuple> getFarmersByCategory(String categoryName) {
-      QFarmer farmer = QFarmer.farmer;
-      QCategory category = QCategory.category;
-      QProduct product = QProduct.product;
-      return jpaQueryFactory.select(farmer, category.categoryName).from(product).join(farmer)
-            .on(product.farmerId.eq(farmer.farmerId)).join(category).on(product.categoryId.eq(category.categoryId))
-            .where(category.categoryName.eq(categoryName)).fetch();
-   }
    
    
 

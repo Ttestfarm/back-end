@@ -15,7 +15,7 @@ public class RequestDto {
 	private Long requestId;
 	private String requestProduct;
 	private String requestQuantity;
-	private Date requestDate;
+	private String requestDate;
 	private String requestMessage;
 	private Boolean choiceState; // 0 본인(기본 배송지), 1 선물
 

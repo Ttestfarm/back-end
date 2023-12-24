@@ -11,6 +11,7 @@ import com.kosta.farm.dto.FarmerInfoDto;
 import com.kosta.farm.dto.OrderHistoryDto;
 import com.kosta.farm.dto.ProductInfoDto;
 import com.kosta.farm.dto.QuotationInfoDto;
+import com.kosta.farm.dto.QuotePayDto;
 import com.kosta.farm.dto.RequestDto;
 import com.kosta.farm.dto.ReviewDto;
 import com.kosta.farm.entity.Farmer;
@@ -21,7 +22,6 @@ import com.kosta.farm.entity.Quotation;
 import com.kosta.farm.entity.Request;
 import com.kosta.farm.entity.Review;
 import com.kosta.farm.util.PageInfo;
-import com.kosta.farm.util.RequestStatus;
 import com.querydsl.core.Tuple;
 
 public interface FarmService {
@@ -51,14 +51,14 @@ public interface FarmService {
 
 	List<PayInfo> getOrdersandReviewByUser(Long userId) throws Exception;
 
+//	List<PayInfo> getCompletedOrdersByUser(Long userId) throws Exception;
+//	List<PayInfo> getProcessingOrdersByUser(Long userId) throws Exception;
+
 	// 요청서 등록
 	Request addRequest(RequestDto request) throws Exception;
 
 	// 파머리스트 페이지
 	List<Farmer> farmerListByPage(PageInfo pageInfo) throws Exception;
-
-	// 소트별로
-	List<FarmerInfoDto> findFarmersWithSorting(String sortType, PageInfo pageInfo) throws Exception;
 
 	List<FarmerInfoDto> findfarmerDetail(Long farmerId) throws Exception;
 	// 파머리스트 페이지 (무한스크롤)
@@ -82,15 +82,8 @@ public interface FarmService {
 
 	void readImage(Integer num, ServletOutputStream outputStream) throws Exception;
 
-	// 키워드로 농부 검색하기
-	List<FarmerInfoDto> farmerSearchList(String sortType, String keyword, PageInfo pageInfo) throws Exception;
-
-
-	// 매칭 리스트 가져오기? 매칭 메인 페이지
-	List<RequestDto> requestListByPage(PageInfo pageInfo) throws Exception;
-
 	List<Request> requestListByUser(Long userId) throws Exception;
-
+	
 	List<Quotation> quoteListByRequest(Long requestId) throws Exception;
 
 	List<Tuple> quoteandRequestListByRequestId(Long requestId) throws Exception;
@@ -98,16 +91,9 @@ public interface FarmService {
 	// 견적서 수 요청서id별로
 	Long quoteCount(Long requestId) throws Exception;
 
-	// 모든 농부들의 별점 평균
-	Double avgTotalRating() throws Exception;
-
-	// 모든 requestcount을 state별로
-	Long requestCountByState(RequestStatus state) throws Exception;
-
-	
 	Map<String, Object> quoteWithFarmerByRequestId(Long requestId) throws Exception;
 
-	ProductInfoDto getProductInfoFromOrder(PayInfo payInfo) throws Exception;
+	ProductInfoDto getProductInfoByProductId(Long productId) throws Exception;
 
 	QuotationInfoDto getQuotationInfoFromOrder(PayInfo payInfo) throws Exception;
 
@@ -115,4 +101,5 @@ public interface FarmService {
 
 	void savePaymentInfo(PayInfo paymentInfo) throws Exception;
 
+	QuotePayDto getQuoteWithRequestInfoById(Long quotationId) throws Exception;
 }

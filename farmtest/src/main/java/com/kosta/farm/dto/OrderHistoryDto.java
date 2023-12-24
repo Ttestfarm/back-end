@@ -1,27 +1,9 @@
 package com.kosta.farm.dto;
 
-import java.sql.Timestamp;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kosta.farm.entity.PayInfo;
-//import com.kosta.farm.entity.Orders;
-import com.kosta.farm.entity.Product;
 import com.kosta.farm.entity.Review;
-//import com.kosta.farm.repository.FarmDslRepository;
-//import com.kosta.farm.repository.FarmerDslRepository;
-import com.kosta.farm.repository.FarmerRepository;
-import com.kosta.farm.repository.FarmerfollowRepository;
-//import com.kosta.farm.repository.OrdersRepository;
-import com.kosta.farm.repository.ProductFileRepository;
-import com.kosta.farm.repository.ProductRepository;
-import com.kosta.farm.repository.QuotationRepository;
-import com.kosta.farm.repository.RequestRepository;
-import com.kosta.farm.repository.ReviewRepository;
-import com.kosta.farm.repository.UserRepository;
-import com.kosta.farm.service.UserService;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 @Getter

@@ -8,6 +8,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
@@ -28,14 +29,15 @@ public class Review {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long reviewId;
+	@ColumnDefault("0")
 	@Column
-	private Integer rating; //별점
+	private Integer rating; // 별점
 	@Column
 	private String content;
 	@Column
 	private String reviewpixUrl;
 	@Column
-	private Boolean reviewState; 
+	private Boolean reviewState;
 	@CreationTimestamp
 	@Column
 	private Timestamp createDate;
@@ -44,6 +46,8 @@ public class Review {
 	@Column
 	private Long userId;
 	@Column
+	private String userName;
+	@Column
 	private String receiptId;
-	
+
 }

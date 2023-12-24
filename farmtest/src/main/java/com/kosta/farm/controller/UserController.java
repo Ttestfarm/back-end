@@ -103,7 +103,7 @@ public class UserController {
 		User user = (User) auth.getPrincipal();
 		try {
 			User loginUser = userService.getLoginUserByUserEmail(user.getUserEmail());
-
+			System.out.println(loginUser);
 			UserInfoDto userInfoResponse = new UserInfoDto(
 					loginUser.getUserId(),
 					loginUser.getFarmerId(),
@@ -115,9 +115,11 @@ public class UserController {
 					loginUser.getAddress2(),
 					loginUser.getAddress3(),
 					loginUser.getUserRole().name());
-
+			
+			System.out.println(userInfoResponse);
 			return ResponseEntity.ok().body(userInfoResponse);
 		} catch (Exception e) {
+			e.printStackTrace();
 			ErrorResponseDto errorResponse = new ErrorResponseDto("유저 정보 불러오기 실패", e.getMessage());
 			return ResponseEntity.badRequest().body(errorResponse);
 		}
@@ -130,15 +132,7 @@ public class UserController {
 			User loginUser = (User) auth.getPrincipal();
 
 			// 사용자 정보 수정
-			loginUser.setUserName(modifyUserRequest.getUserName());
-			loginUser.setUserPassword(encoder.encode(modifyUserRequest.getUserPassword()));
-			loginUser.setUserTel(modifyUserRequest.getUserTel());
-			loginUser.setAddress1(modifyUserRequest.getAddress1());
-			loginUser.setAddress2(modifyUserRequest.getAddress2());
-			loginUser.setAddress3(modifyUserRequest.getAddress3());
-
-			// 수정된 사용자 정보 저장
-			userService.saveUser(loginUser);
+			User modifiedUser = userService.modifyUser(loginUser, modifyUserRequest);
 
 			// 수정된 사용자 정보 응답
 			UserInfoDto modifiedUserInfo = new UserInfoDto(

@@ -12,12 +12,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kosta.farm.dto.ProductInfoDto;
 import com.kosta.farm.dto.RequestDto;
 import com.kosta.farm.entity.Farmer;
 import com.kosta.farm.entity.Farmerfollow;
 import com.kosta.farm.entity.PayInfo;
 import com.kosta.farm.entity.Product;
-import com.kosta.farm.entity.QCategory;
 import com.kosta.farm.entity.QFarmer;
 import com.kosta.farm.entity.QFarmerfollow;
 import com.kosta.farm.entity.QPayInfo;
@@ -140,6 +140,13 @@ public class FarmDslRepository {
         }
       return list;
    }
+   
+//   public List<ProductInfoDto> productInfo(Long productId) throws Exception{
+//	   QProduct product= QProduct.product;
+//	   ProductInfoDto productInfo = new JPAQuery<>(entityManager)
+//	   
+//   }
+   
    public Map<String, Object> findQuotationsWithFarmerByRequestId(Long requestId) {
       QQuotation quotation = QQuotation.quotation;
       QFarmer farmer = QFarmer.farmer;

@@ -56,7 +56,7 @@ public class FarmerServiceImpl implements FarmerService {
 	private final FarmerDslRepository farmerDslRepository;
 	private final ObjectMapper objectMapper;
 
-	@Value("$(upload.paht)")
+	@Value("$(upload.path)")
 	private String dir;
 
 	// ** 매칭 주문 요청서 보기 **

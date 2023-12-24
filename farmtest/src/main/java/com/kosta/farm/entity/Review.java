@@ -46,6 +46,8 @@ public class Review {
 	@Column
 	private Long userId;
 	@Column
+	private String userName;
+	@Column
 	private String receiptId;
 
 }

@@ -22,7 +22,6 @@ import com.kosta.farm.entity.Quotation;
 import com.kosta.farm.entity.Request;
 import com.kosta.farm.entity.Review;
 import com.kosta.farm.util.PageInfo;
-import com.kosta.farm.util.RequestStatus;
 import com.querydsl.core.Tuple;
 
 public interface FarmService {
@@ -94,7 +93,7 @@ public interface FarmService {
 
 	Map<String, Object> quoteWithFarmerByRequestId(Long requestId) throws Exception;
 
-	ProductInfoDto getProductInfoFromOrder(PayInfo payInfo) throws Exception;
+	ProductInfoDto getProductInfoByProductId(Long productId) throws Exception;
 
 	QuotationInfoDto getQuotationInfoFromOrder(PayInfo payInfo) throws Exception;
 

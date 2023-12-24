@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import javax.servlet.ServletOutputStream;
-import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -34,6 +33,7 @@ import com.kosta.farm.entity.Product;
 import com.kosta.farm.entity.Quotation;
 import com.kosta.farm.entity.Request;
 import com.kosta.farm.entity.Review;
+import com.kosta.farm.entity.User;
 import com.kosta.farm.repository.FarmDslRepository;
 import com.kosta.farm.repository.FarmerDslRepository;
 import com.kosta.farm.repository.FarmerRepository;
@@ -141,12 +141,19 @@ public class FarmServiceImpl implements FarmService {
 		if (oPay.isEmpty())
 			throw new Exception("해당하는 주문이 없습니다");
 		PayInfo orders = oPay.get();
+
+		Long userId = orders.getUserId();
+		Optional<User> user = userRepository.findById(userId);
+		if (user.isEmpty())
+			throw new Exception("사용자 정보를 찾을 수 없습니다");
+		String userName = user.get().getUserName(); // username가져오기
+
 		Optional<Review> oReview = reviewRepository.findByReceiptId(orders.getReceiptId());
 		if (oReview.isPresent())
 			throw new Exception("이미 존재하는 리뷰가 있습니다");
 
 		Review review = Review.builder().receiptId(orders.getReceiptId()).rating(rating).content(content)
-				.farmerId(orders.getFarmerId()).userId(orders.getUserId()).build();
+				.farmerId(orders.getFarmerId()).userId(orders.getUserId()).userName(userName).build();
 		System.out.println(content);
 
 		String fileNums = "";
@@ -254,7 +261,6 @@ public class FarmServiceImpl implements FarmService {
 		pageInfo.setEndPage(endPage);
 		List<Review> reviewList = new ArrayList<>();
 		for (Review review : pages.getContent()) {
-//			String userName=userRepository.findUserNameByUserId(review.getUserId());
 
 			reviewList.add(review);
 		}
@@ -372,22 +378,29 @@ public class FarmServiceImpl implements FarmService {
 	}
 
 	@Override
-	public ProductInfoDto getProductInfoFromOrder(PayInfo payInfo) throws Exception {
-		String receiptId = payInfo.getReceiptId();
-		Long productId = payInfo.getProductId();
-		Product product = productRepository.findById(productId).get();
-		// Product로부터 필요한 정보를 가져와 ProductInfoDto에 설정
-		if (product != null) {
-			ProductInfoDto productInfo = new ProductInfoDto();
-			productInfo.setProductName(product.getProductName());
-			productInfo.setThumbNail(product.getThumbNail());
-
-			// 다른 필요한 정보들 설정
-
-			return productInfo;
+	public ProductInfoDto getProductInfoByProductId(Long productId) throws Exception {
+		Optional<Product> oProduct = productRepository.findById(productId);
+		if (oProduct.isPresent()) {
+			Product product = oProduct.get();
+			return null;
 		}
-		return null; // 상품 정보가 없으면 null 반환
+		return null;
 	}
+//		String receiptId = payInfo.getReceiptId();
+//		Long productId = payInfo.getProductId();
+//		Product product = productRepository.findById(productId).get();
+//		// Product로부터 필요한 정보를 가져와 ProductInfoDto에 설정
+//		if (product != null) {
+//			ProductInfoDto productInfo = new ProductInfoDto();
+//			productInfo.setProductName(product.getProductName());
+//			productInfo.setThumbNail(product.getThumbNail());
+//
+//			// 다른 필요한 정보들 설정
+//
+//			return productInfo;
+//		}
+//		return null; // 상품 정보가 없으면 null 반환
+//	}
 
 	@Override
 	public QuotationInfoDto getQuotationInfoFromOrder(PayInfo payInfo) throws Exception {

@@ -95,7 +95,6 @@ public class FarmController {
 	// 파머 follow 했는지 여부 안되었으면 follow가 된다
 	@GetMapping("/findfarmer/{farmerId}/follow")
 	public ResponseEntity<Map<String, Object>> farmerFollow(Authentication authentication,
-//         @RequestParam Long userId, 
 			@PathVariable Long farmerId) {
 		User user = (User) authentication.getPrincipal();
 		Long userId = user.getUserId();
@@ -149,8 +148,7 @@ public class FarmController {
 	// 유저의 파머찜리스트
 	@GetMapping("/user/followlist")
 	public ResponseEntity<Map<String, Object>> getFollowingFarmersByUserId(Authentication authentication,
-			@RequestParam(required = false, name = "page", defaultValue = "1") Integer page
-	)
+			@RequestParam(required = false, name = "page", defaultValue = "1") Integer page)
 
 	{
 		User user = (User) authentication.getPrincipal();
@@ -209,8 +207,8 @@ public class FarmController {
 //			@RequestParam(required = false, name = "page", defaultValue = "1") Integer page,
 			Authentication authentication
 //			@PathVariable Long userId
-			
-			) {
+
+	) {
 		User user = (User) authentication.getPrincipal();
 		Long userId = user.getUserId();
 		try {
@@ -218,8 +216,8 @@ public class FarmController {
 			Map<String, Object> res = new HashMap<>();
 			List<PayInfo> buyList = farmService.getOrdersListByUser(userId);
 			System.out.println(buyList);
-			System.out.println("여기요"+ userId);
-			
+			System.out.println("여기요" + userId);
+
 			List<OrderHistoryDto> OrdersWithReview = new ArrayList<>();
 			List<Review> reviewList = farmService.getReviewListByUser(userId);
 			for (PayInfo payInfo : buyList) {
@@ -232,7 +230,9 @@ public class FarmController {
 					orderHistory.setReview(findreview);
 				}
 //				 주문에 대한 상품 정보(ProductInfoDto) 가져오기 이거 고쳐야하네
-//				ProductInfoDto productInfo = farmService.getProductInfoFromOrder(payInfo);
+				Long productId = payInfo.getProductId();
+//				List<ProductInfoDto> productInfoDto= farmService.getpro
+////				ProductInfoDto productInfo = farmService.getProductInfoFromOrder(payInfo);
 //				if (productInfo != null) {
 //					orderHistory.setProductInfo(productInfo);
 //				}
@@ -241,7 +241,7 @@ public class FarmController {
 //				if (quotationInfo != null) {
 //					orderHistory.setQuotationInfo(quotationInfo);
 //				} 
-				
+
 				OrdersWithReview.add(orderHistory);
 			}
 			res.put("OrdersWithReview", OrdersWithReview);
@@ -253,6 +253,7 @@ public class FarmController {
 
 		}
 	}
+
 	private Review findReviewForOrder(List<Review> reviewList, String receiptId) {
 		for (Review review : reviewList) {
 			if (review.getReceiptId().equals(receiptId)) {
@@ -274,12 +275,11 @@ public class FarmController {
 		}
 
 	}
-	
+
 	@GetMapping("user/request/{quotationId}") // 받은 매칭 견적서에서 견적서 checkout..?
 	public ResponseEntity<Map<String, Object>> quoteDetail(Authentication authentication,
 			@PathVariable Long quotationId) {
 		try {
-
 			Map<String, Object> res = new HashMap<>();
 			QuotePayDto quote = farmService.getQuoteWithRequestInfoById(quotationId);
 			res.put("quote", quote);

@@ -52,8 +52,8 @@ public class PaymentsApiController {
 		String receiptId = payInfo.getReceiptId();
 		try {
 			System.out.println(userId);
-			payService.savepayInfo(payInfo);
 			payInfo.setUserId(userId);
+			payService.savepayInfo(payInfo);
 			log.info("결제 성공 :주문번호 {}", receiptId);
 			return new ResponseEntity<String>("결제 성공", HttpStatus.OK);
 		} catch (Exception e) {

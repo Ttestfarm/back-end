@@ -274,6 +274,7 @@ public class FarmController {
 		}
 
 	}
+	
 	@GetMapping("user/request/{quotationId}") // 받은 매칭 견적서에서 견적서 checkout..?
 	public ResponseEntity<Map<String, Object>> quoteDetail(Authentication authentication,
 			@PathVariable Long quotationId) {

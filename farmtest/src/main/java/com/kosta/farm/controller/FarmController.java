@@ -203,16 +203,16 @@ public class FarmController {
 	}
 
 	// 구매내역 불러오기 하기 후기도 같이 불러옴 무한스크롤 필터기능?
-	@GetMapping("/buylist/{userId}")
+	@GetMapping("/user/buylist")
 	public ResponseEntity<Map<String, Object>> buyList(
 //			@RequestParam(required = false, name = "filterType") String filterType,
 //			@RequestParam(required = false, name = "page", defaultValue = "1") Integer page,
-//			Authentication authentication
-			@PathVariable Long userId
+			Authentication authentication
+//			@PathVariable Long userId
 			
 			) {
-//		User user = (User) authentication.getPrincipal();
-//		Long userId = user.getUserId();
+		User user = (User) authentication.getPrincipal();
+		Long userId = user.getUserId();
 		try {
 //			PageInfo pageInfo = PageInfo.builder().curPage(page).build();
 			Map<String, Object> res = new HashMap<>();

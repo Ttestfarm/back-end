@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
 @Data
 @Getter
 @Setter
@@ -30,10 +31,25 @@ public class FarmerInfoDto {
 	private Double rating;
 
 	public Farmer toEntity() {
-		return Farmer.builder().farmerId(farmerId).farmName(farmName).farmPixurl(farmPixurl).farmTel(farmTel)
-				.farmAddress(farmAddress).farmAddressDetail(farmAddressDetail).registrationNum(registrationNum)
-				.farmBank(farmBank).farmAccountNum(farmAccountNum).farmInterest1(farmInterest)
-				.farmInterest2(farmInterest).farmInterest3(farmInterest).farmInterest4(farmInterest)
-				.farmInterest5(farmInterest).followCount(followCount).reviewCount(reviewCount).rating(rating).build();
+		return Farmer.builder()
+				.farmerId(farmerId)
+				.farmName(farmName)
+				.farmPixurl(farmPixurl)
+				.farmTel(farmTel)
+				.farmAddress(farmAddress)
+				.farmAddressDetail(farmAddressDetail)
+				.registrationNum(registrationNum)
+				.farmBank(farmBank)
+				.farmAccountNum(farmAccountNum)
+				.farmInterest1(farmInterest)
+				.farmInterest2(farmInterest)
+				.farmInterest3(farmInterest)
+				.farmInterest4(farmInterest)
+				.farmInterest5(farmInterest)
+				.followCount(followCount)
+				.reviewCount(reviewCount)
+				.rating(rating)
+				.build();
 	}
+	
 }

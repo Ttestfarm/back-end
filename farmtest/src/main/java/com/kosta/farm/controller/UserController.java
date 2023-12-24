@@ -24,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.kosta.farm.config.jwt.JwtTokenUtil;
 import com.kosta.farm.config.oauth2.OAuth2LoginSuccessHandler;
 import com.kosta.farm.dto.ErrorResponseDto;
+import com.kosta.farm.dto.FarmerInfoDto;
 import com.kosta.farm.dto.JoinRequestDto;
 import com.kosta.farm.dto.LoginRequestDto;
 import com.kosta.farm.dto.ModifyFarmDto;
@@ -252,7 +253,41 @@ public class UserController {
 			return ResponseEntity.badRequest().body("파머등록 실패: " + e.getMessage());
 		}
 	}
+	
+	// 파머 정보 가져오기
+	@GetMapping("/farmer/farmerInfo/{farmerId}")
+	public ResponseEntity<?> farmerInfo(@PathVariable Long farmerId, Authentication auth) throws Exception {
+		User user = (User) auth.getPrincipal();
+		try {
+			// 현재 로그인한 사용자의 farmerId 가져오기
+			Long loginFarmerId = user.getFarmerId();
 
+			if (loginFarmerId == null || !loginFarmerId.equals(farmerId)) {
+				// 로그인한 사용자의 farmerId가 없거나, 프론트에서 받은 farmerId와 일치하지 않으면 에러 응답
+				ErrorResponseDto errorResponse = new ErrorResponseDto("파머 정보에 접근할 수 없습니다", "권한이 없거나 유효하지 않은 farmerId입니다");
+				return ResponseEntity.status(403).body(errorResponse);
+			}
+
+			// Farmer 정보 가져오기
+			Farmer farmer = farmerService.getFarmerById(farmerId);
+
+			if (farmer != null) {
+				// Farmer 정보가 있을 경우 응답
+				FarmerInfoDto farmerInfoResponse = farmer.toDto();
+				return ResponseEntity.ok().body(farmerInfoResponse);
+			} else {
+				// Farmer 정보가 없을 경우 에러 응답
+				ErrorResponseDto errorResponse = new ErrorResponseDto("파머를 찾을 수 없습니다", "해당 farmerId에 대한 정보를 찾을 수 없습니다");
+				return ResponseEntity.status(404).body(errorResponse);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			ErrorResponseDto errorResponse = new ErrorResponseDto("파머 정보 조회 실패", e.getMessage());
+			return ResponseEntity.badRequest().body(errorResponse);
+		}
+
+	}
+	
 	// 팜 정보 수정
 	@PutMapping("/farmer/modify-farm")
 	public ResponseEntity<?> modifyFarm(

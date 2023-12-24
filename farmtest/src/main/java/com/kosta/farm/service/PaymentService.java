@@ -22,7 +22,7 @@ import lombok.Data;
 
 @Service
 public class PaymentService {
-	
+	//토큰생성
 	@Value("${imp_key}")
 	private String impKey;
 
@@ -79,12 +79,12 @@ public class PaymentService {
 
 		return token;
 	}
-
-	public Boolean paymentInfo(String receiptId, String access_token, PayInfo payInfo) throws IOException {
+	//결제정보 불러오기
+	public Boolean paymentInfo(String imp_uid, String access_token, PayInfo payInfo) throws IOException {
 
 	    HttpsURLConnection conn = null;
 	    
-	    URL url = new URL("https://api.iamport.kr/payments/" + receiptId);
+	    URL url = new URL("https://api.iamport.kr/payments/" + imp_uid);
 	 
 	    conn = (HttpsURLConnection) url.openConnection();
 	 
@@ -102,7 +102,7 @@ public class PaymentService {
 	    conn.disconnect();
 	    
 	    if(response.getResponse().getAmount() != payInfo.getAmount().intValue()) {
-	    	paymentCancel(access_token, receiptId, response.getResponse().getAmount(),"금액불일치" );
+	    	paymentCancel(access_token, imp_uid, response.getResponse().getAmount(),"금액불일치" );
 	    	return false;
 	    }
 	    return true;
@@ -110,10 +110,10 @@ public class PaymentService {
 	
 	
 	
-	public void paymentCancel(String access_token, String receiptId, Integer amount, String reason) throws IOException  {
+	public void paymentCancel(String access_token, String imp_uid, Integer amount, String reason) throws IOException  {
 		System.out.println("결제 취소");
 		System.out.println(access_token);
-		System.out.println(receiptId);
+		System.out.println("imp_uid = " + imp_uid);
 		HttpsURLConnection conn = null;
 		URL url = new URL("https://api.iamport.kr/payments/cancel");
  
@@ -130,7 +130,7 @@ public class PaymentService {
 		JsonObject json = new JsonObject();
  
 		json.addProperty("reason", reason);
-		json.addProperty("imp_uid", receiptId);
+		json.addProperty("imp_uid", imp_uid);
 		json.addProperty("amount", amount);
 		json.addProperty("checksum", amount);
  

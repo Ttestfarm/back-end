@@ -30,18 +30,20 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
+		System.out.println("AAAAA");
 		Enumeration<String> headerNames = request.getHeaderNames();
 		while (headerNames.hasMoreElements()) {
 			String hname = headerNames.nextElement();
 			//System.out.println(hname + ":" + request.getHeader(hname));
 		}
-
+		System.out.println("BBBBB");
 		String authorizationHeader = request.getHeader("authorization");
 		// Header의 Authorization 값이 비어있으면 token을 전송하지 않음 (로그인 X)
 		if (authorizationHeader == null) {
 			filterChain.doFilter(request, response);
 			return;
 		}
+		System.out.println("CCCCCCCC"+authorizationHeader);
 		// Header의 Authorization 값이 'Bearer '로 시작하지 않으면 잘못된 토큰
 		if (!authorizationHeader.startsWith("Bearer ")) {
 			filterChain.doFilter(request, response);
@@ -65,6 +67,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		System.out.println(loginUser);
 		// loginUser 정보로 UsernamePasswordAuthenticationToken 발급
 		UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
 				loginUser.getUserEmail(), null, List.of(new SimpleGrantedAuthority(loginUser.getUserRole().name())));

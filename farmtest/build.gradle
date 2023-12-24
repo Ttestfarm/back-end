@@ -61,6 +61,8 @@ dependencies {
    //implementation 'org.springframework:spring-core:2.7.12'
    //아임포트
    implementation 'com.github.iamport:iamport-rest-client-java:0.2.23'
+   implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.12.5' // 여기서 2.x.x는 사용하는 Jackson 라이브러리 버전에 맞게 변경되어야 합니다.
+   
 }
 
 tasks.named('bootBuildImage') {

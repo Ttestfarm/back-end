@@ -95,9 +95,21 @@ public class Farmer {
 		addFarmInterest(farmInterestBuilder, farmInterest5);
 		String farmInterest = farmInterestBuilder.toString();
 
-		return FarmerInfoDto.builder().farmerId(farmerId).farmName(farmName).farmPixurl(farmPixurl).farmAddress(farmAddress)
-	            .farmInterest(farmInterest)
-				.followCount(followCount).reviewCount(reviewCount).rating(rating).build();
+		return FarmerInfoDto.builder()
+				.farmerId(farmerId)
+				.farmName(farmName)
+				.farmPixurl(farmPixurl)
+				.farmTel(farmTel)
+				.farmAddress(farmAddress)
+				.farmAddressDetail(farmAddressDetail)
+				.farmBank(farmBank)
+				.farmAccountNum(farmAccountNum)
+				.registrationNum(registrationNum)
+	      .farmInterest(farmInterest)
+				.followCount(followCount)
+				.reviewCount(reviewCount)
+				.rating(rating)
+				.build();
 	}
 
 	private void addFarmInterest(StringBuilder builder, String interest) {
@@ -108,4 +120,5 @@ public class Farmer {
 			builder.append(interest);
 		}
 	}
+	
 }

@@ -63,4 +63,7 @@ public interface FarmerService {
 
 	// 파머정보수정
 	Farmer modifyFarmer(ModifyFarmDto request, MultipartFile farmPixurl) throws Exception;
+	
+	// 파머아이디로 파머찾기
+	Farmer getFarmerById(Long farmerId) throws Exception;
 }

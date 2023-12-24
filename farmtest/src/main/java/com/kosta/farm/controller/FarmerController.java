@@ -73,8 +73,9 @@ public class FarmerController {
 	public ResponseEntity<String> regQuotation(@ModelAttribute Quotation quot, List<MultipartFile> images,
 			Authentication authentication) {
 		 User user = (User) authentication.getPrincipal();
-		 Long farmerId= user.getFarmerId();
+		 Long farmerId = user.getFarmerId();
 		try {
+			System.out.println("here");
 			// 견적서 DB에 저장
 			farmerService.saveQuotation(quot, images);
 			return new ResponseEntity<String>("성공", HttpStatus.OK);

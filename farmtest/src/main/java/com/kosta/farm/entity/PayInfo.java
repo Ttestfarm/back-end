@@ -2,6 +2,7 @@ package com.kosta.farm.entity;
 
 import java.math.BigDecimal;
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 import javax.persistence.Column;
@@ -72,12 +73,12 @@ public class PayInfo {
 	private String buyerAddress;
 
     @CreationTimestamp
-    private Date createAt;
     private Date paidAt; // 결제 완료 일시
     private String pgType;
     private String pgTid;
     private Date failedAt; // 결제 실패 일시
-	
+	private Timestamp createAt;
+    
 	// 정산
 	@Column
 	private Date invoiceDate; // 정산예정일 "yyyy-MM-dd" 형식

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.servlet.ServletOutputStream;
 
@@ -20,11 +21,13 @@ import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kosta.farm.dto.FarmerInfoDto;
 import com.kosta.farm.dto.OrderHistoryDto;
+import com.kosta.farm.dto.PayInfoSummaryDto;
 import com.kosta.farm.dto.ProductInfoDto;
 import com.kosta.farm.dto.QuotationInfoDto;
 import com.kosta.farm.dto.QuotePayDto;
 import com.kosta.farm.dto.RequestDto;
 import com.kosta.farm.dto.ReviewDto;
+import com.kosta.farm.dto.ReviewInfoDto;
 import com.kosta.farm.entity.Farmer;
 import com.kosta.farm.entity.Farmerfollow;
 import com.kosta.farm.entity.FileVo;
@@ -47,6 +50,8 @@ import com.kosta.farm.repository.RequestRepository;
 import com.kosta.farm.repository.ReviewRepository;
 import com.kosta.farm.repository.UserRepository;
 import com.kosta.farm.util.PageInfo;
+import com.kosta.farm.util.PaymentStatus;
+import com.kosta.farm.util.QuotationStatus;
 import com.kosta.farm.util.RequestStatus;
 import com.querydsl.core.Tuple;
 
@@ -134,7 +139,7 @@ public class FarmServiceImpl implements FarmService {
 	}
 
 	@Override // 리뷰 작성하기 ordersId에 해당하면 리뷰를 쓸 수 있다 근데 하나의 주문에 하나의 review만 쓸 수 있다 리뷰가 추가되면 파머
-	// rating field 업데이트
+				// rating field 업데이트
 	public void addReview(String receiptId, MultipartFile reviewpixUrl, Integer rating, String content)
 			throws Exception {
 		Optional<PayInfo> oPay = payInfoRepository.findById(receiptId);
@@ -175,20 +180,20 @@ public class FarmServiceImpl implements FarmService {
 
 		}
 		review.setReviewpixUrl(fileNums);
-// 리뷰 작성하기
+		// 리뷰 작성하기
 		reviewRepository.save(review);
 
-// 판매자의 리뷰 목록 가져오기
+		// 판매자의 리뷰 목록 가져오기
 		List<Review> farmerReviews = reviewRepository.findAllByFarmerId(review.getFarmerId()); // farmersid에 해당하는 리뷰 목록
 
-// 해당 판매자의 평균 별점 업데이트
+		// 해당 판매자의 평균 별점 업데이트
 		Farmer farmer = farmerRepository.findById(review.getFarmerId())
 				.orElseThrow(() -> new Exception("해당 판매자를 찾을 수 없습니다."));
 		farmer.updateAvgRating(farmerReviews);
 		Integer reviewCount = farmerReviews.size();
 		farmer.setReviewCount(reviewCount);
 
-// 업데이트된 판매자 엔티티 저장
+		// 업데이트된 판매자 엔티티 저장
 		farmerRepository.save(farmer);
 
 	}
@@ -283,6 +288,12 @@ public class FarmServiceImpl implements FarmService {
 		}
 		return productList;
 	}
+	
+	@Override
+	public List<ReviewInfoDto> getReviewListInfoByFarmer(Long farmerId, PageInfo pageInfo) throws Exception {
+		return farmDslRepository.reviewListWithFarmNameByPage(farmerId, pageInfo);
+	}
+	
 
 	@Override // 유저별로 리뷰리스트 가져오기
 	public List<Review> getReviewListByUser(Long userId) throws Exception {
@@ -386,21 +397,6 @@ public class FarmServiceImpl implements FarmService {
 		}
 		return null;
 	}
-//		String receiptId = payInfo.getReceiptId();
-//		Long productId = payInfo.getProductId();
-//		Product product = productRepository.findById(productId).get();
-//		// Product로부터 필요한 정보를 가져와 ProductInfoDto에 설정
-//		if (product != null) {
-//			ProductInfoDto productInfo = new ProductInfoDto();
-//			productInfo.setProductName(product.getProductName());
-//			productInfo.setThumbNail(product.getThumbNail());
-//
-//			// 다른 필요한 정보들 설정
-//
-//			return productInfo;
-//		}
-//		return null; // 상품 정보가 없으면 null 반환
-//	}
 
 	@Override
 	public QuotationInfoDto getQuotationInfoFromOrder(PayInfo payInfo) throws Exception {
@@ -426,13 +422,7 @@ public class FarmServiceImpl implements FarmService {
 
 	}
 
-	@Override
-	public OrderHistoryDto getOrderDetails(String recieptId) throws Exception {
-		PayInfo payInfo = payInfoRepository.findById(recieptId).get();
-		OrderHistoryDto orderHistoryDto = new OrderHistoryDto();
-		orderHistoryDto.setPayInfo(payInfo);
-		return null;
-	}
+
 
 	@Override // payment정보 저장하기
 	public void savePaymentInfo(PayInfo payInfo) throws Exception {
@@ -465,6 +455,20 @@ public class FarmServiceImpl implements FarmService {
 
 		}
 		return null; // 둘다 존재하지 않으면 null;
+	}
+
+
+
+	@Override
+	public List<PayInfoSummaryDto> findBuyListByUserAndState(PageInfo pageInfo, Long userId, PaymentStatus state)
+			throws Exception {
+		List<PayInfoSummaryDto> buyList = farmDslRepository.getPartialOrdersListByUserByPage(pageInfo, userId);
+		return buyList.stream().filter(payInfo -> payInfo.getState().equals(state)).collect(Collectors.toList());
+	}
+
+	@Override
+	public List<PayInfoSummaryDto> findBuyListByUser(PageInfo pageInfo, Long userId) throws Exception {
+		return farmDslRepository.getPartialOrdersListByUserByPage(pageInfo, userId);
 	}
 
 }

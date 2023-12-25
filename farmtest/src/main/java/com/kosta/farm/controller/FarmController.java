@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,12 +21,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.kosta.farm.dto.FarmerInfoDto;
 import com.kosta.farm.dto.OrderHistoryDto;
-import com.kosta.farm.dto.ProductInfoDto;
-import com.kosta.farm.dto.QuotationInfoDto;
+import com.kosta.farm.dto.PayInfoSummaryDto;
 import com.kosta.farm.dto.QuotePayDto;
 import com.kosta.farm.dto.RequestDto;
 import com.kosta.farm.dto.RequestWithQuotationCountDTO;
 import com.kosta.farm.dto.ReviewDto;
+import com.kosta.farm.dto.ReviewInfoDto;
 import com.kosta.farm.entity.Farmer;
 import com.kosta.farm.entity.Farmerfollow;
 import com.kosta.farm.entity.PayInfo;
@@ -35,6 +36,7 @@ import com.kosta.farm.entity.Review;
 import com.kosta.farm.entity.User;
 import com.kosta.farm.service.FarmService;
 import com.kosta.farm.util.PageInfo;
+import com.kosta.farm.util.PaymentStatus;
 
 @RestController
 public class FarmController {
@@ -60,6 +62,7 @@ public class FarmController {
 		Long userId = user.getUserId();
 		try {
 			request.setUserId(userId);
+			System.out.println(userId);
 			Request req = farmService.addRequest(request);
 			return ResponseEntity.ok("요청서를 등록했습니다");
 
@@ -118,7 +121,7 @@ public class FarmController {
 		try {
 			Map<String, Object> res = new HashMap<>();
 			PageInfo pageInfo = PageInfo.builder().curPage(page).build();
-			List<Review> reviewList = farmService.getReviewListByFarmer(farmerId, pageInfo);
+			List<ReviewInfoDto> reviewList = farmService.getReviewListInfoByFarmer(farmerId, pageInfo);
 			res.put("reviewList", reviewList);
 			res.put("pageInfo", pageInfo);
 			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
@@ -145,7 +148,7 @@ public class FarmController {
 		}
 	}
 
-	// 유저의 파머찜리스트
+	// 유저의 파머찜리스트 무한스크롤
 	@GetMapping("/user/followlist")
 	public ResponseEntity<Map<String, Object>> getFollowingFarmersByUserId(Authentication authentication,
 			@RequestParam(required = false, name = "page", defaultValue = "1") Integer page)
@@ -174,7 +177,7 @@ public class FarmController {
 	}
 
 //
-	@GetMapping("/user") // 마이페이지 메인 받은 매칭 견적 list 무한스크롤
+	@GetMapping("/user") // 마이페이지 메인 받은 매칭 견적 list 무한스크롤?
 	public ResponseEntity<Map<String, Object>> matchingList(Authentication authentication) {
 		User user = (User) authentication.getPrincipal();
 		Long userId = user.getUserId();
@@ -200,52 +203,38 @@ public class FarmController {
 
 	}
 
-	// 구매내역 불러오기 하기 후기도 같이 불러옴 무한스크롤 필터기능?
-	@GetMapping("/user/buylist")
-	public ResponseEntity<Map<String, Object>> buyList(
-//			@RequestParam(required = false, name = "filterType") String filterType,
-//			@RequestParam(required = false, name = "page", defaultValue = "1") Integer page,
-			Authentication authentication
-//			@PathVariable Long userId
-
-	) {
+	// 구매내역 불러오기 하기 후기도 같이 불러옴 무한스크롤 필터기능? 몇개씩 불러와야하나여
+	@GetMapping("/user/buylist") 
+	public ResponseEntity<Map<String, Object>> buyList(Authentication authentication,
+			@RequestParam(required = false, name = "page", defaultValue = "1") Integer page,
+			@RequestParam(required = false) PaymentStatus state) 
+	{
 		User user = (User) authentication.getPrincipal();
 		Long userId = user.getUserId();
 		try {
-//			PageInfo pageInfo = PageInfo.builder().curPage(page).build();
 			Map<String, Object> res = new HashMap<>();
-			List<PayInfo> buyList = farmService.getOrdersListByUser(userId);
-			System.out.println(buyList);
-			System.out.println("여기요" + userId);
+			PageInfo pageInfo = PageInfo.builder().curPage(page).build();
+			List<PayInfoSummaryDto> buyList = state != null
+					? farmService.findBuyListByUserAndState(pageInfo, userId, state)
+					: farmService.findBuyListByUser(pageInfo, userId);
 
 			List<OrderHistoryDto> OrdersWithReview = new ArrayList<>();
 			List<Review> reviewList = farmService.getReviewListByUser(userId);
-			for (PayInfo payInfo : buyList) {
-				String receiptId = payInfo.getReceiptId();
+			System.out.println(reviewList);
+			for (PayInfoSummaryDto payInfoSummaryDto : buyList) {
+				String receiptId = payInfoSummaryDto.getReceiptId();
 				OrderHistoryDto orderHistory = new OrderHistoryDto();
-				orderHistory.setPayInfo(payInfo);
+				orderHistory.setPayInfo(payInfoSummaryDto);
 				// order에 따른 리뷰
 				Review findreview = findReviewForOrder(reviewList, receiptId);
 				if (findreview != null) {
 					orderHistory.setReview(findreview);
 				}
-//				 주문에 대한 상품 정보(ProductInfoDto) 가져오기 이거 고쳐야하네
-				Long productId = payInfo.getProductId();
-//				List<ProductInfoDto> productInfoDto= farmService.getpro
-////				ProductInfoDto productInfo = farmService.getProductInfoFromOrder(payInfo);
-//				if (productInfo != null) {
-//					orderHistory.setProductInfo(productInfo);
-//				}
-//				 주문에 대한 견적 정보(QuotationInfoDto) 가져오기
-//				QuotationInfoDto quotationInfo = farmService.getQuotationInfoFromOrder(payInfo);
-//				if (quotationInfo != null) {
-//					orderHistory.setQuotationInfo(quotationInfo);
-//				} 
 
 				OrdersWithReview.add(orderHistory);
 			}
 			res.put("OrdersWithReview", OrdersWithReview);
-//			res.put("pageInfo", pageInfo);
+			res.put("pageInfo", pageInfo);
 			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();

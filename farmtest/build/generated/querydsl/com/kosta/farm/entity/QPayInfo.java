@@ -35,9 +35,11 @@ public class QPayInfo extends EntityPathBase<PayInfo> {
 
     public final NumberPath<Integer> count = createNumber("count", Integer.class);
 
-    public final DateTimePath<java.time.LocalDateTime> createAt = createDateTime("createAt", java.time.LocalDateTime.class);
+    public final DateTimePath<java.sql.Timestamp> createAt = createDateTime("createAt", java.sql.Timestamp.class);
 
-    public final DateTimePath<java.time.LocalDateTime> failedAt = createDateTime("failedAt", java.time.LocalDateTime.class);
+    public final DatePath<java.sql.Date> createAtaa = createDate("createAtaa", java.sql.Date.class);
+
+    public final DatePath<java.sql.Date> failedAt = createDate("failedAt", java.sql.Date.class);
 
     public final NumberPath<Long> farmerId = createNumber("farmerId", Long.class);
 

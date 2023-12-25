@@ -46,7 +46,7 @@ public class PayService {
 			quote = quoteRepository.findById(payInfo.getQuotationId()).get();
 			quote.setState(QuotationStatus.COMPLETED);
 			quoteRepository.save(quote);
-			//이거 확인하기
+			//quote state이 바뀌면 requeststate도 변경
 			Request request = requestRepository.findById(quote.getRequestId()).get();
 			if (request != null) {
 				request.setState(RequestStatus.MATCHED);

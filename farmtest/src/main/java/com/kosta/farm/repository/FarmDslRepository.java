@@ -34,6 +34,7 @@ import com.kosta.farm.entity.Quotation;
 import com.kosta.farm.entity.Request;
 import com.kosta.farm.entity.Review;
 import com.kosta.farm.util.PageInfo;
+import com.kosta.farm.util.RequestStatus;
 import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
@@ -53,7 +54,6 @@ public class FarmDslRepository {
 		QQuotation quotation = QQuotation.quotation;
 		return jpaQueryFactory.select(quotation.count()).from(quotation).where(quotation.requestId.eq(requestId))
 				.fetchOne();
-//      return count;
 	};
 
 	// 파머 수 가져오기
@@ -128,7 +128,8 @@ public class FarmDslRepository {
 		System.out.println(pageRequest.getPageSize());
 		List<Tuple> tupleList = jpaQueryFactory.select(request, user.userName).from(request).leftJoin(user)
 				.on(request.userId.eq(user.userId)).offset(pageRequest.getOffset()).limit(pageRequest.getPageSize())
-				.orderBy(request.requestId.desc()).fetch();
+				.where(request.state.eq(RequestStatus.REQUEST).or(request.state.eq(RequestStatus.MATCHED)))
+				.orderBy(request.requestId.desc()).fetch(); //requestStatus가 request상태거나 matched상태 개수만 보여준다
 
 		List<RequestDto> list = new ArrayList<>();
 		for (Tuple t : tupleList) {
@@ -275,7 +276,6 @@ public class FarmDslRepository {
 
 	}
 
-//   public List<Tuple> getQuoteandReqInfoBy
 
 	public List<PayInfo> findPayInfowithReviewByUserId(Long userId) {
 		QPayInfo payInfo = QPayInfo.payInfo;
@@ -285,9 +285,5 @@ public class FarmDslRepository {
 
 	}
 
-	@Transactional
-	public void updateStock(Long productId, Integer stock) {
-
-	}
 
 }

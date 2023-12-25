@@ -24,6 +24,7 @@ import com.kosta.farm.dto.FarmerInfoDto;
 import com.kosta.farm.dto.OrderHistoryDto;
 import com.kosta.farm.dto.PayInfoSummaryDto;
 import com.kosta.farm.dto.QuotePayDto;
+import com.kosta.farm.dto.RequestCopyDto;
 import com.kosta.farm.dto.RequestDto;
 import com.kosta.farm.dto.RequestWithQuotationCountDTO;
 import com.kosta.farm.dto.ReviewDto;
@@ -62,8 +63,7 @@ public class FarmController {
 		Long userId = user.getUserId();
 		try {
 			request.setUserId(userId);
-			System.out.println(userId);
-			Request req = farmService.addRequest(request);
+			farmService.addRequest(request);
 			return ResponseEntity.ok("요청서를 등록했습니다");
 
 		} catch (Exception e) {
@@ -195,24 +195,22 @@ public class FarmController {
 				requestWithCountList.add(requestWithCount);
 			}
 			Collections.sort(requestWithCountList, (r1, r2) -> {
-			    Long count1 = r1.getQuotationCount();
-			    Long count2 = r2.getQuotationCount();
-			    
-			    // 견적 수 비교 후, 견적 수가 같으면 requestId 비교
-			    if (count1 == null && count2 == null) {
-			        return Long.compare(r2.getRequest().getRequestId(), r1.getRequest().getRequestId());
-			    } else if (count1 == null) {
-			        return 1;
-			    } else if (count2 == null) {
-			        return -1;
-			    } else {
-			        int countComparison = count2.compareTo(count1);
-			        return countComparison != 0 ? countComparison : Long.compare(r2.getRequest().getRequestId(), r1.getRequest().getRequestId());
-			    }
+				Long count1 = r1.getQuotationCount();
+				Long count2 = r2.getQuotationCount();
+
+				// 견적 수 비교 후, 견적 수가 같으면 requestId 비교
+				if (count1 == null && count2 == null) {
+					return Long.compare(r2.getRequest().getRequestId(), r1.getRequest().getRequestId());
+				} else if (count1 == null) {
+					return 1;
+				} else if (count2 == null) {
+					return -1;
+				} else {
+					int countComparison = count2.compareTo(count1);
+					return countComparison != 0 ? countComparison
+							: Long.compare(r2.getRequest().getRequestId(), r1.getRequest().getRequestId());
+				}
 			});
-
-
-
 			res.put("requestWithCountList", requestWithCountList);
 			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
 		} catch (Exception e) {
@@ -222,7 +220,7 @@ public class FarmController {
 
 	}
 
-	// 구매내역 불러오기 하기 후기도 같이 불러옴 무한스크롤 필터기능? 몇개씩 불러와야하나여
+	// 구매내역 불러오기 하기 후기도 같이 불러옴 무한스크롤 필터기능
 	@GetMapping("/user/buylist")
 	public ResponseEntity<Map<String, Object>> buyList(Authentication authentication,
 			@RequestParam(required = false, name = "page", defaultValue = "1") Integer page,
@@ -294,6 +292,20 @@ public class FarmController {
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
+		}
+	}
+
+	// 요청서에서 따라사기 버튼 누르면 요청품목과 수량을 불러온다
+	@GetMapping("/matching/buy") // matching/buy?reqformId=요청서번호
+	public ResponseEntity<RequestCopyDto> copyRequest(Authentication authentication,
+			@RequestParam(value = "reqformId") Long requestId) {
+		try {
+			RequestCopyDto request = farmService.requestCopy(requestId);
+			return ResponseEntity.ok().body(request); // json으로 변환해서 줌
+		} catch (Exception e) {
+			e.printStackTrace();
+			return ResponseEntity.badRequest().body(null); // 예외 처리
+
 		}
 	}
 

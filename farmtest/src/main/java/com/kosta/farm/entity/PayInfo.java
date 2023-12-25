@@ -77,6 +77,7 @@ public class PayInfo {
     private String pgType;
     private String pgTid;
     private Date failedAt; // 결제 실패 일시
+    @CreationTimestamp
 	private Timestamp createAt;
     
 	// 정산

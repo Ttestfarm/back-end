@@ -26,6 +26,7 @@ import com.kosta.farm.dto.QuotePayDto;
 import com.kosta.farm.dto.RequestDto;
 import com.kosta.farm.dto.RequestWithQuotationCountDTO;
 import com.kosta.farm.dto.ReviewDto;
+import com.kosta.farm.dto.ReviewInfoDto;
 import com.kosta.farm.entity.Farmer;
 import com.kosta.farm.entity.Farmerfollow;
 import com.kosta.farm.entity.PayInfo;
@@ -60,6 +61,7 @@ public class FarmController {
 		Long userId = user.getUserId();
 		try {
 			request.setUserId(userId);
+			System.out.println(userId);
 			Request req = farmService.addRequest(request);
 			return ResponseEntity.ok("요청서를 등록했습니다");
 
@@ -118,7 +120,8 @@ public class FarmController {
 		try {
 			Map<String, Object> res = new HashMap<>();
 			PageInfo pageInfo = PageInfo.builder().curPage(page).build();
-			List<Review> reviewList = farmService.getReviewListByFarmer(farmerId, pageInfo);
+//			List<Review> reviewList = farmService.getReviewListByFarmer(farmerId, pageInfo);
+			List<ReviewInfoDto> reviewList=farmService.getReviewListInfoByFarmer(farmerId, pageInfo);
 			res.put("reviewList", reviewList);
 			res.put("pageInfo", pageInfo);
 			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
@@ -200,13 +203,11 @@ public class FarmController {
 
 	}
 
-	// 구매내역 불러오기 하기 후기도 같이 불러옴 무한스크롤 필터기능?
-	@GetMapping("/user/buylist")
+	// 구매내역 불러오기 하기 후기도 같이 불러옴 무한스크롤 필터기능? 이거 아직 ㄴㄴ
+	@GetMapping("/user/buylist")	
 	public ResponseEntity<Map<String, Object>> buyList(
-//			@RequestParam(required = false, name = "filterType") String filterType,
-//			@RequestParam(required = false, name = "page", defaultValue = "1") Integer page,
+
 			Authentication authentication
-//			@PathVariable Long userId
 
 	) {
 		User user = (User) authentication.getPrincipal();
@@ -230,7 +231,7 @@ public class FarmController {
 					orderHistory.setReview(findreview);
 				}
 //				 주문에 대한 상품 정보(ProductInfoDto) 가져오기 이거 고쳐야하네
-				Long productId = payInfo.getProductId();
+//				Long productId = payInfo.getProductId();
 //				List<ProductInfoDto> productInfoDto= farmService.getpro
 ////				ProductInfoDto productInfo = farmService.getProductInfoFromOrder(payInfo);
 //				if (productInfo != null) {

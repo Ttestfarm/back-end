@@ -25,6 +25,7 @@ import com.kosta.farm.dto.QuotationInfoDto;
 import com.kosta.farm.dto.QuotePayDto;
 import com.kosta.farm.dto.RequestDto;
 import com.kosta.farm.dto.ReviewDto;
+import com.kosta.farm.dto.ReviewInfoDto;
 import com.kosta.farm.entity.Farmer;
 import com.kosta.farm.entity.Farmerfollow;
 import com.kosta.farm.entity.FileVo;
@@ -134,7 +135,7 @@ public class FarmServiceImpl implements FarmService {
 	}
 
 	@Override // 리뷰 작성하기 ordersId에 해당하면 리뷰를 쓸 수 있다 근데 하나의 주문에 하나의 review만 쓸 수 있다 리뷰가 추가되면 파머
-	// rating field 업데이트
+				// rating field 업데이트
 	public void addReview(String receiptId, MultipartFile reviewpixUrl, Integer rating, String content)
 			throws Exception {
 		Optional<PayInfo> oPay = payInfoRepository.findById(receiptId);
@@ -175,20 +176,20 @@ public class FarmServiceImpl implements FarmService {
 
 		}
 		review.setReviewpixUrl(fileNums);
-// 리뷰 작성하기
+		// 리뷰 작성하기
 		reviewRepository.save(review);
 
-// 판매자의 리뷰 목록 가져오기
+		// 판매자의 리뷰 목록 가져오기
 		List<Review> farmerReviews = reviewRepository.findAllByFarmerId(review.getFarmerId()); // farmersid에 해당하는 리뷰 목록
 
-// 해당 판매자의 평균 별점 업데이트
+		// 해당 판매자의 평균 별점 업데이트
 		Farmer farmer = farmerRepository.findById(review.getFarmerId())
 				.orElseThrow(() -> new Exception("해당 판매자를 찾을 수 없습니다."));
 		farmer.updateAvgRating(farmerReviews);
 		Integer reviewCount = farmerReviews.size();
 		farmer.setReviewCount(reviewCount);
 
-// 업데이트된 판매자 엔티티 저장
+		// 업데이트된 판매자 엔티티 저장
 		farmerRepository.save(farmer);
 
 	}
@@ -465,6 +466,11 @@ public class FarmServiceImpl implements FarmService {
 
 		}
 		return null; // 둘다 존재하지 않으면 null;
+	}
+
+	@Override
+	public List<ReviewInfoDto> getReviewListInfoByFarmer(Long farmerId, PageInfo pageInfo) throws Exception {
+		return farmDslRepository.reviewListWithFarmNameByPage(farmerId, pageInfo);
 	}
 
 }

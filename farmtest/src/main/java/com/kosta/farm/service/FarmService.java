@@ -14,6 +14,7 @@ import com.kosta.farm.dto.QuotationInfoDto;
 import com.kosta.farm.dto.QuotePayDto;
 import com.kosta.farm.dto.RequestDto;
 import com.kosta.farm.dto.ReviewDto;
+import com.kosta.farm.dto.ReviewInfoDto;
 import com.kosta.farm.entity.Farmer;
 import com.kosta.farm.entity.Farmerfollow;
 import com.kosta.farm.entity.PayInfo;
@@ -40,6 +41,9 @@ public interface FarmService {
 
 	// farmer별로 리뷰리스트 가져오기
 	List<Review> getReviewListByFarmer(Long farmerId, PageInfo pageInfo) throws Exception;
+	
+	List<ReviewInfoDto> getReviewListInfoByFarmer(Long farmerId, PageInfo pageInfo) throws Exception;
+	
 
 	// farmer별로 product list가져오기
 	List<Product> getProductListByFarmer(Long farmerId, PageInfo pageInfo) throws Exception;
@@ -102,4 +106,7 @@ public interface FarmService {
 	void savePaymentInfo(PayInfo paymentInfo) throws Exception;
 
 	QuotePayDto getQuoteWithRequestInfoById(Long quotationId) throws Exception;
+	
+	
+	
 }

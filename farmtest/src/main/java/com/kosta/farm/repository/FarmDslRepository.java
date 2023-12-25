@@ -12,6 +12,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kosta.farm.dto.OrderHistoryDto;
+import com.kosta.farm.dto.PayInfoSummaryDto;
 import com.kosta.farm.dto.ProductInfoDto;
 import com.kosta.farm.dto.RequestDto;
 import com.kosta.farm.dto.ReviewInfoDto;
@@ -141,6 +143,7 @@ public class FarmDslRepository {
 		QReview review = QReview.review;
 		return jpaQueryFactory.select(review.count()).from(review).where(review.farmerId.eq(farmerId)).fetchOne();
 	}
+
 //리뷰인포 가져오기
 	public List<ReviewInfoDto> reviewListWithFarmNameByPage(Long farmerId, PageInfo pageInfo) throws Exception {
 		QReview review = QReview.review;
@@ -152,15 +155,10 @@ public class FarmDslRepository {
 		System.out.println(pageRequest.getOffset());
 		System.out.println(pageRequest.getPageSize());
 
-		List<Tuple> tupleList = jpaQueryFactory
-			    .select(review, farmer.farmName, payInfo.count, payInfo.productName)
-			    .from(review)
-			    .leftJoin(farmer).on(review.farmerId.eq(farmer.farmerId))
-			    .leftJoin(payInfo).on(review.receiptId.eq(payInfo.receiptId))
-			    .offset(pageRequest.getOffset())
-			    .limit(pageRequest.getPageSize())
-			    .orderBy(review.reviewId.desc())
-			    .fetch();
+		List<Tuple> tupleList = jpaQueryFactory.select(review, farmer.farmName, payInfo.count, payInfo.productName)
+				.from(review).leftJoin(farmer).on(review.farmerId.eq(farmer.farmerId)).leftJoin(payInfo)
+				.on(review.receiptId.eq(payInfo.receiptId)).offset(pageRequest.getOffset())
+				.limit(pageRequest.getPageSize()).orderBy(review.reviewId.desc()).fetch();
 
 		List<ReviewInfoDto> list = new ArrayList<>();
 		for (Tuple t : tupleList) {
@@ -168,8 +166,59 @@ public class FarmDslRepository {
 			ReviewInfoDto revDto = objectMapper.convertValue(rev, ReviewInfoDto.class); // Review 객체를 ReviewInfoDto로 변환
 			revDto.setFarmName(t.get(1, String.class));// tuple에서 farname가져오기
 			revDto.setCount(t.get(2, Integer.class));
-			revDto.setProductName(t.get(3, String.class)); //tuple에서 payInfo정보 가져오기
+			revDto.setProductName(t.get(3, String.class)); // tuple에서 payInfo정보 가져오기
 			list.add(revDto);
+		}
+		return list;
+	}
+
+	// 무한스크롤도 해서 page필요함..
+	public List<OrderHistoryDto> buyListWithReviewAndOtherInfoByPage(Long userId, PageInfo pageInfo) {
+		return null;
+
+	}
+
+	public List<PayInfoSummaryDto> getPartialOrdersListByUserByPage(Long userId, PageInfo pageInfo) {
+		QPayInfo payInfo = QPayInfo.payInfo;
+		QProduct product = QProduct.product;
+		QFarmer farmer = QFarmer.farmer;
+		QQuotation quotation = QQuotation.quotation;
+		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 6);
+
+		List<Tuple> tupleList = jpaQueryFactory
+				.select(payInfo.receiptId, payInfo.ordersId, payInfo.userId, payInfo.paymentMethod,
+						payInfo.paymentDelivery, payInfo.productPrice, payInfo.count, payInfo.amount,
+						payInfo.productName, payInfo.buyerAddress, payInfo.buyerName, payInfo.buyerTel,
+						payInfo.createAt, payInfo.state, product.thumbNail, farmer.farmName, quotation.quotationImages)
+				.from(payInfo).leftJoin(product).on(payInfo.productId.eq(product.productId)).leftJoin(farmer)
+				.on(payInfo.farmerId.eq(farmer.farmerId)).leftJoin(quotation)
+				.on(payInfo.quotationId.eq(quotation.quotationId)).where(payInfo.userId.eq(userId))
+				.offset(pageRequest.getOffset()).limit(pageRequest.getPageSize())
+//				.orderBy(payInfo.createAt.desc())
+				.fetch();
+		List<PayInfoSummaryDto> list = new ArrayList<>();
+		for (Tuple t : tupleList) {
+			PayInfoSummaryDto dto = new PayInfoSummaryDto();
+
+			dto.setReceiptId(t.get(payInfo.receiptId));
+	        dto.setOrdersId(t.get(payInfo.ordersId));
+	        dto.setUserId(t.get(payInfo.userId));
+	        dto.setFarmerId(t.get(payInfo.farmerId));
+	        dto.setPaymentMethod(t.get(payInfo.paymentMethod));
+	        dto.setPaymentDelivery(t.get(payInfo.paymentDelivery));
+	        dto.setProductPrice(t.get(payInfo.productPrice));
+	        dto.setCount(t.get(payInfo.count));
+	        dto.setAmount(t.get(payInfo.amount));
+	        dto.setProductName(t.get(payInfo.productName));
+	        dto.setBuyerAddress(t.get(payInfo.buyerAddress));
+	        dto.setBuyerName(t.get(payInfo.buyerName));
+	        dto.setBuyerTel(t.get(payInfo.buyerTel));
+	        dto.setState(t.get(payInfo.state));
+	        dto.setThumbNail(t.get(product.thumbNail));
+	        dto.setFarmName(t.get(farmer.farmName));
+	        dto.setQuotationImages(t.get(quotation.quotationImages));
+
+			list.add(dto);
 		}
 		return list;
 	}

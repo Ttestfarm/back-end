@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.servlet.ServletOutputStream;
 
@@ -20,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kosta.farm.dto.FarmerInfoDto;
 import com.kosta.farm.dto.OrderHistoryDto;
+import com.kosta.farm.dto.PayInfoSummaryDto;
 import com.kosta.farm.dto.ProductInfoDto;
 import com.kosta.farm.dto.QuotationInfoDto;
 import com.kosta.farm.dto.QuotePayDto;
@@ -48,6 +50,8 @@ import com.kosta.farm.repository.RequestRepository;
 import com.kosta.farm.repository.ReviewRepository;
 import com.kosta.farm.repository.UserRepository;
 import com.kosta.farm.util.PageInfo;
+import com.kosta.farm.util.PaymentStatus;
+import com.kosta.farm.util.QuotationStatus;
 import com.kosta.farm.util.RequestStatus;
 import com.querydsl.core.Tuple;
 
@@ -427,13 +431,13 @@ public class FarmServiceImpl implements FarmService {
 
 	}
 
-	@Override
-	public OrderHistoryDto getOrderDetails(String recieptId) throws Exception {
-		PayInfo payInfo = payInfoRepository.findById(recieptId).get();
-		OrderHistoryDto orderHistoryDto = new OrderHistoryDto();
-		orderHistoryDto.setPayInfo(payInfo);
-		return null;
-	}
+//	@Override
+//	public OrderHistoryDto getOrderDetails(String recieptId) throws Exception {
+//		PayInfo payInfo = payInfoRepository.findById(recieptId).get();
+//		OrderHistoryDto orderHistoryDto = new OrderHistoryDto();
+//		orderHistoryDto.setPayInfo(payInfo);
+//		return null;
+//	}
 
 	@Override // payment정보 저장하기
 	public void savePaymentInfo(PayInfo payInfo) throws Exception {
@@ -471,6 +475,18 @@ public class FarmServiceImpl implements FarmService {
 	@Override
 	public List<ReviewInfoDto> getReviewListInfoByFarmer(Long farmerId, PageInfo pageInfo) throws Exception {
 		return farmDslRepository.reviewListWithFarmNameByPage(farmerId, pageInfo);
+	}
+
+	@Override
+	public List<PayInfoSummaryDto> findBuyListByUserAndState(PageInfo pageInfo, Long userId, PaymentStatus state)
+			throws Exception {
+		List<PayInfoSummaryDto> buyList = farmDslRepository.getPartialOrdersListByUserByPage(userId, pageInfo);
+		return buyList.stream().filter(payInfo -> payInfo.getState().equals(state)).collect(Collectors.toList());
+	}
+
+	@Override
+	public List<PayInfoSummaryDto> findBuyListByUser(PageInfo pageInfo, Long userId) throws Exception {
+		return farmDslRepository.getPartialOrdersListByUserByPage(userId, pageInfo);
 	}
 
 }

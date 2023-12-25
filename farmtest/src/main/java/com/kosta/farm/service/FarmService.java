@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.kosta.farm.dto.FarmerInfoDto;
 import com.kosta.farm.dto.OrderHistoryDto;
+import com.kosta.farm.dto.PayInfoSummaryDto;
 import com.kosta.farm.dto.ProductInfoDto;
 import com.kosta.farm.dto.QuotationInfoDto;
 import com.kosta.farm.dto.QuotePayDto;
@@ -23,6 +24,8 @@ import com.kosta.farm.entity.Quotation;
 import com.kosta.farm.entity.Request;
 import com.kosta.farm.entity.Review;
 import com.kosta.farm.util.PageInfo;
+import com.kosta.farm.util.PaymentStatus;
+import com.kosta.farm.util.QuotationStatus;
 import com.querydsl.core.Tuple;
 
 public interface FarmService {
@@ -41,9 +44,8 @@ public interface FarmService {
 
 	// farmer별로 리뷰리스트 가져오기
 	List<Review> getReviewListByFarmer(Long farmerId, PageInfo pageInfo) throws Exception;
-	
+
 	List<ReviewInfoDto> getReviewListInfoByFarmer(Long farmerId, PageInfo pageInfo) throws Exception;
-	
 
 	// farmer별로 product list가져오기
 	List<Product> getProductListByFarmer(Long farmerId, PageInfo pageInfo) throws Exception;
@@ -87,7 +89,7 @@ public interface FarmService {
 	void readImage(Integer num, ServletOutputStream outputStream) throws Exception;
 
 	List<Request> requestListByUser(Long userId) throws Exception;
-	
+
 	List<Quotation> quoteListByRequest(Long requestId) throws Exception;
 
 	List<Tuple> quoteandRequestListByRequestId(Long requestId) throws Exception;
@@ -101,12 +103,15 @@ public interface FarmService {
 
 	QuotationInfoDto getQuotationInfoFromOrder(PayInfo payInfo) throws Exception;
 
-	OrderHistoryDto getOrderDetails(String receiptId) throws Exception;
+//	OrderHistoryDto getOrderDetails(String receiptId) throws Exception;
 
 	void savePaymentInfo(PayInfo paymentInfo) throws Exception;
 
 	QuotePayDto getQuoteWithRequestInfoById(Long quotationId) throws Exception;
-	
-	
-	
+
+	List<PayInfoSummaryDto> findBuyListByUserAndState(PageInfo pageInfo, Long userId, PaymentStatus state)
+			throws Exception;
+
+	List<PayInfoSummaryDto> findBuyListByUser(PageInfo pageInfo, Long userId) throws Exception;
+
 }

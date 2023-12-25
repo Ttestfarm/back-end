@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -291,7 +292,20 @@ public class FarmServiceImpl implements FarmService {
 	
 	@Override
 	public List<ReviewInfoDto> getReviewListInfoByFarmer(Long farmerId, PageInfo pageInfo) throws Exception {
-		return farmDslRepository.reviewListWithFarmNameByPage(farmerId, pageInfo);
+		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 6, Sort.by(Direction.DESC, "reviewId")); // 6개씩
+		List<ReviewInfoDto> reviewList=farmDslRepository.reviewListWithFarmNameByPage(farmerId, pageRequest);
+		Long allCount=farmDslRepository.reviewCountByFarmer(farmerId);
+		Integer allPage = allCount.intValue() / pageRequest.getPageSize();
+
+		if (allCount % pageRequest.getPageSize() != 0)
+			allPage += 1;
+		Integer startPage = (pageInfo.getCurPage() - 1) / 10 * 10 + 1;
+		Integer endPage = Math.min(startPage + 10 - 1, allPage);
+		pageInfo.setAllPage(allPage);
+		pageInfo.setStartPage(startPage);
+		pageInfo.setEndPage(endPage);
+		
+		return reviewList;
 	}
 	
 
@@ -348,7 +362,6 @@ public class FarmServiceImpl implements FarmService {
 	// 유저별로 리퀘스트쓴거
 	@Override
 	public List<Request> requestListByUser(Long userId) throws Exception {
-//		return requestRepository.findRequestByUserId(userId);
 		return requestRepository.findRequestByUserIdOrderByRequestIdDesc(userId);
 	}
 

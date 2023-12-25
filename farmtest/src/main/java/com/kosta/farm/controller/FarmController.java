@@ -1,10 +1,11 @@
 package com.kosta.farm.controller;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -29,7 +30,6 @@ import com.kosta.farm.dto.ReviewDto;
 import com.kosta.farm.dto.ReviewInfoDto;
 import com.kosta.farm.entity.Farmer;
 import com.kosta.farm.entity.Farmerfollow;
-import com.kosta.farm.entity.PayInfo;
 import com.kosta.farm.entity.Product;
 import com.kosta.farm.entity.Request;
 import com.kosta.farm.entity.Review;
@@ -177,7 +177,7 @@ public class FarmController {
 	}
 
 //
-	@GetMapping("/user") // 마이페이지 메인 받은 매칭 견적 list 무한스크롤?
+	@GetMapping("/user") // 마이페이지 메인 받은 매칭 견적 list
 	public ResponseEntity<Map<String, Object>> matchingList(Authentication authentication) {
 		User user = (User) authentication.getPrincipal();
 		Long userId = user.getUserId();
@@ -186,14 +186,33 @@ public class FarmController {
 			List<Request> requestList = farmService.requestListByUser(userId);
 			List<RequestWithQuotationCountDTO> requestWithCountList = new ArrayList<>();
 			for (Request request : requestList) {
-				Long requestId = request.getRequestId(); // 각 요청의 ID 가져오기
-				Long quoteCount = farmService.quoteCount(requestId); // 요청 ID에 대한 견적 수 가져오기
+				Long requestId = request.getRequestId(); // 각 요청의 id 가져오기
+				Long quoteCount = farmService.quoteCount(requestId); // 요청 id에 대한 견적 수 가져오기
 				RequestWithQuotationCountDTO requestWithCount = new RequestWithQuotationCountDTO();
 				requestWithCount.setRequest(request);
 				requestWithCount.setQuotationCount(quoteCount);
 				System.out.println(quoteCount);
 				requestWithCountList.add(requestWithCount);
 			}
+			Collections.sort(requestWithCountList, (r1, r2) -> {
+			    Long count1 = r1.getQuotationCount();
+			    Long count2 = r2.getQuotationCount();
+			    
+			    // 견적 수 비교 후, 견적 수가 같으면 requestId 비교
+			    if (count1 == null && count2 == null) {
+			        return Long.compare(r2.getRequest().getRequestId(), r1.getRequest().getRequestId());
+			    } else if (count1 == null) {
+			        return 1;
+			    } else if (count2 == null) {
+			        return -1;
+			    } else {
+			        int countComparison = count2.compareTo(count1);
+			        return countComparison != 0 ? countComparison : Long.compare(r2.getRequest().getRequestId(), r1.getRequest().getRequestId());
+			    }
+			});
+
+
+
 			res.put("requestWithCountList", requestWithCountList);
 			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
 		} catch (Exception e) {
@@ -204,11 +223,10 @@ public class FarmController {
 	}
 
 	// 구매내역 불러오기 하기 후기도 같이 불러옴 무한스크롤 필터기능? 몇개씩 불러와야하나여
-	@GetMapping("/user/buylist") 
+	@GetMapping("/user/buylist")
 	public ResponseEntity<Map<String, Object>> buyList(Authentication authentication,
 			@RequestParam(required = false, name = "page", defaultValue = "1") Integer page,
-			@RequestParam(required = false) PaymentStatus state) 
-	{
+			@RequestParam(required = false) PaymentStatus state) {
 		User user = (User) authentication.getPrincipal();
 		Long userId = user.getUserId();
 		try {

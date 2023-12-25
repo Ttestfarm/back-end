@@ -2,6 +2,7 @@ package com.kosta.farm.dto;
 
 import java.math.BigDecimal;
 import java.sql.Date;
+import java.sql.Timestamp;
 
 import com.kosta.farm.util.PaymentStatus;
 
@@ -26,6 +27,7 @@ public class PayInfoSummaryDto {
 	private String buyerName;
 	private String buyerAddress;
     private Date paidAt; // 결제 완료 일시
+    private Timestamp createAt;
 	private PaymentStatus state;
 	
 	private Long thumbNail; // 대표이미지 id

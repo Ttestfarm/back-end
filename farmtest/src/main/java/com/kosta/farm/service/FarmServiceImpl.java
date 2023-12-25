@@ -288,6 +288,12 @@ public class FarmServiceImpl implements FarmService {
 		}
 		return productList;
 	}
+	
+	@Override
+	public List<ReviewInfoDto> getReviewListInfoByFarmer(Long farmerId, PageInfo pageInfo) throws Exception {
+		return farmDslRepository.reviewListWithFarmNameByPage(farmerId, pageInfo);
+	}
+	
 
 	@Override // 유저별로 리뷰리스트 가져오기
 	public List<Review> getReviewListByUser(Long userId) throws Exception {
@@ -391,21 +397,6 @@ public class FarmServiceImpl implements FarmService {
 		}
 		return null;
 	}
-//		String receiptId = payInfo.getReceiptId();
-//		Long productId = payInfo.getProductId();
-//		Product product = productRepository.findById(productId).get();
-//		// Product로부터 필요한 정보를 가져와 ProductInfoDto에 설정
-//		if (product != null) {
-//			ProductInfoDto productInfo = new ProductInfoDto();
-//			productInfo.setProductName(product.getProductName());
-//			productInfo.setThumbNail(product.getThumbNail());
-//
-//			// 다른 필요한 정보들 설정
-//
-//			return productInfo;
-//		}
-//		return null; // 상품 정보가 없으면 null 반환
-//	}
 
 	@Override
 	public QuotationInfoDto getQuotationInfoFromOrder(PayInfo payInfo) throws Exception {
@@ -431,13 +422,7 @@ public class FarmServiceImpl implements FarmService {
 
 	}
 
-//	@Override
-//	public OrderHistoryDto getOrderDetails(String recieptId) throws Exception {
-//		PayInfo payInfo = payInfoRepository.findById(recieptId).get();
-//		OrderHistoryDto orderHistoryDto = new OrderHistoryDto();
-//		orderHistoryDto.setPayInfo(payInfo);
-//		return null;
-//	}
+
 
 	@Override // payment정보 저장하기
 	public void savePaymentInfo(PayInfo payInfo) throws Exception {
@@ -472,21 +457,18 @@ public class FarmServiceImpl implements FarmService {
 		return null; // 둘다 존재하지 않으면 null;
 	}
 
-	@Override
-	public List<ReviewInfoDto> getReviewListInfoByFarmer(Long farmerId, PageInfo pageInfo) throws Exception {
-		return farmDslRepository.reviewListWithFarmNameByPage(farmerId, pageInfo);
-	}
+
 
 	@Override
 	public List<PayInfoSummaryDto> findBuyListByUserAndState(PageInfo pageInfo, Long userId, PaymentStatus state)
 			throws Exception {
-		List<PayInfoSummaryDto> buyList = farmDslRepository.getPartialOrdersListByUserByPage(userId, pageInfo);
+		List<PayInfoSummaryDto> buyList = farmDslRepository.getPartialOrdersListByUserByPage(pageInfo, userId);
 		return buyList.stream().filter(payInfo -> payInfo.getState().equals(state)).collect(Collectors.toList());
 	}
 
 	@Override
 	public List<PayInfoSummaryDto> findBuyListByUser(PageInfo pageInfo, Long userId) throws Exception {
-		return farmDslRepository.getPartialOrdersListByUserByPage(userId, pageInfo);
+		return farmDslRepository.getPartialOrdersListByUserByPage(pageInfo, userId);
 	}
 
 }

@@ -9,6 +9,7 @@ import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -152,8 +153,6 @@ public class FarmDslRepository {
 		Long cnt = reviewCountByFarmer(farmerId);
 		pageInfo.setAllPage((int) Math.ceil(cnt.intValue() / 6));
 		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 6);
-		System.out.println(pageRequest.getOffset());
-		System.out.println(pageRequest.getPageSize());
 
 		List<Tuple> tupleList = jpaQueryFactory.select(review, farmer.farmName, payInfo.count, payInfo.productName)
 				.from(review).leftJoin(farmer).on(review.farmerId.eq(farmer.farmerId)).leftJoin(payInfo)
@@ -172,19 +171,23 @@ public class FarmDslRepository {
 		return list;
 	}
 
-	// 무한스크롤도 해서 page필요함..
-	public List<OrderHistoryDto> buyListWithReviewAndOtherInfoByPage(Long userId, PageInfo pageInfo) {
-		return null;
-
+	public Long payInfoAllCount(Long userId) throws Exception {
+		QPayInfo payInfo = QPayInfo.payInfo;
+		return jpaQueryFactory.select(payInfo.count()).from(payInfo).where(payInfo.userId.eq(userId)).fetchOne();
 	}
 
-	public List<PayInfoSummaryDto> getPartialOrdersListByUserByPage(Long userId, PageInfo pageInfo) {
+	public List<PayInfoSummaryDto> getPartialOrdersListByUserByPage(PageInfo pageInfo, Long userId) throws Exception {
 		QPayInfo payInfo = QPayInfo.payInfo;
 		QProduct product = QProduct.product;
 		QFarmer farmer = QFarmer.farmer;
 		QQuotation quotation = QQuotation.quotation;
-		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 6);
 
+		Long cnt = payInfoAllCount(userId);
+		System.out.println("hwerererere"+cnt);
+
+		pageInfo.setAllPage((int) Math.ceil(cnt.intValue() / 6));
+		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 6,
+				Sort.by(Sort.Direction.DESC, "createAt"));
 		List<Tuple> tupleList = jpaQueryFactory
 				.select(payInfo.receiptId, payInfo.ordersId, payInfo.userId, payInfo.paymentMethod,
 						payInfo.paymentDelivery, payInfo.productPrice, payInfo.count, payInfo.amount,
@@ -193,30 +196,29 @@ public class FarmDslRepository {
 				.from(payInfo).leftJoin(product).on(payInfo.productId.eq(product.productId)).leftJoin(farmer)
 				.on(payInfo.farmerId.eq(farmer.farmerId)).leftJoin(quotation)
 				.on(payInfo.quotationId.eq(quotation.quotationId)).where(payInfo.userId.eq(userId))
-				.offset(pageRequest.getOffset()).limit(pageRequest.getPageSize())
-//				.orderBy(payInfo.createAt.desc())
+				.offset(pageRequest.getOffset()).limit(pageRequest.getPageSize()).orderBy(payInfo.createAt.desc())
 				.fetch();
 		List<PayInfoSummaryDto> list = new ArrayList<>();
 		for (Tuple t : tupleList) {
 			PayInfoSummaryDto dto = new PayInfoSummaryDto();
-
+			dto.setCreateAt(t.get(payInfo.createAt));
 			dto.setReceiptId(t.get(payInfo.receiptId));
-	        dto.setOrdersId(t.get(payInfo.ordersId));
-	        dto.setUserId(t.get(payInfo.userId));
-	        dto.setFarmerId(t.get(payInfo.farmerId));
-	        dto.setPaymentMethod(t.get(payInfo.paymentMethod));
-	        dto.setPaymentDelivery(t.get(payInfo.paymentDelivery));
-	        dto.setProductPrice(t.get(payInfo.productPrice));
-	        dto.setCount(t.get(payInfo.count));
-	        dto.setAmount(t.get(payInfo.amount));
-	        dto.setProductName(t.get(payInfo.productName));
-	        dto.setBuyerAddress(t.get(payInfo.buyerAddress));
-	        dto.setBuyerName(t.get(payInfo.buyerName));
-	        dto.setBuyerTel(t.get(payInfo.buyerTel));
-	        dto.setState(t.get(payInfo.state));
-	        dto.setThumbNail(t.get(product.thumbNail));
-	        dto.setFarmName(t.get(farmer.farmName));
-	        dto.setQuotationImages(t.get(quotation.quotationImages));
+			dto.setOrdersId(t.get(payInfo.ordersId));
+			dto.setUserId(t.get(payInfo.userId));
+			dto.setFarmerId(t.get(payInfo.farmerId));
+			dto.setPaymentMethod(t.get(payInfo.paymentMethod));
+			dto.setPaymentDelivery(t.get(payInfo.paymentDelivery));
+			dto.setProductPrice(t.get(payInfo.productPrice));
+			dto.setCount(t.get(payInfo.count));
+			dto.setAmount(t.get(payInfo.amount));
+			dto.setProductName(t.get(payInfo.productName));
+			dto.setBuyerAddress(t.get(payInfo.buyerAddress));
+			dto.setBuyerName(t.get(payInfo.buyerName));
+			dto.setBuyerTel(t.get(payInfo.buyerTel));
+			dto.setState(t.get(payInfo.state));
+			dto.setThumbNail(t.get(product.thumbNail));
+			dto.setFarmName(t.get(farmer.farmName));
+			dto.setQuotationImages(t.get(quotation.quotationImages));
 
 			list.add(dto);
 		}

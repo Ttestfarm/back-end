@@ -121,7 +121,6 @@ public class FarmController {
 		try {
 			Map<String, Object> res = new HashMap<>();
 			PageInfo pageInfo = PageInfo.builder().curPage(page).build();
-//			List<Review> reviewList = farmService.getReviewListByFarmer(farmerId, pageInfo);
 			List<ReviewInfoDto> reviewList = farmService.getReviewListInfoByFarmer(farmerId, pageInfo);
 			res.put("reviewList", reviewList);
 			res.put("pageInfo", pageInfo);
@@ -149,7 +148,7 @@ public class FarmController {
 		}
 	}
 
-	// 유저의 파머찜리스트
+	// 유저의 파머찜리스트 무한스크롤
 	@GetMapping("/user/followlist")
 	public ResponseEntity<Map<String, Object>> getFollowingFarmersByUserId(Authentication authentication,
 			@RequestParam(required = false, name = "page", defaultValue = "1") Integer page)
@@ -204,23 +203,20 @@ public class FarmController {
 
 	}
 
-	// 구매내역 불러오기 하기 후기도 같이 불러옴 무한스크롤 필터기능? 이거 아직 ㄴㄴ
-	@GetMapping("/user/buylist")
+	// 구매내역 불러오기 하기 후기도 같이 불러옴 무한스크롤 필터기능? 몇개씩 불러와야하나여
+	@GetMapping("/user/buylist") 
 	public ResponseEntity<Map<String, Object>> buyList(Authentication authentication,
 			@RequestParam(required = false, name = "page", defaultValue = "1") Integer page,
-			@RequestParam(required = false) PaymentStatus state
-
-	) {
-		PageInfo pageInfo = PageInfo.builder().curPage(page).build();
+			@RequestParam(required = false) PaymentStatus state) 
+	{
 		User user = (User) authentication.getPrincipal();
 		Long userId = user.getUserId();
 		try {
 			Map<String, Object> res = new HashMap<>();
+			PageInfo pageInfo = PageInfo.builder().curPage(page).build();
 			List<PayInfoSummaryDto> buyList = state != null
 					? farmService.findBuyListByUserAndState(pageInfo, userId, state)
 					: farmService.findBuyListByUser(pageInfo, userId);
-			System.out.println(buyList);
-			System.out.println("여기요" + userId);
 
 			List<OrderHistoryDto> OrdersWithReview = new ArrayList<>();
 			List<Review> reviewList = farmService.getReviewListByUser(userId);
@@ -228,7 +224,7 @@ public class FarmController {
 			for (PayInfoSummaryDto payInfoSummaryDto : buyList) {
 				String receiptId = payInfoSummaryDto.getReceiptId();
 				OrderHistoryDto orderHistory = new OrderHistoryDto();
-				orderHistory.setPayInfoSummaryDto(payInfoSummaryDto);
+				orderHistory.setPayInfo(payInfoSummaryDto);
 				// order에 따른 리뷰
 				Review findreview = findReviewForOrder(reviewList, receiptId);
 				if (findreview != null) {
@@ -237,7 +233,6 @@ public class FarmController {
 
 				OrdersWithReview.add(orderHistory);
 			}
-
 			res.put("OrdersWithReview", OrdersWithReview);
 			res.put("pageInfo", pageInfo);
 			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);

@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 public class OrderHistoryDto {
 	// 주문정보
-	private PayInfoSummaryDto payInfoSummaryDto;
+	private PayInfoSummaryDto payInfo;
 	// 리뷰정보
 	private Review review;
 	// 상품정보

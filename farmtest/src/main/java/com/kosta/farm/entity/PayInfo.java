@@ -73,12 +73,12 @@ public class PayInfo {
 	private String buyerAddress;
 
     @CreationTimestamp
-    private Timestamp createAt;
     private Date paidAt; // 결제 완료 일시
     private String pgType;
     private String pgTid;
     private Date failedAt; // 결제 실패 일시
-	
+	private Timestamp createAt;
+    
 	// 정산
 	@Column
 	private Date invoiceDate; // 정산예정일 "yyyy-MM-dd" 형식

@@ -54,8 +54,7 @@ public class RefundService {
 		BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 		br.close();
 		conn.disconnect();
-		System.out.println(merchant_uid);
-		System.out.printf("결제 취소 완료 : 주문 번호"+ merchant_uid);
+
         log.info("결제 취소 완료 : 주문 번호 {}", merchant_uid);
 	}
 

@@ -1,7 +1,6 @@
 package com.kosta.farm.entity;
 
 import java.sql.Date;
-import java.sql.Timestamp;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -15,6 +14,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
+import com.kosta.farm.dto.RequestCopyDto;
 import com.kosta.farm.util.RequestStatus;
 
 import lombok.AllArgsConstructor;
@@ -63,4 +63,9 @@ public class Request {
 	@Enumerated(EnumType.STRING)
 	private RequestStatus state = RequestStatus.REQUEST; // EXPIRED, REQUEST, MATCHED, CANCEL
 
+	public RequestCopyDto toDto() {
+		return RequestCopyDto.builder().requestId(requestId).requestProduct(requestProduct)
+				.requestQuantity(requestQuantity).build();
+
+	}
 }

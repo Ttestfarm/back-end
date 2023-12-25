@@ -34,6 +34,7 @@ import com.kosta.farm.entity.Quotation;
 import com.kosta.farm.entity.Request;
 import com.kosta.farm.entity.Review;
 import com.kosta.farm.util.PageInfo;
+import com.kosta.farm.util.RequestStatus;
 import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
@@ -53,7 +54,6 @@ public class FarmDslRepository {
 		QQuotation quotation = QQuotation.quotation;
 		return jpaQueryFactory.select(quotation.count()).from(quotation).where(quotation.requestId.eq(requestId))
 				.fetchOne();
-//      return count;
 	};
 
 	// 파머 수 가져오기
@@ -128,7 +128,8 @@ public class FarmDslRepository {
 		System.out.println(pageRequest.getPageSize());
 		List<Tuple> tupleList = jpaQueryFactory.select(request, user.userName).from(request).leftJoin(user)
 				.on(request.userId.eq(user.userId)).offset(pageRequest.getOffset()).limit(pageRequest.getPageSize())
-				.orderBy(request.requestId.desc()).fetch();
+				.where(request.state.eq(RequestStatus.REQUEST).or(request.state.eq(RequestStatus.MATCHED)))
+				.orderBy(request.requestId.desc()).fetch(); //requestStatus가 request상태거나 matched상태 개수만 보여준다
 
 		List<RequestDto> list = new ArrayList<>();
 		for (Tuple t : tupleList) {
@@ -146,13 +147,10 @@ public class FarmDslRepository {
 	}
 
 //리뷰인포 가져오기
-	public List<ReviewInfoDto> reviewListWithFarmNameByPage(Long farmerId, PageInfo pageInfo) throws Exception {
+	public List<ReviewInfoDto> reviewListWithFarmNameByPage(Long farmerId,PageRequest pageRequest) throws Exception {
 		QReview review = QReview.review;
 		QFarmer farmer = QFarmer.farmer;
 		QPayInfo payInfo = QPayInfo.payInfo;
-		Long cnt = reviewCountByFarmer(farmerId);
-		pageInfo.setAllPage((int) Math.ceil(cnt.intValue() / 6));
-		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 6);
 
 		List<Tuple> tupleList = jpaQueryFactory.select(review, farmer.farmName, payInfo.count, payInfo.productName)
 				.from(review).leftJoin(farmer).on(review.farmerId.eq(farmer.farmerId)).leftJoin(payInfo)
@@ -189,15 +187,21 @@ public class FarmDslRepository {
 		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 6,
 				Sort.by(Sort.Direction.DESC, "createAt"));
 		List<Tuple> tupleList = jpaQueryFactory
-				.select(payInfo.receiptId, payInfo.ordersId, payInfo.userId, payInfo.paymentMethod,
+				.select(payInfo.receiptId, payInfo.ordersId,
+						payInfo.farmerId,payInfo.quotationId,
+						payInfo.productId,
+						payInfo.userId, payInfo.paymentMethod,
 						payInfo.paymentDelivery, payInfo.productPrice, payInfo.count, payInfo.amount,
 						payInfo.productName, payInfo.buyerAddress, payInfo.buyerName, payInfo.buyerTel,
 						payInfo.createAt, payInfo.state, product.thumbNail, farmer.farmName, quotation.quotationImages)
-				.from(payInfo).leftJoin(product).on(payInfo.productId.eq(product.productId)).leftJoin(farmer)
-				.on(payInfo.farmerId.eq(farmer.farmerId)).leftJoin(quotation)
+				.from(payInfo)
+				.leftJoin(product)
+				.on(payInfo.productId.eq(product.productId))
+				.leftJoin(farmer).on(payInfo.farmerId.eq(farmer.farmerId)).leftJoin(quotation)
 				.on(payInfo.quotationId.eq(quotation.quotationId)).where(payInfo.userId.eq(userId))
 				.offset(pageRequest.getOffset()).limit(pageRequest.getPageSize()).orderBy(payInfo.createAt.desc())
 				.fetch();
+		
 		List<PayInfoSummaryDto> list = new ArrayList<>();
 		for (Tuple t : tupleList) {
 			PayInfoSummaryDto dto = new PayInfoSummaryDto();
@@ -208,6 +212,7 @@ public class FarmDslRepository {
 			dto.setFarmerId(t.get(payInfo.farmerId));
 			dto.setPaymentMethod(t.get(payInfo.paymentMethod));
 			dto.setPaymentDelivery(t.get(payInfo.paymentDelivery));
+			dto.setProductId(t.get(payInfo.productId));
 			dto.setProductPrice(t.get(payInfo.productPrice));
 			dto.setCount(t.get(payInfo.count));
 			dto.setAmount(t.get(payInfo.amount));
@@ -271,7 +276,6 @@ public class FarmDslRepository {
 
 	}
 
-//   public List<Tuple> getQuoteandReqInfoBy
 
 	public List<PayInfo> findPayInfowithReviewByUserId(Long userId) {
 		QPayInfo payInfo = QPayInfo.payInfo;
@@ -281,9 +285,5 @@ public class FarmDslRepository {
 
 	}
 
-	@Transactional
-	public void updateStock(Long productId, Integer stock) {
-
-	}
 
 }

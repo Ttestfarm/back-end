@@ -42,7 +42,7 @@ public class Quotation {
 	@Column
 	private String quotationProduct; // 품목명
 	@Column
-	private Integer quotationQuantity; // 수량
+	private String quotationQuantity; // 수량
 	@Column
 	private Integer quotationPrice; // 가격
 	@Column

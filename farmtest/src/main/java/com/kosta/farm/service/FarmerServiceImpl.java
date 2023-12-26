@@ -27,7 +27,6 @@ import com.kosta.farm.entity.PayInfo;
 import com.kosta.farm.entity.Product;
 import com.kosta.farm.entity.Quotation;
 import com.kosta.farm.entity.Request;
-import com.kosta.farm.entity.User;
 import com.kosta.farm.repository.FarmerDslRepository;
 import com.kosta.farm.repository.FarmerRepository;
 import com.kosta.farm.repository.FileVoRepository;
@@ -36,6 +35,7 @@ import com.kosta.farm.repository.ProductRepository;
 import com.kosta.farm.repository.QuotationRepository;
 import com.kosta.farm.util.PageInfo;
 import com.kosta.farm.util.PaymentStatus;
+import com.kosta.farm.util.RequestStatus;
 import com.querydsl.core.Tuple;
 
 import lombok.RequiredArgsConstructor;
@@ -77,11 +77,12 @@ public class FarmerServiceImpl implements FarmerService {
 
 	// 관심 농산물인 요청서 리스트 보기
 	@Override
-	public List<Request> findRequestsByFarmInterest(Long farmerId, String farmInterest) throws Exception {
-		List<Request> list = farmerDslRepository.findRequestByInterestAndFarmerId(farmerId, farmInterest);
+	public List<Request> findRequestsByFarmInterestPageInfo(Long farmerId, String farmInterest, PageInfo pageInfo) throws Exception {
+		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 10); // 첫번째 값 : 페이지 번호, 두 번째 값 : 페이지 크기
+		List<Request> list = farmerDslRepository.findRequestByInterestAndFarmerId(farmerId, farmInterest, pageRequest);
 		return list;
 	}
-
+	
 	// ** 견적서 **
 	// 견적서 보내기(저장)
 	@Override

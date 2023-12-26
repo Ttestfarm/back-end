@@ -60,6 +60,7 @@ public class PaymentsApiController {
 			log.info("주문 상품 환불 진행 : 주문 번호 {}", receiptId);
 			String token = refundService.getToken(impKey, impSecret);
 			refundService.refundRequest(token, receiptId, e.getMessage());
+			
 			e.printStackTrace();
 			return new ResponseEntity<String>("결제 에러", HttpStatus.BAD_REQUEST);
 		}

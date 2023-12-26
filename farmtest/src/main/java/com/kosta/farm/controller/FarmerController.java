@@ -27,6 +27,7 @@ import com.kosta.farm.entity.Request;
 import com.kosta.farm.entity.User;
 import com.kosta.farm.service.FarmerService;
 import com.kosta.farm.util.PageInfo;
+import com.kosta.farm.util.RequestStatus;
 
 @RestController
 @RequestMapping("/farmer")
@@ -42,11 +43,12 @@ public class FarmerController {
 		 User user = (User) authentication.getPrincipal();
 		 Long farmerId= user.getFarmerId();
 		try {
-			Map<String, Object> res = new HashMap<>();
 			List<String> interestList = farmerService.findFarmInterestByFarmerId(farmerId);
-			List<Request> reqList = farmerService.findRequestsByFarmInterest(farmerId, interestList.get(0));
+//			List<Request> reqList = farmerService.findRequestsByFarmInterest(farmerId, interestList.get(0));
+			
+			Map<String, Object> res = new HashMap<>();
 			res.put("interestList", interestList);
-			res.put("reqList", reqList);
+//			res.put("reqList", reqList);
 			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -56,15 +58,27 @@ public class FarmerController {
 
 	// 관심 농산물인 요청서 리스트 보기
 	@GetMapping("/requestlist")
-	public ResponseEntity<List<Request>> requestList(@RequestParam String farmInterest, Authentication authentication) {
+	public ResponseEntity<Map<String, Object>> requestList(@RequestParam(required = false, name = "page", defaultValue = "1")Integer page, 
+			@RequestParam String farmInterest, Authentication authentication) {
 		 User user = (User) authentication.getPrincipal();
 		 Long farmerId= user.getFarmerId();
 		try {
-			List<Request> reqList = farmerService.findRequestsByFarmInterest(farmerId, farmInterest);
-			return new ResponseEntity<List<Request>>(reqList, HttpStatus.OK);
+			PageInfo pageInfo = PageInfo.builder().curPage(page).build();
+			List<Request> reqList = farmerService.findRequestsByFarmInterestPageInfo(farmerId, farmInterest, pageInfo);
+//			Double average = farmerService.avgTotalRequest(farmerId, farmInterest); 
+//			Long requestProgress = farmerService.requestCountByState(farmerId, farmInterest);
+			// 매칭중 
+//			Long foundMatching = farmerService.requestCountByState(RequestStatus.MATCHED);
+			Map<String, Object> res = new HashMap<>();
+			res.put("reqList", reqList);
+//			res.put("average", Math.round(average * 100.0) / 100.0);
+//			res.put("matchingProgress", requestProgress);
+//			res.put("foundMatching", foundMatching);
+			res.put("pageInfo", pageInfo);
+			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
-			return new ResponseEntity<List<Request>>(HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
 		}
 	}
 

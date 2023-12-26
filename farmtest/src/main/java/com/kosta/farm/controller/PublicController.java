@@ -85,7 +85,6 @@ public class PublicController {
 	         if (sortType == null || sortType.equals("") || sortType.equals("latest")) {
 	            sortType = "farmerId";
 	         }
-	         System.out.println(keyword);
 	         PageInfo pageInfo = PageInfo.builder().curPage(page).build();
 	         List<FarmerInfoDto> farmerList = null;
 	         if (keyword.equals("all")) {

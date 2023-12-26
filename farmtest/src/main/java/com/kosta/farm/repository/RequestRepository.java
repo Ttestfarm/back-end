@@ -1,5 +1,6 @@
 package com.kosta.farm.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,4 +19,6 @@ public interface RequestRepository extends JpaRepository<Request, Long> {
 	List<Request> findByState(RequestStatus state);
 	
 	List<Request> findRequestByUserIdOrderByRequestIdDesc(Long userId);
+
+	List<Request> findByCreateDateBeforeAndStateNot(LocalDateTime oneWeekAgo, RequestStatus expired);
 }

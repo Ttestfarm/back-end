@@ -17,6 +17,7 @@ import com.kosta.farm.entity.QQuotation;
 import com.kosta.farm.entity.QRequest;
 import com.kosta.farm.entity.Quotation;
 import com.kosta.farm.entity.Request;
+import com.kosta.farm.util.PageInfo;
 import com.kosta.farm.util.PaymentStatus;
 import com.kosta.farm.util.QuotationStatus;
 import com.kosta.farm.util.RequestStatus;
@@ -38,18 +39,19 @@ public class FarmerDslRepository {
                         .where(farmer.farmerId.eq(farmerId))
                         .fetchOne();
       }
-
+      
       // 매칭 주문 요청서 리스트
-      public List<Request> findRequestByInterestAndFarmerId(Long farmerId, String farmInterest) {
+      public List<Request> findRequestByInterestAndFarmerId(Long farmerId, String farmInterest, PageRequest pageRequest) {
             QRequest req = QRequest.request;
             QQuotation quot = QQuotation.quotation;
             return jpaQueryFactory.selectFrom(req)
                         .leftJoin(quot).on(req.requestId.eq(quot.requestId))
                         .where(req.requestProduct.eq(farmInterest)
                                     .and(req.state.eq(RequestStatus.REQUEST))
-                                    .and(
-                                                quot.farmerId.isNull()
-                                                            .or(quot.farmerId.ne(farmerId))))
+                                    .and(quot.farmerId.isNull()
+                                    .or(quot.farmerId.ne(farmerId))))
+                        .offset(pageRequest.getOffset())
+                        .limit(pageRequest.getPageSize())
                         .fetch();
       }
 

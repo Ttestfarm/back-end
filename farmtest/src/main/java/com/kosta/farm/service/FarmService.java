@@ -28,13 +28,9 @@ import com.kosta.farm.util.PaymentStatus;
 import com.querydsl.core.Tuple;
 
 public interface FarmService {
-	// 상품 등록
-	Long productEnter(Product product, MultipartFile thmbnail, List<MultipartFile> file) throws Exception;
 
 	// 리뷰 등록
 	void addReview(String receiptId, MultipartFile reviewpixUrl, Integer rating, String content) throws Exception;
-
-	Long addReviews(ReviewDto review, List<MultipartFile> files) throws Exception;
 
 	// 모든 파머 가져오기
 	List<Farmer> findAllFarmers() throws Exception;

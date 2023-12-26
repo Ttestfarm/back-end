@@ -81,6 +81,9 @@ public class FarmServiceImpl implements FarmService {
 
 	@Value("${imp_secret}")
 	private String impSecret;
+	
+	@Value("$(upload.path)")
+	private String dir;
 
 	@Override // 이건 페이지네이션을 지원
 	public List<Farmer> farmerListByPage(PageInfo pageInfo) throws Exception {
@@ -165,8 +168,6 @@ public class FarmServiceImpl implements FarmService {
 
 		if (reviewpixUrl != null && !reviewpixUrl.isEmpty()) {
 
-			String dir = "c:/jisu/upload/";
-
 			FileVo imageFile = FileVo.builder().directory(dir).fileName(reviewpixUrl.getOriginalFilename())
 					.size(reviewpixUrl.getSize()).build();
 			fileVoRepository.save(imageFile);
@@ -198,51 +199,9 @@ public class FarmServiceImpl implements FarmService {
 
 	}
 
-	@Override
-	public Long addReviews(ReviewDto review, List<MultipartFile> files) throws Exception {
-		return null;
-	}
-
-	@Override
-	public Long productEnter(Product product, MultipartFile thumbNail, List<MultipartFile> files) throws Exception {
-		String dir = "c:/jisu/upload/";
-		String fileNums = "";
-		if (thumbNail != null && !thumbNail.isEmpty()) {
-			FileVo imageFile = FileVo.builder().directory(dir).fileName(thumbNail.getOriginalFilename())
-					.size(thumbNail.getSize()).build();
-			productFileRepository.save(imageFile);
-			File uploadFile = new File(dir + imageFile.getFileId());
-			thumbNail.transferTo(uploadFile);
-			product.setThumbNail(imageFile.getFileId());
-		}
-
-		if (files != null && files.size() != 0) {
-
-			for (MultipartFile file : files) {
-				// primgfiletable에 insert
-				FileVo imageFile = FileVo.builder().directory(dir).fileName(file.getOriginalFilename())
-						.size(file.getSize()).build();
-				productFileRepository.save(imageFile);
-
-				// upload 폴더에 upload
-				File uploadFile = new File(dir + imageFile.getFileId());
-				file.transferTo(uploadFile);
-
-				// file 번호 목록 만들기
-				if (!fileNums.equals(""))
-					fileNums += ",";
-//				fileNums += imageFile.getFileId();
-			}
-			product.setFileUrl(fileNums);
-		}
-		// product table에 insert
-		productRepository.save(product);
-		return product.getProductId();
-	}
 
 	@Override
 	public void readImage(Integer num, ServletOutputStream outputStream) throws Exception {
-		String dir = "c:/jisu/upload/";
 		FileInputStream fis = new FileInputStream(dir + num);
 		FileCopyUtils.copy(fis, outputStream);
 		fis.close();

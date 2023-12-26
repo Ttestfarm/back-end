@@ -14,7 +14,7 @@ plugins {
 }
 
 group = 'com.kosta'
-version = '1.0.1'
+version = '0.0.1-SNAPSHOT'
 
 java {
    sourceCompatibility = '11'

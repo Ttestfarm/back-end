@@ -9,7 +9,7 @@ public class QuotationDto {
 	private Long farmerId;
 	
 	private String quotationProduct;
-	private Integer quotationQuantity;
+	private String quotationQuantity;
 	private Integer quotationPrice;
 	private Integer quotationDelivery;
 	private String quotationComment;

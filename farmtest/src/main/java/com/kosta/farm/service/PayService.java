@@ -37,7 +37,11 @@ public class PayService {
 			if (currentStock == (null) || (currentStock < payInfo.getCount())) {
 				throw new Exception("상품의 재고가 부족합니다. 현재 재고 수량: " + currentStock);
 			} else {
-				product.setProductStock(currentStock - payInfo.getCount());
+				int updatedStock = currentStock - payInfo.getCount();
+				product.setProductStock(updatedStock);
+				if (updatedStock == 0) { 
+					product.setState("판매완료"); //만약 재고가 0으로 바뀌면 판매완료 처리
+				}
 				productRepository.save(product);
 			}
 		}
@@ -46,7 +50,7 @@ public class PayService {
 			quote = quoteRepository.findById(payInfo.getQuotationId()).get();
 			quote.setState(QuotationStatus.COMPLETED);
 			quoteRepository.save(quote);
-			//quote state이 바뀌면 requeststate도 변경
+			// quote state이 바뀌면 requeststate도 변경
 			Request request = requestRepository.findById(quote.getRequestId()).get();
 			if (request != null) {
 				request.setState(RequestStatus.MATCHED);

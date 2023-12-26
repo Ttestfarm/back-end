@@ -129,7 +129,7 @@ public class FarmDslRepository {
 		List<Tuple> tupleList = jpaQueryFactory.select(request, user.userName).from(request).leftJoin(user)
 				.on(request.userId.eq(user.userId)).offset(pageRequest.getOffset()).limit(pageRequest.getPageSize())
 				.where(request.state.eq(RequestStatus.REQUEST).or(request.state.eq(RequestStatus.MATCHED)))
-				.orderBy(request.requestId.desc()).fetch(); //requestStatus가 request상태거나 matched상태 개수만 보여준다
+				.orderBy(request.requestId.desc()).fetch(); // requestStatus가 request상태거나 matched상태 개수만 보여준다
 
 		List<RequestDto> list = new ArrayList<>();
 		for (Tuple t : tupleList) {
@@ -147,14 +147,19 @@ public class FarmDslRepository {
 	}
 
 //리뷰인포 가져오기
-	public List<ReviewInfoDto> reviewListWithFarmNameByPage(Long farmerId,PageRequest pageRequest) throws Exception {
+	public List<ReviewInfoDto> reviewListWithFarmNameByPage(Long farmerId, PageRequest pageRequest) throws Exception {
 		QReview review = QReview.review;
 		QFarmer farmer = QFarmer.farmer;
 		QPayInfo payInfo = QPayInfo.payInfo;
 
 		List<Tuple> tupleList = jpaQueryFactory.select(review, farmer.farmName, payInfo.count, payInfo.productName)
-				.from(review).leftJoin(farmer).on(review.farmerId.eq(farmer.farmerId)).leftJoin(payInfo)
-				.on(review.receiptId.eq(payInfo.receiptId)).offset(pageRequest.getOffset())
+				.from(review)
+				.leftJoin(farmer)
+				.on(review.farmerId.eq(farmer.farmerId).and(farmer.farmerId.eq(farmerId)))
+				.leftJoin(payInfo)
+				.on(review.receiptId.eq(payInfo.receiptId))
+		        .where(review.farmerId.eq(farmerId)) //review의 farmerId랑 매칭
+				.offset(pageRequest.getOffset())
 				.limit(pageRequest.getPageSize()).orderBy(review.reviewId.desc()).fetch();
 
 		List<ReviewInfoDto> list = new ArrayList<>();
@@ -181,27 +186,23 @@ public class FarmDslRepository {
 		QQuotation quotation = QQuotation.quotation;
 
 		Long cnt = payInfoAllCount(userId);
-		System.out.println("hwerererere"+cnt);
+		System.out.println("hwerererere" + cnt);
 
 		pageInfo.setAllPage((int) Math.ceil(cnt.intValue() / 6));
 		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 6,
 				Sort.by(Sort.Direction.DESC, "createAt"));
 		List<Tuple> tupleList = jpaQueryFactory
-				.select(payInfo.receiptId, payInfo.ordersId,
-						payInfo.farmerId,payInfo.quotationId,
-						payInfo.productId,
-						payInfo.userId, payInfo.paymentMethod,
-						payInfo.paymentDelivery, payInfo.productPrice, payInfo.count, payInfo.amount,
-						payInfo.productName, payInfo.buyerAddress, payInfo.buyerName, payInfo.buyerTel,
-						payInfo.createAt, payInfo.state, product.thumbNail, farmer.farmName, quotation.quotationImages)
-				.from(payInfo)
-				.leftJoin(product)
-				.on(payInfo.productId.eq(product.productId))
-				.leftJoin(farmer).on(payInfo.farmerId.eq(farmer.farmerId)).leftJoin(quotation)
+				.select(payInfo.receiptId, payInfo.ordersId, payInfo.farmerId, payInfo.quotationId, payInfo.productId,
+						payInfo.userId, payInfo.paymentMethod, payInfo.paymentDelivery, payInfo.productPrice,
+						payInfo.count, payInfo.amount, payInfo.productName, payInfo.buyerAddress, payInfo.buyerName,
+						payInfo.buyerTel, payInfo.createAt, payInfo.state, product.thumbNail, farmer.farmName,
+						quotation.quotationImages)
+				.from(payInfo).leftJoin(product).on(payInfo.productId.eq(product.productId)).leftJoin(farmer)
+				.on(payInfo.farmerId.eq(farmer.farmerId)).leftJoin(quotation)
 				.on(payInfo.quotationId.eq(quotation.quotationId)).where(payInfo.userId.eq(userId))
 				.offset(pageRequest.getOffset()).limit(pageRequest.getPageSize()).orderBy(payInfo.createAt.desc())
 				.fetch();
-		
+
 		List<PayInfoSummaryDto> list = new ArrayList<>();
 		for (Tuple t : tupleList) {
 			PayInfoSummaryDto dto = new PayInfoSummaryDto();
@@ -276,7 +277,6 @@ public class FarmDslRepository {
 
 	}
 
-
 	public List<PayInfo> findPayInfowithReviewByUserId(Long userId) {
 		QPayInfo payInfo = QPayInfo.payInfo;
 		QReview review = QReview.review;
@@ -284,6 +284,5 @@ public class FarmDslRepository {
 				.where(payInfo.userId.eq(userId)).fetch();
 
 	}
-
 
 }

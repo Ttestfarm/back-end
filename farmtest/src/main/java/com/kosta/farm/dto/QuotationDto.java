@@ -11,6 +11,7 @@ public class QuotationDto {
 	private String quotationProduct;
 	private Integer quotationQuantity;
 	private Integer quotationPrice;
+	private Integer quotationDelivery;
 	private String quotationComment;
 	private String quotationImages;
 	

@@ -27,6 +27,7 @@ import com.kosta.farm.entity.PayInfo;
 import com.kosta.farm.entity.Product;
 import com.kosta.farm.entity.Quotation;
 import com.kosta.farm.entity.Request;
+import com.kosta.farm.entity.User;
 import com.kosta.farm.repository.FarmerDslRepository;
 import com.kosta.farm.repository.FarmerRepository;
 import com.kosta.farm.repository.FileVoRepository;
@@ -55,7 +56,7 @@ public class FarmerServiceImpl implements FarmerService {
 	private final FarmerDslRepository farmerDslRepository;
 	private final ObjectMapper objectMapper;
 
-	@Value("$(upload.paht)")
+	@Value("$(upload.path)")
 	private String dir;
 
 	// ** 매칭 주문 요청서 보기 **
@@ -424,14 +425,19 @@ public class FarmerServiceImpl implements FarmerService {
 	@Override
 	public Farmer registerFarmer(RegFarmerDto request, MultipartFile farmPixurl) throws Exception {
 
-		Farmer farmer = Farmer.builder().farmName(request.getFarmName()).farmTel(request.getFarmTel())
-				.farmAddress(request.getFarmAddress()).farmAddressDetail(request.getFarmAddressDetail())
-				.registrationNum(request.getRegistrationNum()).farmBank(request.getFarmBank())
-				.farmAccountNum(request.getFarmAccountNum()).build();
+		Farmer farmer = Farmer.builder()
+				.farmName(request.getFarmName())
+				.farmTel(request.getFarmTel())
+				.farmAddress(request.getFarmAddress())
+				.farmAddressDetail(request.getFarmAddressDetail())
+				.registrationNum(request.getRegistrationNum())
+				.farmBank(request.getFarmBank())
+				.farmAccountNum(request.getFarmAccountNum())
+				.build();
 
 		// 관심품목 입력받아서 # 기준으로 파싱하여 각각 저장
 		String[] interests = request.getFarmInterest().replaceAll("^\\s*#*", "").split("#");
-		int numInterests = Math.min(interests.length, 5); // 최대 5개의 관심사로 제한
+		int numInterests = Math.min(interests.length, 5); // 최대 5개로 제한
 
 		farmer.setFarmInterest1(numInterests > 0 ? interests[0].trim() : null);
 		farmer.setFarmInterest2(numInterests > 1 ? interests[1].trim() : null);
@@ -506,6 +512,21 @@ public class FarmerServiceImpl implements FarmerService {
 		}
 		Farmer modifiedFarmer = farmerRepository.save(farmer);
 		return modifiedFarmer;
+	}
+
+	@Override
+	public Farmer getFarmerById(Long farmerId) throws Exception {
+		if (farmerId == null) {
+			throw new IllegalArgumentException("farmerId가 없습니다.");
+		}
+		
+		Farmer farmer = farmerRepository.findByFarmerId(farmerId);
+
+		if (farmer == null) {
+			throw new RuntimeException("등록된 파머가 없습니다.");
+		}
+
+		return farmer;
 	}
 
 }

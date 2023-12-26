@@ -18,4 +18,20 @@ public class ModifyFarmDto {
 	private String farmBank;
 	private String farmAccountNum;
 	private String farmInterest;
+	
+	public ModifyFarmDto(Long farmerId, String farmName, MultipartFile farmPixurl, String farmTel, String farmAddress,
+			String farmAddressDetail, String registrationNum, String farmBank, String farmAccountNum, String farmInterest) {
+		this.farmerId = farmerId;
+		this.farmName = farmName;
+		this.farmPixurl = farmPixurl;
+		this.farmTel = farmTel;
+		this.farmAddress = farmAddress;
+		this.farmAddressDetail = farmAddressDetail;
+		this.registrationNum = registrationNum;
+		this.farmBank = farmBank;
+		this.farmAccountNum = farmAccountNum;
+		this.farmInterest = farmInterest;
+	}
+	
+	
 }

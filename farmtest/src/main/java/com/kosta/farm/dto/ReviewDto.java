@@ -7,4 +7,6 @@ public class ReviewDto {
 	private String receiptId;
 	private Integer rating;
 	private String content;
+	private String userName;
+
 }

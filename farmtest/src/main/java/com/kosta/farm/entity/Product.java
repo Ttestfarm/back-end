@@ -24,7 +24,6 @@ public class Product {
 	private Long farmerId;
 	@Column
 	private Long categoryId;
-
 	@Column
 	private String productName; // 농산물명
 	@Column
@@ -46,7 +45,6 @@ public class Product {
 	private String fileUrl; // 나머지 파일
 	@Column
 	private Long thumbNail; // 대표이미지 id
-
 
 	public void removeStock(Integer productStock) throws Exception {
 		Integer restStock = this.productStock - productStock;

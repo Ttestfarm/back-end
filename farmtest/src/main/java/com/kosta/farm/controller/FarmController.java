@@ -176,7 +176,6 @@ public class FarmController {
 		}
 	}
 
-//
 	@GetMapping("/user") // 마이페이지 메인 받은 매칭 견적 list
 	public ResponseEntity<Map<String, Object>> matchingList(Authentication authentication) {
 		User user = (User) authentication.getPrincipal();

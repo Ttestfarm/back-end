@@ -72,10 +72,6 @@ public class UserServiceImpl implements UserService {
 			throw new RuntimeException("해당하는 사용자를 찾을 수 없습니다.");
 		}
 		// 찾아온 User의 password와 입력된 password가 다르면 null return
-		System.out.println("DB:" + user.getUserPassword());
-		System.out.println("입력값: " + request.getUserPassword());
-		System.out.println("입력값암호화: " + encoder.encode(request.getUserPassword()));
-		
 		if (!encoder.matches(request.getUserPassword(), user.getUserPassword())) {
 			throw new RuntimeException("비밀번호가 일치하지 않습니다.");
 		}
@@ -212,11 +208,10 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public User modifyUser(User loginUser, ModifyUserDto modifyUserRequest) throws Exception {
+		String rawPassword = modifyUserRequest.getUserPassword().trim();
     // 사용자 정보 수정
-		System.out.println("encoder " + encoder.encode(modifyUserRequest.getUserPassword()));
-		System.out.println("raw " + modifyUserRequest.getUserPassword());
-    loginUser.setUserName(modifyUserRequest.getUserName());
-    loginUser.setUserPassword(encoder.encode(modifyUserRequest.getUserPassword()));
+		String encodePassword =  encoder.encode(rawPassword);
+    loginUser.setUserPassword(encodePassword);
     loginUser.setUserTel(modifyUserRequest.getUserTel());
     loginUser.setAddress1(modifyUserRequest.getAddress1());
     loginUser.setAddress2(modifyUserRequest.getAddress2());

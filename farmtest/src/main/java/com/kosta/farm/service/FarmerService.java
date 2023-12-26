@@ -19,8 +19,8 @@ public interface FarmerService {
 	public List<String> findFarmInterestByFarmerId(Long farmerId) throws Exception;
 
 	// 관심 농산물인 요청서 리스트 보기
-	public List<Request> findRequestsByFarmInterest(Long farmerId, String farmInterest) throws Exception;
-
+	public List<Request> findRequestsByFarmInterestPageInfo(Long farmerId, String farmInterest, PageInfo pageInfo) throws Exception;
+	
 	// 견적서 보내기 (견적서 저장)
 	void saveQuotation(Quotation quotation, List<MultipartFile> images) throws Exception;
 

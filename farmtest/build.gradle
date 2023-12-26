@@ -14,11 +14,7 @@ plugins {
 }
 
 group = 'com.kosta'
-<<<<<<< HEAD
-version = '1.0.0'
-=======
 version = '1.0.1'
->>>>>>> 091282a249f9d415f768bcf72cccaf23d411fb6c
 
 java {
    sourceCompatibility = '11'

@@ -21,6 +21,7 @@ import com.kosta.farm.dto.ModifyFarmDto;
 import com.kosta.farm.dto.PaymentDto;
 import com.kosta.farm.dto.QuotationDto;
 import com.kosta.farm.dto.RegFarmerDto;
+import com.kosta.farm.dto.RequestDto;
 import com.kosta.farm.entity.Farmer;
 import com.kosta.farm.entity.FileVo;
 import com.kosta.farm.entity.PayInfo;
@@ -78,8 +79,12 @@ public class FarmerServiceImpl implements FarmerService {
 	// 관심 농산물인 요청서 리스트 보기
 	@Override
 	public List<Request> findRequestsByFarmInterestPageInfo(Long farmerId, String farmInterest, PageInfo pageInfo) throws Exception {
-		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 10); // 첫번째 값 : 페이지 번호, 두 번째 값 : 페이지 크기
+		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 5); // 첫번째 값 : 페이지 번호, 두 번째 값 : 페이지 크기
 		List<Request> list = farmerDslRepository.findRequestByInterestAndFarmerId(farmerId, farmInterest, pageRequest);
+		
+		if(pageInfo.getAllPage() == null ) {
+			pageInfo.setAllPage((int) Math.ceil((double) farmerDslRepository.findRequestcountByInterestAndFarmerId(farmerId, farmInterest) / 5));				
+		}
 		return list;
 	}
 	

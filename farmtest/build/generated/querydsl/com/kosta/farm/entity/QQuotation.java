@@ -35,7 +35,7 @@ public class QQuotation extends EntityPathBase<Quotation> {
 
     public final StringPath quotationProduct = createString("quotationProduct");
 
-    public final NumberPath<Integer> quotationQuantity = createNumber("quotationQuantity", Integer.class);
+    public final StringPath quotationQuantity = createString("quotationQuantity");
 
     public final NumberPath<Long> requestId = createNumber("requestId", Long.class);
 

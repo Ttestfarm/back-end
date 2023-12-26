@@ -38,6 +38,7 @@ import com.kosta.farm.entity.User;
 import com.kosta.farm.service.FarmService;
 import com.kosta.farm.util.PageInfo;
 import com.kosta.farm.util.PaymentStatus;
+import com.kosta.farm.util.RequestStatus;
 
 @RestController
 public class FarmController {
@@ -46,7 +47,8 @@ public class FarmController {
 
 	// 리뷰 작성하기
 	@PostMapping("/buylist")
-	public ResponseEntity<String> insertReview(@ModelAttribute ReviewDto review, MultipartFile reviewpixUrl) {
+	public ResponseEntity<String> insertReview
+	(@ModelAttribute ReviewDto review, MultipartFile reviewpixUrl) {
 		try {
 			farmService.addReview(review.getReceiptId(), reviewpixUrl, review.getRating(), review.getContent());
 			return ResponseEntity.ok("리뷰 작성이 완료되었습니다");
@@ -80,7 +82,6 @@ public class FarmController {
 			Map<String, Object> res = new HashMap<>();
 			Farmer farmer = farmService.farmerDetail(farmerId);
 			res.put("farmer", farmer);
-			// 왜 여기서 에러가 뜰까 이거 다시보기
 			if (authentication != null) {
 				User user = (User) authentication.getPrincipal();
 				Long userId = user.getUserId();
@@ -194,22 +195,34 @@ public class FarmController {
 				requestWithCountList.add(requestWithCount);
 			}
 			Collections.sort(requestWithCountList, (r1, r2) -> {
-				Long count1 = r1.getQuotationCount();
-				Long count2 = r2.getQuotationCount();
+				RequestStatus state1 = r1.getRequest().getState();
+				RequestStatus state2 = r2.getRequest().getState();
 
-				// 견적 수 비교 후, 견적 수가 같으면 requestId 비교
-				if (count1 == null && count2 == null) {
-					return Long.compare(r2.getRequest().getRequestId(), r1.getRequest().getRequestId());
-				} else if (count1 == null) {
-					return 1;
-				} else if (count2 == null) {
-					return -1;
+				// 'request' 상태를 우선으로 정렬
+				if (state1 == RequestStatus.REQUEST && state2 != RequestStatus.REQUEST) {
+					return -1; // state1이 'request'이고 state2가 'request'가 아닌 경우, state1을 우선으로 정렬
+				} else if (state1 != RequestStatus.REQUEST && state2 == RequestStatus.REQUEST) {
+					return 1; // state2가 'request'이고 state1이 'request'가 아닌 경우, state2를 우선으로 정렬
 				} else {
-					int countComparison = count2.compareTo(count1);
-					return countComparison != 0 ? countComparison
-							: Long.compare(r2.getRequest().getRequestId(), r1.getRequest().getRequestId());
+					Long count1 = r1.getQuotationCount();
+					Long count2 = r2.getQuotationCount();
+
+					if (count1 == null && count2 == null) {
+						int additionalComparison = state2.compareTo(state1);
+						return additionalComparison != 0 ? additionalComparison
+								: Long.compare(r2.getRequest().getRequestId(), r1.getRequest().getRequestId());
+					} else if (count1 == null) {
+						return 1;
+					} else if (count2 == null) {
+						return -1;
+					} else {
+						int countComparison = count2.compareTo(count1);
+						return countComparison != 0 ? countComparison
+								: Long.compare(r2.getRequest().getRequestId(), r1.getRequest().getRequestId());
+					}
 				}
 			});
+
 			res.put("requestWithCountList", requestWithCountList);
 			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
 		} catch (Exception e) {

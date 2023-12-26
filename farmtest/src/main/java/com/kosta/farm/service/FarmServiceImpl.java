@@ -2,7 +2,10 @@ package com.kosta.farm.service;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -15,6 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,7 +31,6 @@ import com.kosta.farm.dto.QuotationInfoDto;
 import com.kosta.farm.dto.QuotePayDto;
 import com.kosta.farm.dto.RequestCopyDto;
 import com.kosta.farm.dto.RequestDto;
-import com.kosta.farm.dto.ReviewDto;
 import com.kosta.farm.dto.ReviewInfoDto;
 import com.kosta.farm.entity.Farmer;
 import com.kosta.farm.entity.Farmerfollow;
@@ -81,7 +84,7 @@ public class FarmServiceImpl implements FarmService {
 
 	@Value("${imp_secret}")
 	private String impSecret;
-	
+
 	@Value("$(upload.path)")
 	private String dir;
 
@@ -136,6 +139,7 @@ public class FarmServiceImpl implements FarmService {
 				.requestDate(request.getRequestDate()).requestMessage(request.getRequestMessage())
 				.requestQuantity(request.getRequestQuantity()).address1(request.getAddress1())
 				.address2(request.getAddress2()).address3(request.getAddress3()).userId(request.getUserId())
+				.name(request.getName())
 				.tel(request.getTel()).state(RequestStatus.REQUEST).build();
 		Request add = requestRepository.save(Nrequest);
 		return add;
@@ -198,7 +202,6 @@ public class FarmServiceImpl implements FarmService {
 		farmerRepository.save(farmer);
 
 	}
-
 
 	@Override
 	public void readImage(Integer num, ServletOutputStream outputStream) throws Exception {
@@ -319,7 +322,7 @@ public class FarmServiceImpl implements FarmService {
 	// 유저별로 리퀘스트쓴거
 	@Override
 	public List<Request> requestListByUser(Long userId) throws Exception {
-		return requestRepository.findRequestByUserIdOrderByRequestIdDesc(userId);
+		return requestRepository.findRequestByUserIdAndStateOrderByRequestIdDesc(userId, RequestStatus.REQUEST);
 	}
 
 	@Override // 유저별로 오더리스트 가져오기
@@ -438,20 +441,35 @@ public class FarmServiceImpl implements FarmService {
 	}
 
 //	@Scheduled(fixedRate = 60000) // 1분(60초) 간격으로 실행
+    @Scheduled(cron = "0 0 0 * * *") // 매일 자정에 실행하도록 스케줄링
 	@Override
 	public void updateRequestState() throws Exception {
-//		// 현재 시간 기준으로 일주일 전 시간 계산
-//		LocalDateTime oneWeekAgo = LocalDateTime.now().minusDays(7);
-//		// 일주일이 지난 요청서 조회
-//		List<Request> expiredRequests = requestRepository.findByCreateDateBeforeAndStateNot(oneWeekAgo,
-//				RequestStatus.EXPIRED);
-//		// 조회된 요청서의 상태를 변경
-//		for (Request request : expiredRequests) {
-//			request.setState(RequestStatus.EXPIRED);
-//			requestRepository.save(request);
-//		}
-	}
+		List<Request> requestList= requestRepository.findByState(RequestStatus.REQUEST);
+		for(Request request : requestList) {
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+            try {
+                Date requestDate = formatter.parse(request.getRequestDate()); // 문자열을 Date로 변환
+                // 현재 날짜 구하기
+                Date currentDate = new Date();
 
+                // 날짜를 비교하여 요청 날짜가 현재 날짜 이전인지 확인
+                if (requestDate.before(currentDate)) {
+                    // 요청 날짜가 현재 날짜 이전인 경우
+                    // 처리할 작업 수행
+                    request.setState(RequestStatus.EXPIRED); //상태를 EXPIRED로 변경
+                    requestRepository.save(request); // 변경된 상태 저장
+                } else {
+                    // 요청 날짜가 현재 날짜 이후인 경우 다른 작업 수행
+                }
+            } catch (ParseException e) {
+                // 날짜 형식 변환 실패 시 예외 처리
+                e.printStackTrace();
+                System.out.println("Failed to parse date: " + request.getRequestDate()); // 요청된 날짜 값을 출력
+
+            }
+        }
+    }
+    
 	@Override
 	public RequestCopyDto requestCopy(Long requestId) throws Exception {
 		Optional<Request> oRequest = requestRepository.findById(requestId);
@@ -460,5 +478,6 @@ public class FarmServiceImpl implements FarmService {
 		}
 		return oRequest.get().toDto();
 	}
+
 
 }

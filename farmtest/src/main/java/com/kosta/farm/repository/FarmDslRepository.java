@@ -10,6 +10,7 @@ import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Repository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -114,7 +115,9 @@ public class FarmDslRepository {
 
 	public Long requestAllCount() throws Exception {
 		QRequest request = QRequest.request;
-		return jpaQueryFactory.select(request.count()).from(request).fetchOne();
+		return jpaQueryFactory.select(request.count()).from(request)
+			    .where(request.state.eq(RequestStatus.REQUEST))
+			    .fetchOne();
 	}
 
 	public List<RequestDto> requestListWithNameByPage(PageInfo pageInfo) throws Exception {
@@ -122,14 +125,16 @@ public class FarmDslRepository {
 		QUser user = QUser.user;
 		Long count = requestAllCount();
 		pageInfo.setAllPage((int) Math.ceil(count.intValue() / 9));
-		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 9);
+		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 9
+//				,Sort.by(Sort.Direction.DESC, "requestId")
+		);
 
-		System.out.println(pageRequest.getOffset());
-		System.out.println(pageRequest.getPageSize());
 		List<Tuple> tupleList = jpaQueryFactory.select(request, user.userName).from(request).leftJoin(user)
-				.on(request.userId.eq(user.userId)).offset(pageRequest.getOffset()).limit(pageRequest.getPageSize())
-				.where(request.state.eq(RequestStatus.REQUEST).or(request.state.eq(RequestStatus.MATCHED)))
-				.orderBy(request.requestId.desc()).fetch(); // requestStatus가 request상태거나 matched상태 개수만 보여준다
+				.on(request.userId.eq(user.userId))
+				.where(request.state.eq(RequestStatus.REQUEST))
+			    .orderBy(request.requestId.desc()) // 요청 ID 내림차순으로 정렬
+				.offset(pageRequest.getOffset())
+				.limit(pageRequest.getPageSize()).fetch();
 
 		List<RequestDto> list = new ArrayList<>();
 		for (Tuple t : tupleList) {
@@ -153,14 +158,11 @@ public class FarmDslRepository {
 		QPayInfo payInfo = QPayInfo.payInfo;
 
 		List<Tuple> tupleList = jpaQueryFactory.select(review, farmer.farmName, payInfo.count, payInfo.productName)
-				.from(review)
-				.leftJoin(farmer)
-				.on(review.farmerId.eq(farmer.farmerId).and(farmer.farmerId.eq(farmerId)))
-				.leftJoin(payInfo)
-				.on(review.receiptId.eq(payInfo.receiptId))
-		        .where(review.farmerId.eq(farmerId)) //review의 farmerI
-				.offset(pageRequest.getOffset())
-				.limit(pageRequest.getPageSize()).orderBy(review.reviewId.desc()).fetch();
+				.from(review).leftJoin(farmer).on(review.farmerId.eq(farmer.farmerId).and(farmer.farmerId.eq(farmerId)))
+				.leftJoin(payInfo).on(review.receiptId.eq(payInfo.receiptId)).where(review.farmerId.eq(farmerId)) // review의
+																													// farmerI
+				.offset(pageRequest.getOffset()).limit(pageRequest.getPageSize()).orderBy(review.reviewId.desc())
+				.fetch();
 
 		List<ReviewInfoDto> list = new ArrayList<>();
 		for (Tuple t : tupleList) {

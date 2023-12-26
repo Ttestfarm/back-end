@@ -453,7 +453,7 @@ public class FarmerServiceImpl implements FarmerService {
 		// }
 
 		if (farmPixurl != null && !farmPixurl.isEmpty()) {
-			String dir = "C:/Users/USER/upload";
+			String dir = "C:/Jisu/upload";
 
 			// 파일명 설정
 			String fileName = "profile_image_" + savedFarmer.getFarmerId() + "."

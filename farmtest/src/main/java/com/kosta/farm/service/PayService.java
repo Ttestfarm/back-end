@@ -46,25 +46,14 @@ public class PayService {
 			quote = quoteRepository.findById(payInfo.getQuotationId()).get();
 			quote.setState(QuotationStatus.COMPLETED);
 			quoteRepository.save(quote);
-		}
-	}
-
-	public void changeQuotationStatus(Long quotationId, QuotationStatus newStatus) {
-		Quotation quotation = quoteRepository.findById(quotationId).orElse(null);
-		if (quotation != null) {
-			quotation.setState(newStatus);
-			quoteRepository.save(quotation);
-
-			if (newStatus == QuotationStatus.COMPLETED) {
-				Long requestId = quotation.getRequestId();
-				if (requestId != null) {
-					Request request = requestRepository.findById(requestId).orElse(null);
-					if (request != null) {
-						request.setState(RequestStatus.MATCHED);
-						requestRepository.save(request);
-					}
-				}
+			//quote state이 바뀌면 requeststate도 변경
+			Request request = requestRepository.findById(quote.getRequestId()).get();
+			if (request != null) {
+				request.setState(RequestStatus.MATCHED);
+				requestRepository.save(request);
 			}
+
 		}
 	}
+
 }

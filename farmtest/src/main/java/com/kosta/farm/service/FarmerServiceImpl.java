@@ -27,7 +27,6 @@ import com.kosta.farm.entity.PayInfo;
 import com.kosta.farm.entity.Product;
 import com.kosta.farm.entity.Quotation;
 import com.kosta.farm.entity.Request;
-import com.kosta.farm.entity.User;
 import com.kosta.farm.repository.FarmerDslRepository;
 import com.kosta.farm.repository.FarmerRepository;
 import com.kosta.farm.repository.FileVoRepository;

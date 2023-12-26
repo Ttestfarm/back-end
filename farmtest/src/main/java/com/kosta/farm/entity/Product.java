@@ -9,7 +9,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 
 import lombok.Data;
 
@@ -40,11 +42,12 @@ public class Product {
 	@CreationTimestamp
 	private Timestamp createDate;
 	@Column
-	private String state; // 판매중, 매진, (판매취소)
-	@Column
 	private String fileUrl; // 나머지 파일
 	@Column
 	private Long thumbNail; // 대표이미지 id
+	@Column
+	@ColumnDefault("판매중")
+	private String state; // 판매중, 판매완료
 
 	public void removeStock(Integer productStock) throws Exception {
 		Integer restStock = this.productStock - productStock;

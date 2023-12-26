@@ -18,7 +18,9 @@ public interface RequestRepository extends JpaRepository<Request, Long> {
 
 	List<Request> findByState(RequestStatus state);
 	
-	List<Request> findRequestByUserIdOrderByRequestIdDesc(Long userId);
+	List<Request> findRequestByUserIdAndStateOrderByRequestIdDesc(Long userId, RequestStatus state);
 
 	List<Request> findByCreateDateBeforeAndStateNot(LocalDateTime oneWeekAgo, RequestStatus expired);
+	
+	
 }

@@ -42,14 +42,16 @@ public class PublicServiceImpl implements PublicService {
 	private final RequestRepository requestRepository;
 	private final FarmerRepository farmerRepository;
 
-	@Value("$(upload.path)")
+	@Value("${upload.path}")
 	private String uploadPath;
-	
+
 	@Value("${swetter.apiKey}")
-	String serviceKey = "";
+	private String serviceKey;
 	
 	@Override
 	public void readImage(Integer num, OutputStream out) throws Exception {
+		System.out.println(uploadPath);
+		System.out.println("hehrerererehrjkweharkaesr = " + uploadPath + num);
 		FileInputStream fis = new FileInputStream(uploadPath + num);
 		FileCopyUtils.copy(fis, out);
 		fis.close();
@@ -102,7 +104,7 @@ public class PublicServiceImpl implements PublicService {
 	    		comList.add(new CompanyDto(international, Code, Name));		    		
 	    	}
 	    }
-		
+//		System.out.println("here " + comList.size());
 		return comList;
 	}
 
@@ -122,17 +124,21 @@ public class PublicServiceImpl implements PublicService {
 	public Double avgTotalRating() throws Exception {
 		List<Farmer> farmers = farmerRepository.findAll();
 		double totalRating = 0;
-		Integer numberofFarmers = farmers.size();
-		for (Farmer farmer : farmers) {
-			totalRating += farmer.getRating();
-		}
-		return numberofFarmers > 0 ? totalRating / numberofFarmers : 0;
+	    int numberOfFarmersWithRating = 0;
 
+	    for (Farmer farmer : farmers) {
+	        Double farmerRating = farmer.getRating();
+	        if (farmerRating != null) {
+	            totalRating += farmerRating;
+	            numberOfFarmersWithRating++;
+	        }
+	    }
+	    return numberOfFarmersWithRating > 0 ? totalRating / numberOfFarmersWithRating : 0.0;
 	}
 	
 	@Override // 파머리스트 sorting으로
 	public List<FarmerInfoDto> findFarmersWithSorting(String sortType, PageInfo pageInfo) throws Exception {
-		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 16,
+		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 15,
 				Sort.by(Sort.Direction.DESC, sortType).and(Sort.by(Sort.Direction.DESC, "farmerId")));
 		Page<Farmer> pages = farmerRepository.findAll(pageRequest);
 		pageInfo.setAllPage(pages.getTotalPages());

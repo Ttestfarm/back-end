@@ -15,6 +15,7 @@ public class PaymentDto {
 	private Long productId;
 	private Long requestId;
 	private Long quotationId;
+	private String quotationQuantity; // 수량
 
 	private String buyerName;
 	private String buyerTel;

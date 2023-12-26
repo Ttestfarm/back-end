@@ -21,6 +21,7 @@ import com.kosta.farm.dto.ModifyFarmDto;
 import com.kosta.farm.dto.PaymentDto;
 import com.kosta.farm.dto.QuotationDto;
 import com.kosta.farm.dto.RegFarmerDto;
+import com.kosta.farm.dto.RequestDto;
 import com.kosta.farm.entity.Farmer;
 import com.kosta.farm.entity.FileVo;
 import com.kosta.farm.entity.PayInfo;
@@ -56,7 +57,7 @@ public class FarmerServiceImpl implements FarmerService {
 	private final FarmerDslRepository farmerDslRepository;
 	private final ObjectMapper objectMapper;
 
-	@Value("$(upload.path)")
+	@Value("${upload.path}")
 	private String dir;
 
 	// ** 매칭 주문 요청서 보기 **
@@ -78,20 +79,26 @@ public class FarmerServiceImpl implements FarmerService {
 	// 관심 농산물인 요청서 리스트 보기
 	@Override
 	public List<Request> findRequestsByFarmInterestPageInfo(Long farmerId, String farmInterest, PageInfo pageInfo) throws Exception {
-		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 10); // 첫번째 값 : 페이지 번호, 두 번째 값 : 페이지 크기
+		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 5); // 첫번째 값 : 페이지 번호, 두 번째 값 : 페이지 크기
 		List<Request> list = farmerDslRepository.findRequestByInterestAndFarmerId(farmerId, farmInterest, pageRequest);
+		
+		if(pageInfo.getAllPage() == null ) {
+			pageInfo.setAllPage((int) Math.ceil((double) farmerDslRepository.findRequestcountByInterestAndFarmerId(farmerId, farmInterest) / 5));				
+		}
 		return list;
 	}
 	
 	// ** 견적서 **
 	// 견적서 보내기(저장)
 	@Override
+	@Transactional
 	public void saveQuotation(Quotation quotation, List<MultipartFile> images) throws Exception {
 		String fileNums = "";
-
+		System.out.println("before image save" + quotation.toString());
 		if (images != null && images.size() != 0) {
-
+			System.out.println("here");
 			for (MultipartFile img : images) {
+				System.out.println("directory : "+dir);
 				// primgfiletable에 insert
 				FileVo imageFile = FileVo.builder().directory(dir).fileName(img.getOriginalFilename())
 						.size(img.getSize()).build();
@@ -109,6 +116,7 @@ public class FarmerServiceImpl implements FarmerService {
 			quotation.setQuotationImages(fileNums);
 		}
 		// 견적서 DB에 저장
+		System.out.println("before save "+quotation.toString());
 		quotationRepository.save(quotation);
 	}
 
@@ -209,13 +217,13 @@ public class FarmerServiceImpl implements FarmerService {
 		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 10); // 첫번째 값 : 페이지 번호, 두 번째 값 : 페이지 크기
 		List<PaymentDto> payList = new ArrayList<>();
 		Long allCount = null;
-		if (type.equals("1")) { // 매칭 주문
+		if (type.equals("매칭")) { // 매칭 주문
 			List<Tuple> tuples = farmerDslRepository.findOrdersQuotByFarmerIdAndPaging(farmerId, pageRequest);
 			for (Tuple t : tuples) {
 				PaymentDto dto = new PaymentDto();
 				dto.setReceiptId(t.get(0, String.class));
 				dto.setProductName(t.get(1, String.class));
-				dto.setCount(t.get(2, Integer.class));
+				dto.setQuotationQuantity(t.get(2, String.class));
 				dto.setProductPrice(t.get(3, Integer.class));
 				dto.setBuyerName(t.get(4, String.class));
 				dto.setBuyerTel(t.get(5, String.class));
@@ -224,13 +232,13 @@ public class FarmerServiceImpl implements FarmerService {
 			}
 			allCount = farmerDslRepository.findOrdersCountByFarmerIdAndQuotationIsNotNull(farmerId);
 
-		} else if (type.equals("2")) { // 받은 주문
+		} else if (type.equals("주문")) { // 받은 주문
 			List<PayInfo> tempList = farmerDslRepository.findOrdersByFarmerIdAndPaging(farmerId, pageRequest);
 			for (PayInfo pay : tempList) {
 				PaymentDto dto = new PaymentDto();
 				dto.setReceiptId(pay.getReceiptId());
 				dto.setProductName(pay.getProductName());
-				dto.setCount(pay.getCount());
+				dto.setQuotationQuantity(pay.getQuotationQuantity());
 				dto.setProductPrice(pay.getProductPrice());
 				dto.setBuyerName(pay.getBuyerName());
 				dto.setBuyerTel(pay.getBuyerTel());
@@ -267,7 +275,7 @@ public class FarmerServiceImpl implements FarmerService {
 			payment.setAmount(p.getAmount()); // 총 금액
 
 			payment.setProductName(p.getProductName()); // 품목
-			payment.setCount(p.getCount()); // 수량 (kg)
+			payment.setQuotationQuantity(p.getQuotationQuantity()); // 수량
 			payment.setProductPrice(p.getProductPrice()); // 품목 가격
 
 			payment.setBuyerName(p.getBuyerName());
@@ -375,7 +383,7 @@ public class FarmerServiceImpl implements FarmerService {
 			dto.setBuyerAddress(p.getBuyerAddress());
 
 			dto.setProductName(p.getProductName());
-			dto.setCount(p.getCount());
+			dto.setQuotationQuantity(p.getQuotationQuantity());
 			dto.setProductPrice(p.getProductPrice());
 
 			dto.setState(p.getState());
@@ -453,7 +461,7 @@ public class FarmerServiceImpl implements FarmerService {
 		// }
 
 		if (farmPixurl != null && !farmPixurl.isEmpty()) {
-			String dir = "C:/Users/USER/upload";
+			String dir = "C:/Jisu/upload";
 
 			// 파일명 설정
 			String fileName = "profile_image_" + savedFarmer.getFarmerId() + "."

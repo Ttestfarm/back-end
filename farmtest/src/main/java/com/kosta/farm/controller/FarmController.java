@@ -2,7 +2,6 @@ package com.kosta.farm.controller;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +37,6 @@ import com.kosta.farm.entity.User;
 import com.kosta.farm.service.FarmService;
 import com.kosta.farm.util.PageInfo;
 import com.kosta.farm.util.PaymentStatus;
-import com.kosta.farm.util.RequestStatus;
 
 @RestController
 public class FarmController {
@@ -47,8 +45,7 @@ public class FarmController {
 
 	// 리뷰 작성하기
 	@PostMapping("/buylist")
-	public ResponseEntity<String> insertReview
-	(@ModelAttribute ReviewDto review, MultipartFile reviewpixUrl) {
+	public ResponseEntity<String> insertReview(@ModelAttribute ReviewDto review, MultipartFile reviewpixUrl) {
 		try {
 			farmService.addReview(review.getReceiptId(), reviewpixUrl, review.getRating(), review.getContent());
 			return ResponseEntity.ok("리뷰 작성이 완료되었습니다");
@@ -63,8 +60,10 @@ public class FarmController {
 		System.out.println(request);
 		User user = (User) authentication.getPrincipal();
 		Long userId = user.getUserId();
+		String userName= user.getUserName();
 		try {
 			request.setUserId(userId);
+			request.setName(userName);
 			farmService.addRequest(request);
 			return ResponseEntity.ok("요청서를 등록했습니다");
 
@@ -195,34 +194,22 @@ public class FarmController {
 				requestWithCountList.add(requestWithCount);
 			}
 			Collections.sort(requestWithCountList, (r1, r2) -> {
-				RequestStatus state1 = r1.getRequest().getState();
-				RequestStatus state2 = r2.getRequest().getState();
+				Long count1 = r1.getQuotationCount();
+				Long count2 = r2.getQuotationCount();
 
-				// 'request' 상태를 우선으로 정렬
-				if (state1 == RequestStatus.REQUEST && state2 != RequestStatus.REQUEST) {
-					return -1; // state1이 'request'이고 state2가 'request'가 아닌 경우, state1을 우선으로 정렬
-				} else if (state1 != RequestStatus.REQUEST && state2 == RequestStatus.REQUEST) {
-					return 1; // state2가 'request'이고 state1이 'request'가 아닌 경우, state2를 우선으로 정렬
+				// 견적 수 비교 후, 견적 수가 같으면 requestId 비교
+				if (count1 == null && count2 == null) {
+					return Long.compare(r2.getRequest().getRequestId(), r1.getRequest().getRequestId());
+				} else if (count1 == null) {
+					return 1;
+				} else if (count2 == null) {
+					return -1;
 				} else {
-					Long count1 = r1.getQuotationCount();
-					Long count2 = r2.getQuotationCount();
-
-					if (count1 == null && count2 == null) {
-						int additionalComparison = state2.compareTo(state1);
-						return additionalComparison != 0 ? additionalComparison
-								: Long.compare(r2.getRequest().getRequestId(), r1.getRequest().getRequestId());
-					} else if (count1 == null) {
-						return 1;
-					} else if (count2 == null) {
-						return -1;
-					} else {
-						int countComparison = count2.compareTo(count1);
-						return countComparison != 0 ? countComparison
-								: Long.compare(r2.getRequest().getRequestId(), r1.getRequest().getRequestId());
-					}
+					int countComparison = count2.compareTo(count1);
+					return countComparison != 0 ? countComparison
+							: Long.compare(r2.getRequest().getRequestId(), r1.getRequest().getRequestId());
 				}
 			});
-
 			res.put("requestWithCountList", requestWithCountList);
 			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
 		} catch (Exception e) {
@@ -308,9 +295,8 @@ public class FarmController {
 	}
 
 	// 요청서에서 따라사기 버튼 누르면 요청품목과 수량을 불러온다
-	@GetMapping("/matching/buy") // matching/buy?reqformId=요청서번호
-	public ResponseEntity<RequestCopyDto> copyRequest(Authentication authentication,
-			@RequestParam(value = "reqformId") Long requestId) {
+	@GetMapping("/matching/buy/{requestId}") // matching/buy?reqformId=요청서번호
+	public ResponseEntity<RequestCopyDto> copyRequest(Authentication authentication, @PathVariable Long requestId) {
 		try {
 			RequestCopyDto request = farmService.requestCopy(requestId);
 			return ResponseEntity.ok().body(request); // json으로 변환해서 줌

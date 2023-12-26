@@ -44,23 +44,38 @@ public class FarmerDslRepository {
       public List<Request> findRequestByInterestAndFarmerId(Long farmerId, String farmInterest, PageRequest pageRequest) {
             QRequest req = QRequest.request;
             QQuotation quot = QQuotation.quotation;
-            return jpaQueryFactory.selectFrom(req)
+            return jpaQueryFactory.selectFrom(req).distinct()
                         .leftJoin(quot).on(req.requestId.eq(quot.requestId))
                         .where(req.requestProduct.eq(farmInterest)
                                     .and(req.state.eq(RequestStatus.REQUEST))
                                     .and(quot.farmerId.isNull()
                                     .or(quot.farmerId.ne(farmerId))))
+                        .orderBy(req.requestId.desc())
                         .offset(pageRequest.getOffset())
                         .limit(pageRequest.getPageSize())
                         .fetch();
       }
 
+      // pageInfo setAllpage()
+      public double findRequestcountByInterestAndFarmerId(Long farmerId, String farmInterest) {
+    	  QRequest req = QRequest.request;
+          QQuotation quot = QQuotation.quotation;
+          return jpaQueryFactory.select(req.count())
+        		  		.from(req)
+                      .leftJoin(quot).on(req.requestId.eq(quot.requestId))
+                      .where(req.requestProduct.eq(farmInterest)
+                                  .and(req.state.eq(RequestStatus.REQUEST))
+                                  .and(quot.farmerId.isNull()
+                                  .or(quot.farmerId.ne(farmerId))))
+                      .fetchOne();
+      }
+      
       // 파머페이지 견적서현황 state : CANCEL, READY, EXPIRED, COMPLETED
       public List<Tuple> findQuotationByFarmerIdAndStateAndPaging(Long farmerId, String state,
                   PageRequest pageRequest) {
             QQuotation quot = QQuotation.quotation;
             QRequest req = QRequest.request;
-            return jpaQueryFactory.select(quot, req.address2)
+            return jpaQueryFactory.select(quot, req.address2).distinct()
                         .from(quot)
                         .join(req).on(req.requestId.eq(quot.requestId))
                         .where(quot.farmerId.eq(farmerId)

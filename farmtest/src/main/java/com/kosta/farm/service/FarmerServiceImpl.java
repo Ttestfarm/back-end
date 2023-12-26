@@ -91,11 +91,12 @@ public class FarmerServiceImpl implements FarmerService {
 	// ** 견적서 **
 	// 견적서 보내기(저장)
 	@Override
+	@Transactional
 	public void saveQuotation(Quotation quotation, List<MultipartFile> images) throws Exception {
 		String fileNums = "";
-
+		System.out.println("before image save" + quotation.toString());
 		if (images != null && images.size() != 0) {
-
+			System.out.println("here");
 			for (MultipartFile img : images) {
 				// primgfiletable에 insert
 				FileVo imageFile = FileVo.builder().directory(dir).fileName(img.getOriginalFilename())
@@ -113,8 +114,8 @@ public class FarmerServiceImpl implements FarmerService {
 			}
 			quotation.setQuotationImages(fileNums);
 		}
-		System.out.println(quotation.toString());
 		// 견적서 DB에 저장
+		System.out.println("before save "+quotation.toString());
 		quotationRepository.save(quotation);
 	}
 
@@ -221,7 +222,7 @@ public class FarmerServiceImpl implements FarmerService {
 				PaymentDto dto = new PaymentDto();
 				dto.setReceiptId(t.get(0, String.class));
 				dto.setProductName(t.get(1, String.class));
-				dto.setCount(t.get(2, Integer.class));
+				dto.setQuotationQuantity(t.get(2, String.class));
 				dto.setProductPrice(t.get(3, Integer.class));
 				dto.setBuyerName(t.get(4, String.class));
 				dto.setBuyerTel(t.get(5, String.class));
@@ -236,7 +237,7 @@ public class FarmerServiceImpl implements FarmerService {
 				PaymentDto dto = new PaymentDto();
 				dto.setReceiptId(pay.getReceiptId());
 				dto.setProductName(pay.getProductName());
-				dto.setCount(pay.getCount());
+				dto.setQuotationQuantity(pay.getQuotationQuantity());
 				dto.setProductPrice(pay.getProductPrice());
 				dto.setBuyerName(pay.getBuyerName());
 				dto.setBuyerTel(pay.getBuyerTel());
@@ -273,7 +274,7 @@ public class FarmerServiceImpl implements FarmerService {
 			payment.setAmount(p.getAmount()); // 총 금액
 
 			payment.setProductName(p.getProductName()); // 품목
-			payment.setCount(p.getCount()); // 수량 (kg)
+			payment.setQuotationQuantity(p.getQuotationQuantity()); // 수량
 			payment.setProductPrice(p.getProductPrice()); // 품목 가격
 
 			payment.setBuyerName(p.getBuyerName());
@@ -381,7 +382,7 @@ public class FarmerServiceImpl implements FarmerService {
 			dto.setBuyerAddress(p.getBuyerAddress());
 
 			dto.setProductName(p.getProductName());
-			dto.setCount(p.getCount());
+			dto.setQuotationQuantity(p.getQuotationQuantity());
 			dto.setProductPrice(p.getProductPrice());
 
 			dto.setState(p.getState());

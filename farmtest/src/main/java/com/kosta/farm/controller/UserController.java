@@ -1,5 +1,7 @@
 package com.kosta.farm.controller;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
@@ -221,7 +223,7 @@ public class UserController {
 	}
 
 	@PostMapping("/findfarmer/reg-farmer")
-	public ResponseEntity<String> regFarmer(
+	public ResponseEntity<Map<String, Object>> regFarmer(
 			@RequestPart("farmPixurl") MultipartFile farmPixurl,
 			@RequestParam("farmName") String farmName,
 			@RequestParam("farmTel") String farmTel,
@@ -248,10 +250,14 @@ public class UserController {
 
 			Farmer registeredFarmer = farmerService.registerFarmer(request, farmPixurl);
 			userService.updateUserInfoAfterRegFarmer(loginUser, registeredFarmer.getFarmerId());
-			System.out.println();
-			return ResponseEntity.ok("파머등록 성공");
+			Map<String, Object> response = new HashMap<>();
+      response.put("message", "파머등록 성공");
+      response.put("farmerId", registeredFarmer.getFarmerId());
+      return ResponseEntity.ok(response);
+      //return ResponseEntity.ok("파머등록 성공");
 		} catch (Exception e) {
-			return ResponseEntity.badRequest().body("파머등록 실패: " + e.getMessage());
+			//return ResponseEntity.badRequest().body("파머등록 실패: " + e.getMessage());
+			return ResponseEntity.badRequest().body(Collections.singletonMap("message", "파머등록 실패: " + e.getMessage()));
 		}
 	}
 	
@@ -290,7 +296,7 @@ public class UserController {
 	}
 	
 	// 팜 정보 수정
-	@PutMapping("/farmer/modify-farm")
+	@PutMapping("/farmer/modify-farmer")
 	public ResponseEntity<?> modifyFarm(
 			@RequestPart("farmPixurl") MultipartFile farmPixurl,
 			@RequestParam("farmName") String farmName,
@@ -337,5 +343,5 @@ public class UserController {
 			return ResponseEntity.badRequest().body(errorResponse);
 		}
 	}
-
+	
 }

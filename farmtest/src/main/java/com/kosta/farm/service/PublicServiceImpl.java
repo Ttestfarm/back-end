@@ -122,12 +122,16 @@ public class PublicServiceImpl implements PublicService {
 	public Double avgTotalRating() throws Exception {
 		List<Farmer> farmers = farmerRepository.findAll();
 		double totalRating = 0;
-		Integer numberofFarmers = farmers.size();
-		for (Farmer farmer : farmers) {
-			totalRating += farmer.getRating();
-		}
-		return numberofFarmers > 0 ? totalRating / numberofFarmers : 0;
+	    int numberOfFarmersWithRating = 0;
 
+	    for (Farmer farmer : farmers) {
+	        Double farmerRating = farmer.getRating();
+	        if (farmerRating != null) {
+	            totalRating += farmerRating;
+	            numberOfFarmersWithRating++;
+	        }
+	    }
+	    return numberOfFarmersWithRating > 0 ? totalRating / numberOfFarmersWithRating : 0.0;
 	}
 	
 	@Override // 파머리스트 sorting으로

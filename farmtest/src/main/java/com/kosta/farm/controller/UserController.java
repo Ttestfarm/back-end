@@ -137,16 +137,16 @@ public class UserController {
 
 			// 수정된 사용자 정보 응답
 			UserInfoDto modifiedUserInfo = new UserInfoDto(
-					loginUser.getUserId(),
-					loginUser.getFarmerId(),
-					loginUser.getUserName(),
-					loginUser.getUserEmail(),
-					loginUser.getUserPassword(),
-					loginUser.getUserTel(),
-					loginUser.getAddress1(),
-					loginUser.getAddress2(),
-					loginUser.getAddress3(),
-					loginUser.getUserRole().name());
+					modifiedUser.getUserId(),
+					modifiedUser.getFarmerId(),
+					modifiedUser.getUserName(),
+					modifiedUser.getUserEmail(),
+					modifiedUser.getUserPassword(),
+					modifiedUser.getUserTel(),
+					modifiedUser.getAddress1(),
+					modifiedUser.getAddress2(),
+					modifiedUser.getAddress3(),
+					modifiedUser.getUserRole().name());
 
 			return ResponseEntity.ok().body(modifiedUserInfo);
 		} catch (Exception e) {

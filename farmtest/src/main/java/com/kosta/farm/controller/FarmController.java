@@ -308,9 +308,9 @@ public class FarmController {
 	}
 
 	// 요청서에서 따라사기 버튼 누르면 요청품목과 수량을 불러온다
-	@GetMapping("/matching/buy") // matching/buy?reqformId=요청서번호
+	@GetMapping("/matching/buy/{requestId}") // matching/buy?reqformId=요청서번호
 	public ResponseEntity<RequestCopyDto> copyRequest(Authentication authentication,
-			@RequestParam(value = "reqformId") Long requestId) {
+			@PathVariable Long requestId) {
 		try {
 			RequestCopyDto request = farmService.requestCopy(requestId);
 			return ResponseEntity.ok().body(request); // json으로 변환해서 줌

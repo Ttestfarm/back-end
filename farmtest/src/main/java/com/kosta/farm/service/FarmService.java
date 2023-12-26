@@ -25,6 +25,7 @@ import com.kosta.farm.entity.Request;
 import com.kosta.farm.entity.Review;
 import com.kosta.farm.util.PageInfo;
 import com.kosta.farm.util.PaymentStatus;
+import com.kosta.farm.util.RequestStatus;
 import com.querydsl.core.Tuple;
 
 public interface FarmService {
@@ -107,6 +108,8 @@ public interface FarmService {
 
 	
 	void updateRequestState() throws Exception;
+	
+	
 	
 	
 }

@@ -136,7 +136,7 @@ public class PublicServiceImpl implements PublicService {
 	
 	@Override // 파머리스트 sorting으로
 	public List<FarmerInfoDto> findFarmersWithSorting(String sortType, PageInfo pageInfo) throws Exception {
-		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 16,
+		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 15,
 				Sort.by(Sort.Direction.DESC, sortType).and(Sort.by(Sort.Direction.DESC, "farmerId")));
 		Page<Farmer> pages = farmerRepository.findAll(pageRequest);
 		pageInfo.setAllPage(pages.getTotalPages());

@@ -28,4 +28,7 @@ public class RequestDto {
 	private String userName;
 	private Date createDate; // 자동
 
+	public void setName(String name) {
+		this.name = name;
+	}
 }

@@ -57,7 +57,7 @@ public class FarmerServiceImpl implements FarmerService {
 	private final FarmerDslRepository farmerDslRepository;
 	private final ObjectMapper objectMapper;
 
-	@Value("$(upload.path)")
+	@Value("${upload.path}")
 	private String dir;
 
 	// ** 매칭 주문 요청서 보기 **
@@ -98,6 +98,7 @@ public class FarmerServiceImpl implements FarmerService {
 		if (images != null && images.size() != 0) {
 			System.out.println("here");
 			for (MultipartFile img : images) {
+				System.out.println("directory : "+dir);
 				// primgfiletable에 insert
 				FileVo imageFile = FileVo.builder().directory(dir).fileName(img.getOriginalFilename())
 						.size(img.getSize()).build();

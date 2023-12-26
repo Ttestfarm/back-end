@@ -78,12 +78,13 @@ public class FarmerController {
 
 	// 견적서 보내기
 	@PostMapping("/regquot")
-	public ResponseEntity<String> regQuotation(@ModelAttribute Quotation quot, List<MultipartFile> images,
+	public ResponseEntity<String> regQuotation(@ModelAttribute Quotation quot, @RequestParam("images") List<MultipartFile> images,
 			Authentication authentication) {
 		 User user = (User) authentication.getPrincipal();
 		 Long farmerId = user.getFarmerId();
 		try {
 			quot.setFarmerId(farmerId);
+			System.out.println("images toStrting"+images.size());
 			// 견적서 DB에 저장
 			farmerService.saveQuotation(quot, images);
 			return new ResponseEntity<String>("성공", HttpStatus.OK);

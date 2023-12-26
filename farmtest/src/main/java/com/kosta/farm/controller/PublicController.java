@@ -40,8 +40,7 @@ public class PublicController {
 	
 	// 택배사 정보 제공
 	@GetMapping("/companylist")
-	public ResponseEntity<List<CompanyDto>> companyList() {
-		Long farmerId = (long) 1;
+	public ResponseEntity<List<CompanyDto>> companyList(Authentication authentication) {
 		try {
 			List<CompanyDto> comList = publicService.requestCompanyList();
 			return new ResponseEntity<List<CompanyDto>>(comList, HttpStatus.OK);

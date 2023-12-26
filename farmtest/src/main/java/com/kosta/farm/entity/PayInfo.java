@@ -46,12 +46,11 @@ public class PayInfo {
     private String paymentMethod; //결제 방법
     @Column(nullable = false)
     private BigDecimal amount; // 결제 금액
-    @Column(nullable = true)
-    private String status;
     @Builder.Default
     private BigDecimal cancelledAmount = BigDecimal.ZERO; // 취소된 금액
     private LocalDateTime cancelledAt; // 결제 취소 일시
-    
+    @Column
+	private String quotationQuantity; // 수량
     @Column
 	private Integer paymentDelivery; // 배송비
 	@Column

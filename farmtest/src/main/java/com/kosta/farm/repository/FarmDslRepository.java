@@ -158,7 +158,7 @@ public class FarmDslRepository {
 				.on(review.farmerId.eq(farmer.farmerId).and(farmer.farmerId.eq(farmerId)))
 				.leftJoin(payInfo)
 				.on(review.receiptId.eq(payInfo.receiptId))
-		        .where(review.farmerId.eq(farmerId)) //review의 farmerId랑 매칭
+		        .where(review.farmerId.eq(farmerId)) //review의 farmerI
 				.offset(pageRequest.getOffset())
 				.limit(pageRequest.getPageSize()).orderBy(review.reviewId.desc()).fetch();
 

@@ -2,9 +2,11 @@ package com.kosta.farm.dto;
 
 import java.sql.Timestamp;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 public class ReviewInfoDto {
 	private Long reviewId;
 	private Integer rating; // 별점

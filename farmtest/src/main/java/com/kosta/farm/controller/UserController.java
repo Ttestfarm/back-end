@@ -248,6 +248,7 @@ public class UserController {
 
 			Farmer registeredFarmer = farmerService.registerFarmer(request, farmPixurl);
 			userService.updateUserInfoAfterRegFarmer(loginUser, registeredFarmer.getFarmerId());
+			System.out.println();
 			return ResponseEntity.ok("파머등록 성공");
 		} catch (Exception e) {
 			return ResponseEntity.badRequest().body("파머등록 실패: " + e.getMessage());

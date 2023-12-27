@@ -464,7 +464,8 @@ public class FarmerServiceImpl implements FarmerService {
 		// }
 
 		if (farmPixurl != null && !farmPixurl.isEmpty()) {
-
+//			String dir = "C://Users/USER/upload";
+			
 			// 파일명 설정
 			String fileName = "profile_image_" + savedFarmer.getFarmerId() + "."
 					+ StringUtils.getFilenameExtension(farmPixurl.getOriginalFilename());
@@ -507,7 +508,7 @@ public class FarmerServiceImpl implements FarmerService {
 		farmer.setFarmInterest5(numInterests > 4 ? interests[4].trim() : null);
 
 		if (farmPixurl != null && !farmPixurl.isEmpty()) {
-			String dir = "C:/Users/USER/upload";
+//			String dir = "C:/Users/USER/upload";
 
 			// 파일명 설정
 			String fileName = "profile_image_" + farmer.getFarmerId() + "."

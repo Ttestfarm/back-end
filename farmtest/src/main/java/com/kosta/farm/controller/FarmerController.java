@@ -170,6 +170,7 @@ public class FarmerController {
 		User user = (User) authentication.getPrincipal();
 		Long farmerId = user.getFarmerId();
 		try {
+			System.out.println(type);
 			PageInfo pageInfo = new PageInfo(page);
 			List<PaymentDto> ordersList = farmerService.findOrdersByFarmerIdAndPage(farmerId, type, pageInfo);
 			Map<String, Object> res = new HashMap<>();
@@ -241,9 +242,6 @@ public class FarmerController {
 		User user = (User) authentication.getPrincipal();
 		Long farmerId = user.getFarmerId();
 		try {
-			// 처음 요청 시 page = 1로 설정
-			if (page == 0)
-				page = 1;
 			PageInfo pageInfo = new PageInfo(page);
 
 			List<PaymentDto> deliveryList = farmerService.findDeliberyByFarmerIdAndDeliveryState(farmerId, state,

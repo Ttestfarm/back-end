@@ -446,6 +446,7 @@ public class FarmerServiceImpl implements FarmerService {
 				.registrationNum(request.getRegistrationNum())
 				.farmBank(request.getFarmBank())
 				.farmAccountNum(request.getFarmAccountNum())
+				.farmPixurl(request.getFarmPixurl().getOriginalFilename())
 				.build();
 
 		// 관심품목 입력받아서 # 기준으로 파싱하여 각각 저장
@@ -458,14 +459,17 @@ public class FarmerServiceImpl implements FarmerService {
 		farmer.setFarmInterest4(numInterests > 3 ? interests[3].trim() : null);
 		farmer.setFarmInterest5(numInterests > 4 ? interests[4].trim() : null);
 
-		Farmer savedFarmer = farmerRepository.save(farmer);
+		
 
 		// if(telSelected) {
 		// userService.updateUserTel(loginUser, request.getFarmTel());
 		// }
 
+		Farmer savedFarmer = farmerRepository.save(farmer);
+		
 		if (farmPixurl != null && !farmPixurl.isEmpty()) {
-
+//			String dir = "C://Users/USER/upload";
+			
 			// 파일명 설정
 			String fileName = "profile_image_" + savedFarmer.getFarmerId() + "."
 					+ StringUtils.getFilenameExtension(farmPixurl.getOriginalFilename());
@@ -476,9 +480,10 @@ public class FarmerServiceImpl implements FarmerService {
 			// 파일 저장
 			farmPixurl.transferTo(new File(filePath));
 
-			savedFarmer.setFarmPixurl(filePath);
+			savedFarmer.setFarmPixurl(fileName);
+			savedFarmer = farmerRepository.save(farmer);
 		}
-
+		
 		return savedFarmer;
 	}
 
@@ -508,7 +513,7 @@ public class FarmerServiceImpl implements FarmerService {
 		farmer.setFarmInterest5(numInterests > 4 ? interests[4].trim() : null);
 
 		if (farmPixurl != null && !farmPixurl.isEmpty()) {
-			String dir = "C:/Users/USER/upload";
+//			String dir = "C:/Users/USER/upload";
 
 			// 파일명 설정
 			String fileName = "profile_image_" + farmer.getFarmerId() + "."

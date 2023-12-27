@@ -29,11 +29,11 @@ public class PublicController {
 	private PublicService publicService;
 	
 	// img 불러오기
-	@GetMapping("/img/{num}")
-	public void imageView(@PathVariable Integer num, HttpServletResponse response) {
+	@GetMapping("/img/{url}")
+	public void imageView(@PathVariable String url, HttpServletResponse response) {
 		try {
-			publicService.readImage(num, response.getOutputStream());
-		} catch(Exception e) {
+			publicService.readImage(url, response.getOutputStream());
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}

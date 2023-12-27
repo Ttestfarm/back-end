@@ -30,7 +30,6 @@ public class PayInfoSummaryDto {
     private Timestamp createAt;
 	private PaymentStatus state;
 	
-	private Long thumbNail; // 대표이미지 id
+	private String thumbNail; // 대표이미지 id
 	private String farmName;
-	private String quotationImages; // 농산물 사진 5장
 }

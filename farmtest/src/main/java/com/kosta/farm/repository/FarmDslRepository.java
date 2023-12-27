@@ -188,7 +188,6 @@ public class FarmDslRepository {
 		QQuotation quotation = QQuotation.quotation;
 
 		Long cnt = payInfoAllCount(userId);
-		System.out.println("hwerererere" + cnt);
 
 		pageInfo.setAllPage((int) Math.ceil(cnt.intValue() / 6));
 		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 6,
@@ -207,6 +206,11 @@ public class FarmDslRepository {
 
 		List<PayInfoSummaryDto> list = new ArrayList<>();
 		for (Tuple t : tupleList) {
+			String imgUrl = null;
+			if(t.get(product.thumbNail)==null)
+				imgUrl = t.get(quotation.quotationImages);
+			else 
+				imgUrl = t.get(product.thumbNail)+"";
 			PayInfoSummaryDto dto = new PayInfoSummaryDto();
 			dto.setCreateAt(t.get(payInfo.createAt));
 			dto.setReceiptId(t.get(payInfo.receiptId));
@@ -224,9 +228,8 @@ public class FarmDslRepository {
 			dto.setBuyerName(t.get(payInfo.buyerName));
 			dto.setBuyerTel(t.get(payInfo.buyerTel));
 			dto.setState(t.get(payInfo.state));
-			dto.setThumbNail(t.get(product.thumbNail));
 			dto.setFarmName(t.get(farmer.farmName));
-			dto.setQuotationImages(t.get(quotation.quotationImages));
+			dto.setThumbNail(imgUrl);
 
 			list.add(dto);
 		}

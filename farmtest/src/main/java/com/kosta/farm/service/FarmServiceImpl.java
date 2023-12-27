@@ -12,6 +12,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.servlet.ServletOutputStream;
+import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -441,6 +442,7 @@ public class FarmServiceImpl implements FarmService {
 	}
 
 //	@Scheduled(fixedRate = 60000) // 1분(60초) 간격으로 실행
+	@Transactional
     @Scheduled(cron = "0 0 0 * * *") // 매일 자정에 실행하도록 스케줄링
 	@Override
 	public void updateRequestState() throws Exception {

@@ -105,7 +105,6 @@ public interface FarmService {
 			throws Exception;
 
 	List<PayInfoSummaryDto> findBuyListByUser(PageInfo pageInfo, Long userId) throws Exception;
-
 	
 	void updateRequestState() throws Exception;
 	

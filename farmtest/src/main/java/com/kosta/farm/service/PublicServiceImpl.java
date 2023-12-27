@@ -56,49 +56,49 @@ public class PublicServiceImpl implements PublicService {
 		FileCopyUtils.copy(fis, out);
 		fis.close();
 	}
-	
+
 	// 택배 API
 	@Override
 	public List<CompanyDto> requestCompanyList() throws Exception {
 		StringBuilder sb = new StringBuilder("http://info.sweettracker.co.kr/api/v1/companylist?");
 
-		sb.append(URLDecoder.decode("t_key="+serviceKey, "UTF-8"));
-		
+		sb.append(URLDecoder.decode("t_key=" + serviceKey, "UTF-8"));
+
 		URL url = new URL(sb.toString()); // http://info.sweettracker.co.kr/api/v1/companylist?t_key=
-		HttpURLConnection conn = (HttpURLConnection)url.openConnection();
+		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 		conn.setRequestMethod("GET");
 		conn.setRequestProperty("Content-type", "application/json");
-		
+
 		int code = conn.getResponseCode();
 		BufferedReader br;
-		
-		if (code == 200 ) {
+
+		if (code == 200) {
 			br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 		} else {
 			br = new BufferedReader(new InputStreamReader(conn.getErrorStream()));
 		}
-		
+
 		StringBuilder dsb = new StringBuilder();
 		String Line = null;
-		
-		while((Line = br.readLine()) != null) {
+
+		while ((Line = br.readLine()) != null) {
 			dsb.append(Line);
 		}
 		br.close();
-	    conn.disconnect();
-	    
-	    List<CompanyDto> comList = new ArrayList<>();
-	    JSONParser parser = new JSONParser();
-	    JSONObject mobj = (JSONObject)parser.parse(dsb.toString());
-	    Long totalCount = (Long)mobj.get("totalCount");
-	    JSONArray data = (JSONArray)mobj.get("Company");
-	    
-	    System.out.println(data.size());
-	    for(int i = 0; i < data.size(); i++) {
-	    	JSONObject ecJson = (JSONObject)data.get(i);
-	    	String international = (String)ecJson.get("International");
-	    	String Code = (String)ecJson.get("Code");
-	    	String Name = (String)ecJson.get("Name");
+		conn.disconnect();
+
+		List<CompanyDto> comList = new ArrayList<>();
+		JSONParser parser = new JSONParser();
+		JSONObject mobj = (JSONObject) parser.parse(dsb.toString());
+		Long totalCount = (Long) mobj.get("totalCount");
+		JSONArray data = (JSONArray) mobj.get("Company");
+
+		System.out.println(data.size());
+		for (int i = 0; i < data.size(); i++) {
+			JSONObject ecJson = (JSONObject) data.get(i);
+			String international = (String) ecJson.get("International");
+			String Code = (String) ecJson.get("Code");
+			String Name = (String) ecJson.get("Name");
 
 	    	if(international.equals("false")) {
 	    		comList.add(new CompanyDto(international, Code, Name));		    		
@@ -113,29 +113,35 @@ public class PublicServiceImpl implements PublicService {
 	public List<RequestDto> requestListByPage(PageInfo pageInfo) throws Exception {
 		return farmDslRepository.requestListWithNameByPage(pageInfo);
 	}
-	
+
 	@Override
 	public Long requestCountByState(RequestStatus state) throws Exception {
 		List<Request> requests = requestRepository.findByState(state);
 		return (long) requests.size();
 	}
-	
-	@Override
-	public Double avgTotalRating() throws Exception {
-		List<Farmer> farmers = farmerRepository.findAll();
-		double totalRating = 0;
-	    int numberOfFarmersWithRating = 0;
 
-	    for (Farmer farmer : farmers) {
-	        Double farmerRating = farmer.getRating();
-	        if (farmerRating != null) {
-	            totalRating += farmerRating;
-	            numberOfFarmersWithRating++;
-	        }
-	    }
-	    return numberOfFarmersWithRating > 0 ? totalRating / numberOfFarmersWithRating : 0.0;
+	@Override
+	public Long countFarmersWithRating() throws Exception {
+		return farmerRepository.countByRatingIsNotNull();
 	}
-	
+
+	public Double avgTotalRating() throws Exception {
+
+		Long numberOfFarmersWithRating = farmerRepository.countByRatingIsNotNull();
+		System.out.println(numberOfFarmersWithRating);
+		if (numberOfFarmersWithRating > 0) {
+			List<Farmer> farmersWithRating = farmerRepository.findAllByRatingIsNotNull(); // rating이 null이 아닌 농부 목록을 가져옴
+			double totalRating = 0;
+			for (Farmer farmer : farmersWithRating) {
+				totalRating += farmer.getRating();
+			}
+			return totalRating / numberOfFarmersWithRating;
+
+		} else {
+			return 0.0; // 평점이 있는 농부가 없는 경우
+		}
+	}
+
 	@Override // 파머리스트 sorting으로
 	public List<FarmerInfoDto> findFarmersWithSorting(String sortType, PageInfo pageInfo) throws Exception {
 		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 15,
@@ -149,7 +155,7 @@ public class PublicServiceImpl implements PublicService {
 		}
 		return farmerDtoList;
 	}
-	
+
 	@Override // 파머 서치리스트 sorting 추가
 	public List<FarmerInfoDto> farmerSearchList(String keyword, String sortType, PageInfo pageInfo) throws Exception {
 		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 8, Sort.by(Sort.Direction.DESC, sortType));
@@ -164,4 +170,5 @@ public class PublicServiceImpl implements PublicService {
 
 		return farmerDtoList;
 	}
+
 }

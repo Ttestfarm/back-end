@@ -27,13 +27,26 @@
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-11/"/>
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.web.container"/>
+<<<<<<< HEAD
 	<classpathentry kind="con" path="org.eclipse.buildship.core.gradleclasspathcontainer"/>
 	<classpathentry kind="src" path="bin/generated-sources/annotations">
+=======
+	<classpathentry kind="con" path="org.eclipse.buildship.core.gradleclasspathcontainer">
+		<attributes>
+			<attribute name="org.eclipse.jst.component.dependency" value="/WEB-INF/lib"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" path=".apt_generated">
+>>>>>>> 2671ba9f2883ad44f74ba3758624d7a4b2038759
 		<attributes>
 			<attribute name="optional" value="true"/>
 		</attributes>
 	</classpathentry>
+<<<<<<< HEAD
 	<classpathentry kind="src" output="bin/test" path="bin/generated-test-sources/annotations">
+=======
+	<classpathentry kind="src" output="bin/test" path=".apt_generated_tests">
+>>>>>>> 2671ba9f2883ad44f74ba3758624d7a4b2038759
 		<attributes>
 			<attribute name="optional" value="true"/>
 			<attribute name="test" value="true"/>

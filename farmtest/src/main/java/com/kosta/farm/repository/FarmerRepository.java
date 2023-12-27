@@ -39,5 +39,9 @@ public interface FarmerRepository extends JpaRepository<Farmer, Long> {
 	Page<Farmer> findPageBy(Pageable pageable);
 	
 	List<Farmer> findListByFarmerId(Long farmerId);
+	
+	Long countByRatingIsNotNull();
+	
+	List<Farmer> findAllByRatingIsNotNull();
 
 }

@@ -40,7 +40,7 @@ public class PayService {
 				int updatedStock = currentStock - payInfo.getCount();
 				product.setProductStock(updatedStock);
 				if (updatedStock == 0) { 
-					product.setState("판매완료"); //만약 재고가 0으로 바뀌면 판매완료 처리
+					product.setState("soldout"); //만약 재고가 0으로 바뀌면 판매완료 처리
 				}
 				productRepository.save(product);
 			}

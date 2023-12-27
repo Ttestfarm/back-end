@@ -216,7 +216,7 @@ public class FarmerServiceImpl implements FarmerService {
 		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 10); // 첫번째 값 : 페이지 번호, 두 번째 값 : 페이지 크기
 		List<PaymentDto> payList = new ArrayList<>();
 		Long allCount = null;
-		if (type.equals("매칭")) { // 매칭 주문
+		if (type.equals("matching")) { // 매칭 주문
 			List<Tuple> tuples = farmerDslRepository.findOrdersQuotByFarmerIdAndPaging(farmerId, pageRequest);
 			for (Tuple t : tuples) {
 				PaymentDto dto = new PaymentDto();
@@ -231,7 +231,7 @@ public class FarmerServiceImpl implements FarmerService {
 			}
 			allCount = farmerDslRepository.findOrdersCountByFarmerIdAndQuotationIsNotNull(farmerId);
 
-		} else if (type.equals("주문")) { // 받은 주문
+		} else if (type.equals("order")) { // 받은 주문
 			List<PayInfo> tempList = farmerDslRepository.findOrdersByFarmerIdAndPaging(farmerId, pageRequest);
 			for (PayInfo pay : tempList) {
 				PaymentDto dto = new PaymentDto();
@@ -262,12 +262,13 @@ public class FarmerServiceImpl implements FarmerService {
 	public PaymentDto OrdersDetailQuotationId(Long farmerId, String receiptId, String type) throws Exception {
 		PaymentDto payment = new PaymentDto();
 		PayInfo p = null;
-		
-		if (type.equals("1")) { // 매칭
+		System.out.println(type);
+		if (type.equals("matching")) { // 매칭
 			p = farmerDslRepository.findOrderByFarmerIdAndOrderIdIsNotNull(farmerId, receiptId);
-		} else if (type.equals("2")) { // 주문
+		} else if (type.equals("order")) { // 주문
 			p = farmerDslRepository.findOrderByFarmerIdAndOrderIdAndQuotaionIdIsNull(farmerId, receiptId);
 		}
+			System.out.println(p.toString());
 			payment.setReceiptId(p.getReceiptId());
 			payment.setPgType(p.getPgType()); // 결제 방법
 			payment.setPaymentDelivery(p.getPaymentDelivery()); // 배송비

@@ -6,6 +6,12 @@
 			<attribute name="gradle_used_by_scope" value="main,test"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="src" output="bin/querydsl" path="build/generated/querydsl">
+		<attributes>
+			<attribute name="gradle_scope" value="querydsl"/>
+			<attribute name="gradle_used_by_scope" value="querydsl"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="src" output="bin/main" path="src/main/resources">
 		<attributes>
 			<attribute name="gradle_scope" value="main"/>
@@ -19,12 +25,6 @@
 			<attribute name="test" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="src" output="bin/querydsl" path="build/generated/querydsl">
-		<attributes>
-			<attribute name="gradle_scope" value="querydsl"/>
-			<attribute name="gradle_used_by_scope" value="querydsl"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-11/"/>
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.web.container"/>
 	<classpathentry kind="con" path="org.eclipse.buildship.core.gradleclasspathcontainer">
@@ -33,6 +33,9 @@
 		</attributes>
 	</classpathentry>
 <<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 772ed589f2de9abc8f67814573f870ebab13d3d3
 	<classpathentry kind="src" path="bin/generated-sources/annotations">
 		<attributes>
 			<attribute name="optional" value="true"/>

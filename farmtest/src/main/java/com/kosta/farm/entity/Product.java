@@ -11,7 +11,7 @@ import javax.persistence.Id;
 
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
-import org.springframework.boot.context.properties.bind.DefaultValue;
+
 
 import lombok.Data;
 
@@ -46,7 +46,7 @@ public class Product {
 	@Column
 	private Long thumbNail; // 대표이미지 id
 	@Column
-	@ColumnDefault("sale")
+	@ColumnDefault("'sale'")
 	private String state; // 판매중(sale), 판매완료(soldout)
 
 	public void removeStock(Integer productStock) throws Exception {

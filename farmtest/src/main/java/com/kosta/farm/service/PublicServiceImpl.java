@@ -42,14 +42,16 @@ public class PublicServiceImpl implements PublicService {
 	private final RequestRepository requestRepository;
 	private final FarmerRepository farmerRepository;
 
-	@Value("$(upload.path)")
+	@Value("${upload.path}")
 	private String uploadPath;
 
 	@Value("${swetter.apiKey}")
-	String serviceKey = "";
-
+	private String serviceKey;
+	
 	@Override
 	public void readImage(Integer num, OutputStream out) throws Exception {
+		System.out.println(uploadPath);
+		System.out.println("hehrerererehrjkweharkaesr = " + uploadPath + num);
 		FileInputStream fis = new FileInputStream(uploadPath + num);
 		FileCopyUtils.copy(fis, out);
 		fis.close();
@@ -98,11 +100,11 @@ public class PublicServiceImpl implements PublicService {
 			String Code = (String) ecJson.get("Code");
 			String Name = (String) ecJson.get("Name");
 
-			if (international.equals("false")) {
-				comList.add(new CompanyDto(international, Code, Name));
-			}
-		}
-
+	    	if(international.equals("false")) {
+	    		comList.add(new CompanyDto(international, Code, Name));		    		
+	    	}
+	    }
+//		System.out.println("here " + comList.size());
 		return comList;
 	}
 

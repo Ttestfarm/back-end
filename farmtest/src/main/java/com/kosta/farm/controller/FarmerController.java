@@ -65,16 +65,10 @@ public class FarmerController {
 		try {
 			PageInfo pageInfo = PageInfo.builder().curPage(page).build();
 			List<Request> reqList = farmerService.findRequestsByFarmInterestPageInfo(farmerId, farmInterest, pageInfo);
-//			Double average = farmerService.avgTotalRequest(farmerId, farmInterest); 
-//			Long requestProgress = farmerService.requestCountByState(farmerId, farmInterest);
-			// 매칭중 
-//			Long foundMatching = farmerService.requestCountByState(RequestStatus.MATCHED);
+			
 			Map<String, Object> res = new HashMap<>();
-			res.put("reqList", reqList);
-//			res.put("average", Math.round(average * 100.0) / 100.0);
-//			res.put("matchingProgress", requestProgress);
-//			res.put("foundMatching", foundMatching);
 			res.put("pageInfo", pageInfo);
+			res.put("reqList", reqList);
 			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -84,12 +78,13 @@ public class FarmerController {
 
 	// 견적서 보내기
 	@PostMapping("/regquot")
-	public ResponseEntity<String> regQuotation(@ModelAttribute Quotation quot, List<MultipartFile> images,
+	public ResponseEntity<String> regQuotation(@ModelAttribute Quotation quot, @RequestParam("images") List<MultipartFile> images,
 			Authentication authentication) {
 		 User user = (User) authentication.getPrincipal();
 		 Long farmerId = user.getFarmerId();
 		try {
-			System.out.println("here");
+			quot.setFarmerId(farmerId);
+			System.out.println("images toStrting"+images.size());
 			// 견적서 DB에 저장
 			farmerService.saveQuotation(quot, images);
 			return new ResponseEntity<String>("성공", HttpStatus.OK);
@@ -106,6 +101,7 @@ public class FarmerController {
 		User user = (User) authentication.getPrincipal();
 		Long farmerId= user.getFarmerId();
 		try {
+			product.setFarmerId(farmerId);
 			farmerService.productEnter(product, titleImage, images);
 			return new ResponseEntity<String>("성공", HttpStatus.OK);
 		} catch (Exception e) {

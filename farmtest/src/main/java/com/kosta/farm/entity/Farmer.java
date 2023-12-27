@@ -72,7 +72,6 @@ public class Farmer {
 	@ColumnDefault("0")
 	private Integer reviewCount;
 	@Column
-	@ColumnDefault("0")
 	private Double rating;
 
 	public void updateAvgRating(List<Review> reviews) {

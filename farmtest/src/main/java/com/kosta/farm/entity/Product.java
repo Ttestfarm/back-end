@@ -47,7 +47,7 @@ public class Product {
 	private Long thumbNail; // 대표이미지 id
 	@Column
 	@ColumnDefault("sale")
-	private String state; // 판매중, 판매완료 sale or soldout
+	private String state; // 판매중(sale), 판매완료(soldout)
 
 	public void removeStock(Integer productStock) throws Exception {
 		Integer restStock = this.productStock - productStock;

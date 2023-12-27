@@ -32,6 +32,10 @@
 			<attribute name="org.eclipse.jst.component.dependency" value="/WEB-INF/lib"/>
 		</attributes>
 	</classpathentry>
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> 772ed589f2de9abc8f67814573f870ebab13d3d3
 	<classpathentry kind="src" path="bin/generated-sources/annotations">
 		<attributes>
 			<attribute name="optional" value="true"/>
@@ -43,5 +47,7 @@
 			<attribute name="test" value="true"/>
 		</attributes>
 	</classpathentry>
+=======
+>>>>>>> 28f03fac2f9ba45033990318e9067b2e6d9f7717
 	<classpathentry kind="output" path="bin/default"/>
 </classpath>

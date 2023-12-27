@@ -2,6 +2,7 @@ package com.kosta.farm.service;
 
 import java.io.File;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.file.Paths;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
@@ -21,7 +22,6 @@ import com.kosta.farm.dto.ModifyFarmDto;
 import com.kosta.farm.dto.PaymentDto;
 import com.kosta.farm.dto.QuotationDto;
 import com.kosta.farm.dto.RegFarmerDto;
-import com.kosta.farm.dto.RequestDto;
 import com.kosta.farm.entity.Farmer;
 import com.kosta.farm.entity.FileVo;
 import com.kosta.farm.entity.PayInfo;
@@ -36,7 +36,6 @@ import com.kosta.farm.repository.ProductRepository;
 import com.kosta.farm.repository.QuotationRepository;
 import com.kosta.farm.util.PageInfo;
 import com.kosta.farm.util.PaymentStatus;
-import com.kosta.farm.util.RequestStatus;
 import com.querydsl.core.Tuple;
 
 import lombok.RequiredArgsConstructor;
@@ -322,7 +321,9 @@ public class FarmerServiceImpl implements FarmerService {
 
 		String temp = currentDate + "";
 		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-		Date date = (Date) dateFormat.parse(temp);
+		java.util.Date utilDate = dateFormat.parse(temp);
+		Date date = new Date(utilDate.getTime());
+
 		// 정산 예정일
 		payment.setInvoiceDate(date);
 		BigDecimal commission = null;
@@ -333,6 +334,7 @@ public class FarmerServiceImpl implements FarmerService {
 			commission = new BigDecimal(0.03);
 			
 			BigDecimal money = amount.subtract(amount.multiply(commission));
+			money = money.setScale(0, RoundingMode.HALF_UP);
 			System.out.println(money.toString());
 			payment.setInvoicePrice(money.toString()); // 정산금액 setter
 		} else {
@@ -341,6 +343,7 @@ public class FarmerServiceImpl implements FarmerService {
 			commission = new BigDecimal(0.05);
 			
 			BigDecimal money = amount.subtract(amount.multiply(commission));
+			money = money.setScale(0, RoundingMode.HALF_UP);
 			System.out.println(money.toString());
 			payment.setInvoicePrice(money.toString()); // 정산금액 setter
 		}

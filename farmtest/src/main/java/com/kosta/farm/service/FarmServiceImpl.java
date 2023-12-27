@@ -205,8 +205,8 @@ public class FarmServiceImpl implements FarmService {
 	}
 
 	@Override
-	public void readImage(Integer num, ServletOutputStream outputStream) throws Exception {
-		FileInputStream fis = new FileInputStream(dir + num);
+	public void readImage(String url, ServletOutputStream outputStream) throws Exception {
+		FileInputStream fis = new FileInputStream(dir + url);
 		FileCopyUtils.copy(fis, outputStream);
 		fis.close();
 	}

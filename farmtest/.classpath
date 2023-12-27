@@ -27,16 +27,11 @@
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-11/"/>
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.web.container"/>
-<<<<<<< HEAD
-	<classpathentry kind="con" path="org.eclipse.buildship.core.gradleclasspathcontainer"/>
-=======
 	<classpathentry kind="con" path="org.eclipse.buildship.core.gradleclasspathcontainer">
 		<attributes>
 			<attribute name="org.eclipse.jst.component.dependency" value="/WEB-INF/lib"/>
 		</attributes>
 	</classpathentry>
-<<<<<<< HEAD
->>>>>>> ea839f671873466404db6f8dfaeaaf580c60a40f
 	<classpathentry kind="src" path="bin/generated-sources/annotations">
 		<attributes>
 			<attribute name="optional" value="true"/>
@@ -48,10 +43,5 @@
 			<attribute name="test" value="true"/>
 		</attributes>
 	</classpathentry>
-<<<<<<< HEAD
-=======
-=======
->>>>>>> 28f03fac2f9ba45033990318e9067b2e6d9f7717
->>>>>>> ea839f671873466404db6f8dfaeaaf580c60a40f
 	<classpathentry kind="output" path="bin/default"/>
 </classpath>

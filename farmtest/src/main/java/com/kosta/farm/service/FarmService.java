@@ -80,7 +80,7 @@ public interface FarmService {
 
 	List<Farmerfollow> getFollowingFarmersByUserId(Long userId, PageInfo pageInfo) throws Exception;
 
-	void readImage(Integer num, ServletOutputStream outputStream) throws Exception;
+//	void readImage(String url, ServletOutputStream outputStream) throws Exception;
 
 	List<Request> requestListByUser(Long userId) throws Exception;
 

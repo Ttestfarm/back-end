@@ -10,7 +10,7 @@ import com.kosta.farm.util.PageInfo;
 import com.kosta.farm.util.RequestStatus;
 
 public interface PublicService {
-	public void readImage(Integer num, OutputStream out) throws Exception;
+	public void readImage(String url, OutputStream out) throws Exception;
 	// 택배 API
 	public List<CompanyDto> requestCompanyList() throws Exception;
 	

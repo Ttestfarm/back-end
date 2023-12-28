@@ -21,6 +21,7 @@ public class PayInfoSummaryDto {
 	private Integer paymentDelivery; // 배송비
 	private Integer productPrice; //상품가격
 	private Integer count; //수량
+	private String quotationQuantity; // 수량
     private BigDecimal amount; // 결제 금액
 	private String productName;
 	private String buyerTel;
@@ -30,7 +31,6 @@ public class PayInfoSummaryDto {
     private Timestamp createAt;
 	private PaymentStatus state;
 	
-	private Long thumbNail; // 대표이미지 id
+	private String thumbNail; // 대표이미지 id
 	private String farmName;
-	private String quotationImages; // 농산물 사진 5장
 }

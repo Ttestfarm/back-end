@@ -49,10 +49,10 @@ public class PublicServiceImpl implements PublicService {
 	private String serviceKey;
 	
 	@Override
-	public void readImage(Integer num, OutputStream out) throws Exception {
+	public void readImage(String url, OutputStream out) throws Exception {
 		System.out.println(uploadPath);
-		System.out.println("hehrerererehrjkweharkaesr = " + uploadPath + num);
-		FileInputStream fis = new FileInputStream(uploadPath + num);
+		System.out.println("hehrerererehrjkweharkaesr = " + uploadPath + url);
+		FileInputStream fis = new FileInputStream(uploadPath + url);
 		FileCopyUtils.copy(fis, out);
 		fis.close();
 	}

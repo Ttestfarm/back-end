@@ -41,7 +41,7 @@ public class QProduct extends EntityPathBase<Product> {
 
     public final NumberPath<Integer> ShippingCost = createNumber("ShippingCost", Integer.class);
 
-    public final StringPath state = createString("state");
+    public final EnumPath<com.kosta.farm.util.ProductStatus> state = createEnum("state", com.kosta.farm.util.ProductStatus.class);
 
     public final NumberPath<Long> thumbNail = createNumber("thumbNail", Long.class);
 

@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,6 +37,7 @@ import com.kosta.farm.entity.Request;
 import com.kosta.farm.entity.Review;
 import com.kosta.farm.entity.User;
 import com.kosta.farm.service.FarmService;
+import com.kosta.farm.service.PublicService;
 import com.kosta.farm.util.PageInfo;
 import com.kosta.farm.util.PaymentStatus;
 
@@ -45,7 +48,7 @@ public class FarmController {
 
 	// 리뷰 작성하기
 	@PostMapping("/buylist")
-	public ResponseEntity<String> insertReview(@ModelAttribute ReviewDto review, MultipartFile reviewpixUrl) {
+	public ResponseEntity<String> insertReview(@ModelAttribute ReviewDto review, MultipartFile reviewpixUrl, Authentication authentication ) {
 		try {
 			farmService.addReview(review.getReceiptId(), reviewpixUrl, review.getRating(), review.getContent());
 			return ResponseEntity.ok("리뷰 작성이 완료되었습니다");
@@ -55,12 +58,13 @@ public class FarmController {
 		}
 	}
 
+
 	@PostMapping("/matching/request") // 요청서 작성하기
 	public ResponseEntity<String> writeRequest(@RequestBody RequestDto request, Authentication authentication) {
 		System.out.println(request);
 		User user = (User) authentication.getPrincipal();
 		Long userId = user.getUserId();
-		String userName= user.getUserName();
+		String userName = user.getUserName();
 		try {
 			request.setUserId(userId);
 			request.setName(userName);
@@ -306,5 +310,22 @@ public class FarmController {
 
 		}
 	}
+
+//	@GetMapping("/user/buylist") // 주문 상세보기
+//	public ResponseEntity<PaymentDto> payInfo(Authentication authentication, @RequestParam String receiptId) {
+//		User user = (User) authentication.getPrincipal();
+//		Long userId = user.getUserId();
+//
+//		try {
+//			
+//			System.out.println(userId);
+//			PaymentDto orders = farmerService.OrdersDetailQuotationId(farmerId, receiptId, type);
+//			return null;
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//			return new ResponseEntity<PaymentDto>(HttpStatus.BAD_REQUEST);
+//		}
+
+//	}
 
 }

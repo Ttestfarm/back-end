@@ -174,10 +174,14 @@ public class FarmerDslRepository {
       // 결제 완료(메칭) 상세 보기
       public PayInfo findOrderByFarmerIdAndOrderIdIsNotNull(Long farmerId, String receiptId) {
             QPayInfo pay = QPayInfo.payInfo;
+            System.out.println("here");
+            System.out.println(receiptId);
             return jpaQueryFactory.selectFrom(pay)
-                        .where(pay.quotationId.isNotNull()
-                        		.and(pay.farmerId.eq(farmerId))
-                        		.and(pay.receiptId.eq(receiptId)))
+                        .where(
+                        		pay.productId.isNull()
+//                        		.and(pay.farmerId.eq(farmerId))
+                        		.and(pay.receiptId.eq(receiptId))
+                        		.and(pay.state.eq(PaymentStatus.PAID)))
                         .fetchOne();
       }
 

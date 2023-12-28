@@ -48,7 +48,7 @@ public class FarmController {
 
 	// 리뷰 작성하기
 	@PostMapping("/buylist")
-	public ResponseEntity<String> insertReview(@ModelAttribute ReviewDto review, MultipartFile reviewpixUrl) {
+	public ResponseEntity<String> insertReview(@ModelAttribute ReviewDto review, MultipartFile reviewpixUrl, Authentication authentication ) {
 		try {
 			farmService.addReview(review.getReceiptId(), reviewpixUrl, review.getRating(), review.getContent());
 			return ResponseEntity.ok("리뷰 작성이 완료되었습니다");
@@ -57,6 +57,7 @@ public class FarmController {
 			return ResponseEntity.badRequest().body("리뷰작성 실패 " + e.getMessage());
 		}
 	}
+
 
 	@PostMapping("/matching/request") // 요청서 작성하기
 	public ResponseEntity<String> writeRequest(@RequestBody RequestDto request, Authentication authentication) {

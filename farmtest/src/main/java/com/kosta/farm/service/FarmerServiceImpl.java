@@ -207,6 +207,7 @@ public class FarmerServiceImpl implements FarmerService {
 			product.setFileUrl(fileNums);
 		}
 		// product table에 insert
+		product.setState("sale");
 		productRepository.save(product);
 	}
 

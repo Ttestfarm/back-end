@@ -98,11 +98,12 @@ public class FarmerController {
 	// 파머 상품 등록
 	@PostMapping("regproduct")
 	public ResponseEntity<String> regProduct(@ModelAttribute Product product, MultipartFile titleImage,
-			List<MultipartFile> images, Authentication authentication) {
+			@RequestParam("images") List<MultipartFile> images, Authentication authentication) {
 		User user = (User) authentication.getPrincipal();
 		Long farmerId = user.getFarmerId();
 		try {
 			product.setFarmerId(farmerId);
+			System.out.println("product = "+product.toString());
 			farmerService.productEnter(product, titleImage, images);
 			return new ResponseEntity<String>("성공", HttpStatus.OK);
 		} catch (Exception e) {

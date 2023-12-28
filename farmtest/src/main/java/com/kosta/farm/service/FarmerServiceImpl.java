@@ -216,7 +216,7 @@ public class FarmerServiceImpl implements FarmerService {
 		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 10); // 첫번째 값 : 페이지 번호, 두 번째 값 : 페이지 크기
 		List<PaymentDto> payList = new ArrayList<>();
 		Long allCount = null;
-		if (type.equals("매칭")) { // 매칭 주문
+		if (type.equals("matching")) { // 매칭 주문
 			List<Tuple> tuples = farmerDslRepository.findOrdersQuotByFarmerIdAndPaging(farmerId, pageRequest);
 			for (Tuple t : tuples) {
 				PaymentDto dto = new PaymentDto();
@@ -231,7 +231,7 @@ public class FarmerServiceImpl implements FarmerService {
 			}
 			allCount = farmerDslRepository.findOrdersCountByFarmerIdAndQuotationIsNotNull(farmerId);
 
-		} else if (type.equals("주문")) { // 받은 주문
+		} else if (type.equals("order")) { // 받은 주문
 			List<PayInfo> tempList = farmerDslRepository.findOrdersByFarmerIdAndPaging(farmerId, pageRequest);
 			for (PayInfo pay : tempList) {
 				PaymentDto dto = new PaymentDto();
@@ -262,12 +262,13 @@ public class FarmerServiceImpl implements FarmerService {
 	public PaymentDto OrdersDetailQuotationId(Long farmerId, String receiptId, String type) throws Exception {
 		PaymentDto payment = new PaymentDto();
 		PayInfo p = null;
-		
-		if (type.equals("1")) { // 매칭
+		System.out.println(type);
+		if (type.equals("matching")) { // 매칭
 			p = farmerDslRepository.findOrderByFarmerIdAndOrderIdIsNotNull(farmerId, receiptId);
-		} else if (type.equals("2")) { // 주문
+		} else if (type.equals("order")) { // 주문
 			p = farmerDslRepository.findOrderByFarmerIdAndOrderIdAndQuotaionIdIsNull(farmerId, receiptId);
 		}
+			System.out.println(p.toString());
 			payment.setReceiptId(p.getReceiptId());
 			payment.setPgType(p.getPgType()); // 결제 방법
 			payment.setPaymentDelivery(p.getPaymentDelivery()); // 배송비
@@ -325,28 +326,28 @@ public class FarmerServiceImpl implements FarmerService {
 		Date date = new Date(utilDate.getTime());
 
 		// 정산 예정일
-		payment.setInvoiceDate(date);
-		BigDecimal commission = null;
-		BigDecimal amount = payment.getAmount();
-		if (payment.getQuotationId().equals(null)) {
-			// matching
-			payment.setInvoiceCommission(3);
-			commission = new BigDecimal(0.03);
-			
-			BigDecimal money = amount.subtract(amount.multiply(commission));
-			money = money.setScale(0, RoundingMode.HALF_UP);
-			System.out.println(money.toString());
-			payment.setInvoicePrice(money.toString()); // 정산금액 setter
-		} else {
-			// product
-			payment.setInvoiceCommission(5);
-			commission = new BigDecimal(0.05);
-			
-			BigDecimal money = amount.subtract(amount.multiply(commission));
-			money = money.setScale(0, RoundingMode.HALF_UP);
-			System.out.println(money.toString());
-			payment.setInvoicePrice(money.toString()); // 정산금액 setter
-		}
+//		payment.setInvoiceDate(date);
+//		BigDecimal commission = null;
+//		BigDecimal amount = payment.getAmount();
+//		if (payment.getQuotationId().equals(null)) {
+//			// matching
+//			payment.setInvoiceCommission(3);
+//			commission = new BigDecimal(0.03);
+//			
+//			BigDecimal money = amount.subtract(amount.multiply(commission));
+//			money = money.setScale(0, RoundingMode.HALF_UP);
+//			System.out.println(money.toString());
+//			payment.setInvoicePrice(money.toString()); // 정산금액 setter
+//		} else {
+//			// product
+//			payment.setInvoiceCommission(5);
+//			commission = new BigDecimal(0.05);
+//			
+//			BigDecimal money = amount.subtract(amount.multiply(commission));
+//			money = money.setScale(0, RoundingMode.HALF_UP);
+//			System.out.println(money.toString());
+//			payment.setInvoicePrice(money.toString()); // 정산금액 setter
+//		}
 
 		// state 배송중(SHIPPING) 변경
 		payment.setState(PaymentStatus.SHIPPING);
@@ -467,7 +468,8 @@ public class FarmerServiceImpl implements FarmerService {
 		Farmer savedFarmer = farmerRepository.save(farmer);
 		
 		if (farmPixurl != null && !farmPixurl.isEmpty()) {
-
+//			String dir = "C://Users/USER/upload";
+			
 			// 파일명 설정
 			String fileName = "profile_image_" + savedFarmer.getFarmerId() + "."
 					+ StringUtils.getFilenameExtension(farmPixurl.getOriginalFilename());
@@ -511,7 +513,7 @@ public class FarmerServiceImpl implements FarmerService {
 		farmer.setFarmInterest5(numInterests > 4 ? interests[4].trim() : null);
 
 		if (farmPixurl != null && !farmPixurl.isEmpty()) {
-			String dir = "C:/Users/USER/upload";
+//			String dir = "C:/Users/USER/upload";
 
 			// 파일명 설정
 			String fileName = "profile_image_" + farmer.getFarmerId() + "."

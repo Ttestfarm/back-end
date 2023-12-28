@@ -4,6 +4,8 @@ import java.sql.Timestamp;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -11,12 +13,18 @@ import javax.persistence.Id;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 
+import com.kosta.farm.util.ProductStatus;
+
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Product {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,9 +54,9 @@ public class Product {
 	@Column
 	private Long thumbNail; // 대표이미지 id
 	@Column
-	@ColumnDefault("\"sale\"")
 	@Builder.Default
-	private String state = "sale"; // 판매중(sale), 판매완료(soldout)
+	@Enumerated(EnumType.STRING)
+	private ProductStatus state = ProductStatus.SALE; // 판매중(sale), 판매완료(soldout)
 
 	public void removeStock(Integer productStock) throws Exception {
 		Integer restStock = this.productStock - productStock;

@@ -12,6 +12,7 @@ import com.kosta.farm.repository.PayInfoRepository;
 import com.kosta.farm.repository.ProductRepository;
 import com.kosta.farm.repository.QuotationRepository;
 import com.kosta.farm.repository.RequestRepository;
+import com.kosta.farm.util.ProductStatus;
 import com.kosta.farm.util.QuotationStatus;
 import com.kosta.farm.util.RequestStatus;
 
@@ -40,7 +41,7 @@ public class PayService {
 				int updatedStock = currentStock - payInfo.getCount();
 				product.setProductStock(updatedStock);
 				if (updatedStock == 0) { 
-					product.setState("soldout"); //만약 재고가 0으로 바뀌면 판매완료 처리
+					product.setState(ProductStatus.SOLDOUT); //만약 재고가 0으로 바뀌면 판매완료 처리
 				}
 				productRepository.save(product);
 			}

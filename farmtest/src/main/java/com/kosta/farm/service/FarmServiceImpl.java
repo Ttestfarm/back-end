@@ -56,6 +56,7 @@ import com.kosta.farm.repository.ReviewRepository;
 import com.kosta.farm.repository.UserRepository;
 import com.kosta.farm.util.PageInfo;
 import com.kosta.farm.util.PaymentStatus;
+import com.kosta.farm.util.ProductStatus;
 import com.kosta.farm.util.RequestStatus;
 import com.querydsl.core.Tuple;
 
@@ -239,7 +240,7 @@ public class FarmServiceImpl implements FarmService {
 	public List<Product> getProductListByFarmer(Long farmerId, PageInfo pageInfo) throws Exception {
 		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 3,
 				Sort.by(Sort.Direction.DESC, "productId"));
-		Page<Product> pages = productRepository.findProductByFarmerId(farmerId, pageRequest);
+		Page<Product> pages = productRepository.findProductByFarmerIdAndState(farmerId, ProductStatus.SALE, pageRequest);
 		pageInfo.setAllPage(pages.getTotalPages());
 		int startPage = (pageInfo.getCurPage() - 1) / 10 * 10 + 1;
 		int endPage = Math.min(startPage + 10 - 1, pageInfo.getAllPage());

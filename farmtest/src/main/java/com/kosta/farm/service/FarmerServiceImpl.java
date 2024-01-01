@@ -207,7 +207,6 @@ public class FarmerServiceImpl implements FarmerService {
 			product.setFileUrl(fileNums);
 		}
 		// product table에 insert
-		product.setState("sale");
 		productRepository.save(product);
 	}
 
@@ -327,28 +326,28 @@ public class FarmerServiceImpl implements FarmerService {
 		Date date = new Date(utilDate.getTime());
 
 		// 정산 예정일
-		payment.setInvoiceDate(date);
-		BigDecimal commission = null;
-		BigDecimal amount = payment.getAmount();
-		if (payment.getQuotationId().equals(null)) {
-			// matching
-			payment.setInvoiceCommission(3);
-			commission = new BigDecimal(0.03);
-			
-			BigDecimal money = amount.subtract(amount.multiply(commission));
-			money = money.setScale(0, RoundingMode.HALF_UP);
-			System.out.println(money.toString());
-			payment.setInvoicePrice(money.toString()); // 정산금액 setter
-		} else {
-			// product
-			payment.setInvoiceCommission(5);
-			commission = new BigDecimal(0.05);
-			
-			BigDecimal money = amount.subtract(amount.multiply(commission));
-			money = money.setScale(0, RoundingMode.HALF_UP);
-			System.out.println(money.toString());
-			payment.setInvoicePrice(money.toString()); // 정산금액 setter
-		}
+//		payment.setInvoiceDate(date);
+//		BigDecimal commission = null;
+//		BigDecimal amount = payment.getAmount();
+//		if (payment.getQuotationId().equals(null)) {
+//			// matching
+//			payment.setInvoiceCommission(3);
+//			commission = new BigDecimal(0.03);
+//			
+//			BigDecimal money = amount.subtract(amount.multiply(commission));
+//			money = money.setScale(0, RoundingMode.HALF_UP);
+//			System.out.println(money.toString());
+//			payment.setInvoicePrice(money.toString()); // 정산금액 setter
+//		} else {
+//			// product
+//			payment.setInvoiceCommission(5);
+//			commission = new BigDecimal(0.05);
+//			
+//			BigDecimal money = amount.subtract(amount.multiply(commission));
+//			money = money.setScale(0, RoundingMode.HALF_UP);
+//			System.out.println(money.toString());
+//			payment.setInvoicePrice(money.toString()); // 정산금액 setter
+//		}
 
 		// state 배송중(SHIPPING) 변경
 		payment.setState(PaymentStatus.SHIPPING);

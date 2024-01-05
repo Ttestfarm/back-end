@@ -108,6 +108,8 @@ public interface FarmService {
 	
 	void updateRequestState() throws Exception;
 	
+	Request updateRequestStateToCANCEL(Long requestId) throws Exception;
+	
 	
 	
 	

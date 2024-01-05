@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -48,7 +49,8 @@ public class FarmController {
 
 	// 리뷰 작성하기
 	@PostMapping("/buylist")
-	public ResponseEntity<String> insertReview(@ModelAttribute ReviewDto review, MultipartFile reviewpixUrl, Authentication authentication ) {
+	public ResponseEntity<String> insertReview(@ModelAttribute ReviewDto review, MultipartFile reviewpixUrl,
+			Authentication authentication) {
 		try {
 			farmService.addReview(review.getReceiptId(), reviewpixUrl, review.getRating(), review.getContent());
 			return ResponseEntity.ok("리뷰 작성이 완료되었습니다");
@@ -57,7 +59,6 @@ public class FarmController {
 			return ResponseEntity.badRequest().body("리뷰작성 실패 " + e.getMessage());
 		}
 	}
-
 
 	@PostMapping("/matching/request") // 요청서 작성하기
 	public ResponseEntity<String> writeRequest(@RequestBody RequestDto request, Authentication authentication) {
@@ -77,6 +78,18 @@ public class FarmController {
 		}
 	}
 
+	@PatchMapping("/{requestId}") // 요청서 삭제하기(상태변경)
+	public ResponseEntity<Request> deleteRequest(@PathVariable Long requestId) {
+	     try {
+	            // 요청서 상태를 cancel로 변경
+	            Request updatedRequest = farmService.updateRequestStateToCANCEL(requestId);
+	            return ResponseEntity.ok(updatedRequest);
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+	        }
+	    }
+	
 	@GetMapping("/findfarmer/{farmerId}") // default 기본페이지 디테일
 	public ResponseEntity<Map<String, Object>> farmerDetail(@PathVariable(name = "farmerId") Long farmerId,
 			Authentication authentication) {
@@ -186,7 +199,7 @@ public class FarmController {
 		Long userId = user.getUserId();
 		try {
 			Map<String, Object> res = new HashMap<>();
-			List<Request> requestList = farmService.requestListByUser(userId);
+			List<Request> requestList = farmService.requestListByUser(userId); //requeststate이 request인것만 가져온다
 			List<RequestWithQuotationCountDTO> requestWithCountList = new ArrayList<>();
 			for (Request request : requestList) {
 				Long requestId = request.getRequestId(); // 각 요청의 id 가져오기
@@ -298,6 +311,8 @@ public class FarmController {
 		}
 	}
 
+
+
 	// 요청서에서 따라사기 버튼 누르면 요청품목과 수량을 불러온다
 	@GetMapping("/matching/buy/{requestId}") // matching/buy?reqformId=요청서번호
 	public ResponseEntity<RequestCopyDto> copyRequest(Authentication authentication, @PathVariable Long requestId) {
@@ -310,22 +325,5 @@ public class FarmController {
 
 		}
 	}
-
-//	@GetMapping("/user/buylist") // 주문 상세보기
-//	public ResponseEntity<PaymentDto> payInfo(Authentication authentication, @RequestParam String receiptId) {
-//		User user = (User) authentication.getPrincipal();
-//		Long userId = user.getUserId();
-//
-//		try {
-//			
-//			System.out.println(userId);
-//			PaymentDto orders = farmerService.OrdersDetailQuotationId(farmerId, receiptId, type);
-//			return null;
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			return new ResponseEntity<PaymentDto>(HttpStatus.BAD_REQUEST);
-//		}
-
-//	}
 
 }

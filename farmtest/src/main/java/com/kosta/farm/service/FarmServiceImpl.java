@@ -467,4 +467,16 @@ public class FarmServiceImpl implements FarmService {
 		return oRequest.get().toDto();
 	}
 
+	@Override
+	public Request updateRequestStateToCANCEL(Long requestId) throws Exception {
+		Optional<Request> oRequest = requestRepository.findById(requestId);
+		if (oRequest.isPresent()) {
+			Request request = oRequest.get();
+			request.setState(RequestStatus.CANCEL); // 상태를 cancel로 변경
+			return requestRepository.save(request);
+		} else {
+			throw new Exception("해당 ID에 해당하는 요청서를 찾지 못했습니다: " + requestId);
+		}
+	}
+
 }

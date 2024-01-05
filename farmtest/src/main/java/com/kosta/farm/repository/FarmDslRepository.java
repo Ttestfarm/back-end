@@ -195,7 +195,7 @@ public class FarmDslRepository {
 		List<Tuple> tupleList = jpaQueryFactory
 				.select(payInfo.receiptId, payInfo.ordersId, payInfo.farmerId, payInfo.quotationId, payInfo.productId,
 						payInfo.userId, payInfo.paymentMethod, payInfo.paymentDelivery, payInfo.productPrice,
-						payInfo.count, payInfo.amount, payInfo.productName, payInfo.buyerAddress, payInfo.buyerName,
+						payInfo.count, payInfo.quotationQuantity, payInfo.amount, payInfo.productName, payInfo.buyerAddress, payInfo.buyerName,
 						payInfo.buyerTel, payInfo.createAt, payInfo.state, product.thumbNail, farmer.farmName,
 						quotation.quotationImages)
 				.from(payInfo).leftJoin(product).on(payInfo.productId.eq(product.productId)).leftJoin(farmer)
@@ -222,6 +222,7 @@ public class FarmDslRepository {
 			dto.setProductId(t.get(payInfo.productId));
 			dto.setProductPrice(t.get(payInfo.productPrice));
 			dto.setCount(t.get(payInfo.count));
+			dto.setQuotationQuantity(t.get(payInfo.quotationQuantity));
 			dto.setAmount(t.get(payInfo.amount));
 			dto.setProductName(t.get(payInfo.productName));
 			dto.setBuyerAddress(t.get(payInfo.buyerAddress));

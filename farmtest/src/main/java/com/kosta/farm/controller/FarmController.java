@@ -78,7 +78,7 @@ public class FarmController {
 		}
 	}
 
-	@PatchMapping("/{requestId}") // 요청서 삭제하기(상태변경)
+	@PatchMapping("/mypage/delete/{requestId}") // 요청서 삭제하기(상태변경)
 	public ResponseEntity<String> deleteRequest(@PathVariable Long requestId) {
 	     try {
 	            // 요청서 상태를 cancel로 변경

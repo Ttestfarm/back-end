@@ -24,10 +24,10 @@ import com.kosta.farm.util.RequestStatus;
 
 @RestController
 public class PublicController {
-	
+
 	@Autowired
 	private PublicService publicService;
-	
+
 	// img 불러오기
 	@GetMapping("/img/{url}")
 	public void imageView(@PathVariable String url, HttpServletResponse response) {
@@ -37,7 +37,7 @@ public class PublicController {
 			e.printStackTrace();
 		}
 	}
-	
+
 	// 택배사 정보 제공
 	@GetMapping("/companylist")
 	public ResponseEntity<List<CompanyDto>> companyList(Authentication authentication) {
@@ -49,7 +49,7 @@ public class PublicController {
 			return new ResponseEntity<List<CompanyDto>>(HttpStatus.BAD_REQUEST);
 		}
 	}
-	
+
 	@GetMapping("/matching") // 매칭 메인 페이지를 보여준다 무한스크롤
 	public ResponseEntity<Map<String, Object>> matching(
 			@RequestParam(required = false, name = "page", defaultValue = "1") Integer page) {
@@ -58,7 +58,7 @@ public class PublicController {
 			List<RequestDto> matchingList = publicService.requestListByPage(pageInfo);
 			Double average = publicService.avgTotalRating();
 			Long matchingProgress = publicService.requestCountByState(RequestStatus.REQUEST);
-			// 매칭중 
+			// 매칭중
 			Long foundMatching = publicService.requestCountByState(RequestStatus.MATCHED);
 			// 매칭완료
 			Map<String, Object> res = new HashMap<>();
@@ -68,40 +68,38 @@ public class PublicController {
 			res.put("foundMatching", foundMatching);
 			res.put("pageInfo", pageInfo);
 			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
-      } catch (Exception e) {
-         e.printStackTrace();
-         return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
-      }
-   }
-	
-	   @GetMapping("/findfarmer") // 파머찾기 검색, sorting기능
-	   public ResponseEntity<Map<String, Object>> findFarmer(
-	         @RequestParam(required = false, name = "keyword", defaultValue = "all") String keyword,
-	         @RequestParam(required = false, name = "sortType", defaultValue = "farmerId") String sortType,
-	         @RequestParam(required = false, name = "page", defaultValue = "1") Integer page) {
-
-	      try {
-	         if (sortType == null || sortType.equals("") || sortType.equals("latest")) {
-	            sortType = "farmerId";
-	         }
-	         PageInfo pageInfo = PageInfo.builder().curPage(page).build();
-	         List<FarmerInfoDto> farmerList = null;
-	         if (keyword.equals("all")) {
-	            // 전체파머스 리스트를 보여준다
-	            farmerList = publicService.findFarmersWithSorting(sortType, pageInfo);
-	         } else {
-	            farmerList = publicService.farmerSearchList(keyword, sortType, pageInfo);
-	         }
-	         Map<String, Object> res = new HashMap<>();
-	         res.put("farmerList", farmerList);
-	         res.put("pageInfo", pageInfo);
-	         return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
-	      } catch (Exception e) {
-	         e.printStackTrace();
-	         return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
-	      }
-
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
 		}
-	
-	
+	}
+
+	@GetMapping("/findfarmer") // 파머찾기 검색, sorting기능
+	public ResponseEntity<Map<String, Object>> findFarmer(
+			@RequestParam(required = false, name = "keyword", defaultValue = "") String keyword,
+			@RequestParam(required = false, name = "sortType", defaultValue = "farmerId") String sortType,
+			@RequestParam(required = false, name = "page", defaultValue = "1") Integer page) {
+		try {
+			if (sortType == null || sortType.equals("") || sortType.equals("latest")) {
+				sortType = "farmerId";
+			}
+			PageInfo pageInfo = PageInfo.builder().curPage(page).build();
+			List<FarmerInfoDto> farmerList = null;
+			if (keyword.equals("")) {
+				// 빈 문자열일 경우 전체파머스 리스트를 보여준다
+				farmerList = publicService.findFarmersWithSorting(sortType, pageInfo);
+			} else {
+				farmerList = publicService.farmerSearchList(keyword, sortType, pageInfo);
+			}
+			Map<String, Object> res = new HashMap<>();
+			res.put("farmerList", farmerList);
+			res.put("pageInfo", pageInfo);
+			return new ResponseEntity<Map<String, Object>>(res, HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
+		}
+
+	}
+
 }

@@ -79,11 +79,11 @@ public class FarmController {
 	}
 
 	@PatchMapping("/{requestId}") // 요청서 삭제하기(상태변경)
-	public ResponseEntity<Request> deleteRequest(@PathVariable Long requestId) {
+	public ResponseEntity<String> deleteRequest(@PathVariable Long requestId) {
 	     try {
 	            // 요청서 상태를 cancel로 변경
 	            Request updatedRequest = farmService.updateRequestStateToCANCEL(requestId);
-	            return ResponseEntity.ok(updatedRequest);
+	            return ResponseEntity.ok("요청서를 삭제했습니다");
 	        } catch (Exception e) {
 	            e.printStackTrace();
 	            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();

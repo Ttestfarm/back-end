@@ -89,7 +89,6 @@ public class FarmServiceImpl implements FarmService {
 
 	@Override // 리뷰 작성하기 ordersId에 해당하면 리뷰를 쓸 수 있다 근데 하나의 주문에 하나의 review만 쓸 수 있다 리뷰가 추가되면 파머
 	// rating field 업데이트
-	// java.io.FileNotFoundException(지정된 파일을 찾을 수 없습니다)
 	public void addReview(String receiptId, MultipartFile reviewpixUrl, Integer rating, String content)
 			throws Exception {
 		Optional<PayInfo> oPay = payInfoRepository.findById(receiptId);
@@ -428,6 +427,7 @@ public class FarmServiceImpl implements FarmService {
 	}
 
 //	@Scheduled(fixedRate = 60000) // 1분(60초) 간격으로 실행
+//	@Scheduled(cron = "0 0 12 * * *") // 매일 오후 12시(정오)에 실행하도록 스케줄링
 	@Transactional
 	@Scheduled(cron = "0 0 0 * * *") // 매일 자정에 실행하도록 스케줄링
 	@Override

@@ -19,8 +19,6 @@ public class QProduct extends EntityPathBase<Product> {
 
     public static final QProduct product = new QProduct("product");
 
-    public final NumberPath<Integer> addShippingCost = createNumber("addShippingCost", Integer.class);
-
     public final NumberPath<Long> categoryId = createNumber("categoryId", Long.class);
 
     public final DateTimePath<java.sql.Timestamp> createDate = createDateTime("createDate", java.sql.Timestamp.class);
@@ -39,11 +37,11 @@ public class QProduct extends EntityPathBase<Product> {
 
     public final StringPath productQuantity = createString("productQuantity");
 
-    public final StringPath productState = createString("productState");
-
     public final NumberPath<Integer> productStock = createNumber("productStock", Integer.class);
 
     public final NumberPath<Integer> ShippingCost = createNumber("ShippingCost", Integer.class);
+
+    public final EnumPath<com.kosta.farm.util.ProductStatus> state = createEnum("state", com.kosta.farm.util.ProductStatus.class);
 
     public final NumberPath<Long> thumbNail = createNumber("thumbNail", Long.class);
 

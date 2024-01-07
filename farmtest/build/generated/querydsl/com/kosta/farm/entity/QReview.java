@@ -25,9 +25,9 @@ public class QReview extends EntityPathBase<Review> {
 
     public final NumberPath<Long> farmerId = createNumber("farmerId", Long.class);
 
-    public final NumberPath<Long> ordersId = createNumber("ordersId", Long.class);
-
     public final NumberPath<Integer> rating = createNumber("rating", Integer.class);
+
+    public final StringPath receiptId = createString("receiptId");
 
     public final NumberPath<Long> reviewId = createNumber("reviewId", Long.class);
 
@@ -36,6 +36,8 @@ public class QReview extends EntityPathBase<Review> {
     public final BooleanPath reviewState = createBoolean("reviewState");
 
     public final NumberPath<Long> userId = createNumber("userId", Long.class);
+
+    public final StringPath userName = createString("userName");
 
     public QReview(String variable) {
         super(Review.class, forVariable(variable));

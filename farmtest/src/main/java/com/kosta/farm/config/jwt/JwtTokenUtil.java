@@ -13,19 +13,18 @@ public class JwtTokenUtil {
 		// Claim = token에 들어갈 정보
 		// Claim에 userEmail를 넣어 줌으로써 나중에 userEmail를 꺼낼 수 있음
 		Claims claims = Jwts.claims();
-		claims.put("userEmail", userEmail);
+		claims.put("username", userEmail);
 		return Jwts.builder()
 				.setHeaderParam("type", "JWT")
 				.setClaims(claims)
 				.setIssuedAt(new Date(System.currentTimeMillis()))
 				.setExpiration(new Date(System.currentTimeMillis() + expireTime))
-				.signWith(SignatureAlgorithm.HS256, secretKey)
-				.compact();
+				.signWith(SignatureAlgorithm.HS256, secretKey.getBytes()).compact();
 	}
 
 	// Claims에서 userEmail 꺼내기
 	public static String getUserEmail(String token, String secretKey) {
-		return extractClaims(token, secretKey).get("userEmail").toString();
+		return extractClaims(token, secretKey).get("username").toString();
 	}
 
 	// 발급된 Token이 만료 시간이 지났는지 체크
@@ -37,6 +36,7 @@ public class JwtTokenUtil {
 
 	// SecretKey를 사용해 Token Parsing
 	private static Claims extractClaims(String token, String secretKey) {
-		return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody();
+		Claims claims = Jwts.parser().setSigningKey(secretKey.getBytes()).parseClaimsJws(token).getBody();
+		return claims;
 	}
 }

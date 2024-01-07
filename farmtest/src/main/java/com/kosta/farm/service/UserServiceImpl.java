@@ -13,16 +13,19 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.kosta.farm.dto.JoinRequestDto;
 import com.kosta.farm.dto.LoginRequestDto;
+import com.kosta.farm.dto.ModifyUserDto;
 import com.kosta.farm.entity.User;
 import com.kosta.farm.repository.UserRepository;
 import com.kosta.farm.util.UserRole;
 
+import lombok.RequiredArgsConstructor;
 import net.nurigo.java_sdk.api.Message;
 import net.nurigo.java_sdk.exceptions.CoolsmsException;
 
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
 	private final UserRepository userRepository;
@@ -34,20 +37,18 @@ public class UserServiceImpl implements UserService {
 
    @Value("${coolsms.apiSecret}")
    private String apiSecret;
-
-	public UserServiceImpl(UserRepository userRepository, BCryptPasswordEncoder encoder, JavaMailSender javaMailSender) {
-		this.userRepository = userRepository;
-		this.encoder = encoder;
-		this.javaMailSender = javaMailSender;
-	}
 	
 	// 회원가입
 	@Override
 	public void join(JoinRequestDto request) throws Exception {
+		String rawPassword = request.getUserPassword();
+		String password = encoder.encode(rawPassword);
+//		System.out.println("raw: " + rawPassword);
+//		System.out.println("encoding: " + password);
 		userRepository.save(User.builder()
 				.userName(request.getUserName())
 				.userEmail(request.getUserEmail())
-				.userPassword(encoder.encode(request.getUserPassword()))
+				.userPassword(password)
 				.userRole(UserRole.ROLE_USER)
 				.build());
 	}
@@ -55,8 +56,9 @@ public class UserServiceImpl implements UserService {
 	// 이메일 중복 체크
 	@Override
 	public boolean checkEmail(String userEmail) throws Exception {
+		// 중복되면 false 리턴, 안되면 true 리턴
 		if (userRepository.existsByUserEmail(userEmail)) {
-			throw new RuntimeException("중복된 이메일입니다`.");
+			return false;
 		}
 		return true;
 	}
@@ -69,7 +71,6 @@ public class UserServiceImpl implements UserService {
 		if (user == null) {
 			throw new RuntimeException("해당하는 사용자를 찾을 수 없습니다.");
 		}
-
 		// 찾아온 User의 password와 입력된 password가 다르면 null return
 		if (!encoder.matches(request.getUserPassword(), user.getUserPassword())) {
 			throw new RuntimeException("비밀번호가 일치하지 않습니다.");
@@ -196,6 +197,29 @@ public class UserServiceImpl implements UserService {
 			System.out.println("에러 코드: " + e.getCode());
 		}
 
+	}
+
+	// 파머등록시 기본전화번호 체크하면 userTel 업데이트
+	@Override
+	public void updateUserTel(User user, String newTel) throws Exception {
+		user.setUserTel(newTel);
+		userRepository.save(user);
+	}
+
+	@Override
+	public User modifyUser(User loginUser, ModifyUserDto modifyUserRequest) throws Exception {
+		String rawPassword = modifyUserRequest.getUserPassword().trim();
+    // 사용자 정보 수정
+		String encodePassword =  encoder.encode(rawPassword);
+    loginUser.setUserPassword(encodePassword);
+    loginUser.setUserTel(modifyUserRequest.getUserTel());
+    loginUser.setAddress1(modifyUserRequest.getAddress1());
+    loginUser.setAddress2(modifyUserRequest.getAddress2());
+    loginUser.setAddress3(modifyUserRequest.getAddress3());
+    // 수정된 사용자 정보 저장
+    userRepository.save(loginUser);
+
+    return loginUser;
 	}
 
 }

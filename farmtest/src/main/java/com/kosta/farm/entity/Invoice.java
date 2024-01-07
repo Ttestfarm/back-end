@@ -30,7 +30,7 @@ public class Invoice {
 	@Column
 	private Long farmerId;
 	@Column
-	private Long orderId; // ordersId로 변경 해야 함.
+	private String receiptId;
 	@Column
 	private Date invoiceDate; // 정산예정일
 	@Column

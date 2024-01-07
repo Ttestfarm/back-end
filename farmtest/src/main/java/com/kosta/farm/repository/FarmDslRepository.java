@@ -8,22 +8,34 @@ import java.util.Map;
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Repository;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kosta.farm.dto.OrderHistoryDto;
+import com.kosta.farm.dto.PayInfoSummaryDto;
+import com.kosta.farm.dto.ProductInfoDto;
+import com.kosta.farm.dto.RequestDto;
+import com.kosta.farm.dto.ReviewInfoDto;
 import com.kosta.farm.entity.Farmer;
 import com.kosta.farm.entity.Farmerfollow;
-import com.kosta.farm.entity.Orders;
+import com.kosta.farm.entity.PayInfo;
 import com.kosta.farm.entity.Product;
-import com.kosta.farm.entity.QCategory;
 import com.kosta.farm.entity.QFarmer;
 import com.kosta.farm.entity.QFarmerfollow;
-import com.kosta.farm.entity.QOrders;
+import com.kosta.farm.entity.QPayInfo;
 import com.kosta.farm.entity.QProduct;
 import com.kosta.farm.entity.QQuotation;
 import com.kosta.farm.entity.QRequest;
 import com.kosta.farm.entity.QReview;
+import com.kosta.farm.entity.QUser;
 import com.kosta.farm.entity.Quotation;
+import com.kosta.farm.entity.Request;
 import com.kosta.farm.entity.Review;
+import com.kosta.farm.util.PageInfo;
+import com.kosta.farm.util.RequestStatus;
 import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
@@ -35,12 +47,14 @@ public class FarmDslRepository {
 	@Autowired
 	private JPAQueryFactory jpaQueryFactory;
 
+	@Autowired
+	private ObjectMapper objectMapper;
+
 	// quotecount 가져오기
 	public Long findQuoteCountByRequestId(Long requestId) throws Exception {
 		QQuotation quotation = QQuotation.quotation;
 		return jpaQueryFactory.select(quotation.count()).from(quotation).where(quotation.requestId.eq(requestId))
 				.fetchOne();
-//		return count;
 	};
 
 	// 파머 수 가져오기
@@ -91,13 +105,144 @@ public class FarmDslRepository {
 		return jpaQueryFactory.selectFrom(review).where(review.userId.eq(userId)).fetch();
 	}
 
+	public List<Tuple> getRequestsWithUsername(PageInfo pageInfo) {
+		QRequest request = QRequest.request;
+		QUser user = QUser.user;
+		List<Tuple> result = jpaQueryFactory.select(request, user.userName).from(request).leftJoin(user)
+				.on(request.userId.eq(user.userId)).fetch();
+		return result;
+	}
+
+	public Long requestAllCount() throws Exception {
+		QRequest request = QRequest.request;
+		return jpaQueryFactory.select(request.count()).from(request)
+			    .where(request.state.eq(RequestStatus.REQUEST))
+			    .fetchOne();
+	}
+
+	public List<RequestDto> requestListWithNameByPage(PageInfo pageInfo) throws Exception {
+		QRequest request = QRequest.request;
+		QUser user = QUser.user;
+		Long count = requestAllCount();
+		pageInfo.setAllPage((int) Math.ceil(count.intValue() / 9));
+		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 9
+//				,Sort.by(Sort.Direction.DESC, "requestId")
+		);
+
+		List<Tuple> tupleList = jpaQueryFactory.select(request, user.userName).from(request).leftJoin(user)
+				.on(request.userId.eq(user.userId))
+				.where(request.state.eq(RequestStatus.REQUEST))
+			    .orderBy(request.requestId.desc()) // 요청 ID 내림차순으로 정렬
+				.offset(pageRequest.getOffset())
+				.limit(pageRequest.getPageSize()).fetch();
+
+		List<RequestDto> list = new ArrayList<>();
+		for (Tuple t : tupleList) {
+			Request req = t.get(0, Request.class);
+			RequestDto reqDto = objectMapper.convertValue(req, RequestDto.class);
+			reqDto.setUserName(t.get(1, String.class));
+			list.add(reqDto);
+		}
+		return list;
+	}
+
+	public Long reviewCountByFarmer(Long farmerId) throws Exception {
+		QReview review = QReview.review;
+		return jpaQueryFactory.select(review.count()).from(review).where(review.farmerId.eq(farmerId)).fetchOne();
+	}
+
+//리뷰인포 가져오기
+	public List<ReviewInfoDto> reviewListWithFarmNameByPage(Long farmerId, PageRequest pageRequest) throws Exception {
+		QReview review = QReview.review;
+		QFarmer farmer = QFarmer.farmer;
+		QPayInfo payInfo = QPayInfo.payInfo;
+
+		List<Tuple> tupleList = jpaQueryFactory.select(review, farmer.farmName, payInfo.count, payInfo.productName)
+				.from(review).leftJoin(farmer).on(review.farmerId.eq(farmer.farmerId).and(farmer.farmerId.eq(farmerId)))
+				.leftJoin(payInfo).on(review.receiptId.eq(payInfo.receiptId)).where(review.farmerId.eq(farmerId)) // review의
+																													// farmerI
+				.offset(pageRequest.getOffset()).limit(pageRequest.getPageSize()).orderBy(review.reviewId.desc())
+				.fetch();
+
+		List<ReviewInfoDto> list = new ArrayList<>();
+		for (Tuple t : tupleList) {
+			Review rev = t.get(0, Review.class); // tuple에서 review 객체 가져오기
+			ReviewInfoDto revDto = objectMapper.convertValue(rev, ReviewInfoDto.class); // Review 객체를 ReviewInfoDto로 변환
+			revDto.setFarmName(t.get(1, String.class));// tuple에서 farname가져오기
+			revDto.setCount(t.get(2, Integer.class));
+			revDto.setProductName(t.get(3, String.class)); // tuple에서 payInfo정보 가져오기
+			list.add(revDto);
+		}
+		return list;
+	}
+
+	public Long payInfoAllCount(Long userId) throws Exception {
+		QPayInfo payInfo = QPayInfo.payInfo;
+		return jpaQueryFactory.select(payInfo.count()).from(payInfo).where(payInfo.userId.eq(userId)).fetchOne();
+	}
+
+	public List<PayInfoSummaryDto> getPartialOrdersListByUserByPage(PageInfo pageInfo, Long userId) throws Exception {
+		QPayInfo payInfo = QPayInfo.payInfo;
+		QProduct product = QProduct.product;
+		QFarmer farmer = QFarmer.farmer;
+		QQuotation quotation = QQuotation.quotation;
+
+		Long cnt = payInfoAllCount(userId);
+
+		pageInfo.setAllPage((int) Math.ceil(cnt.intValue() / 6));
+		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 6,
+				Sort.by(Sort.Direction.DESC, "createAt"));
+		List<Tuple> tupleList = jpaQueryFactory
+				.select(payInfo.receiptId, payInfo.ordersId, payInfo.farmerId, payInfo.quotationId, payInfo.productId,
+						payInfo.userId, payInfo.paymentMethod, payInfo.paymentDelivery, payInfo.productPrice,
+						payInfo.count, payInfo.quotationQuantity, payInfo.amount, payInfo.productName, payInfo.buyerAddress, payInfo.buyerName,
+						payInfo.buyerTel, payInfo.createAt, payInfo.state, product.thumbNail, farmer.farmName,
+						quotation.quotationImages)
+				.from(payInfo).leftJoin(product).on(payInfo.productId.eq(product.productId)).leftJoin(farmer)
+				.on(payInfo.farmerId.eq(farmer.farmerId)).leftJoin(quotation)
+				.on(payInfo.quotationId.eq(quotation.quotationId)).where(payInfo.userId.eq(userId))
+				.offset(pageRequest.getOffset()).limit(pageRequest.getPageSize()).orderBy(payInfo.createAt.desc())
+				.fetch();
+
+		List<PayInfoSummaryDto> list = new ArrayList<>();
+		for (Tuple t : tupleList) {
+			String imgUrl = null;
+			if(t.get(product.thumbNail)==null)
+				imgUrl = t.get(quotation.quotationImages);
+			else 
+				imgUrl = t.get(product.thumbNail)+"";
+			PayInfoSummaryDto dto = new PayInfoSummaryDto();
+			dto.setCreateAt(t.get(payInfo.createAt));
+			dto.setReceiptId(t.get(payInfo.receiptId));
+			dto.setOrdersId(t.get(payInfo.ordersId));
+			dto.setUserId(t.get(payInfo.userId));
+			dto.setFarmerId(t.get(payInfo.farmerId));
+			dto.setPaymentMethod(t.get(payInfo.paymentMethod));
+			dto.setPaymentDelivery(t.get(payInfo.paymentDelivery));
+			dto.setProductId(t.get(payInfo.productId));
+			dto.setProductPrice(t.get(payInfo.productPrice));
+			dto.setCount(t.get(payInfo.count));
+			dto.setQuotationQuantity(t.get(payInfo.quotationQuantity));
+			dto.setAmount(t.get(payInfo.amount));
+			dto.setProductName(t.get(payInfo.productName));
+			dto.setBuyerAddress(t.get(payInfo.buyerAddress));
+			dto.setBuyerName(t.get(payInfo.buyerName));
+			dto.setBuyerTel(t.get(payInfo.buyerTel));
+			dto.setState(t.get(payInfo.state));
+			dto.setFarmName(t.get(farmer.farmName));
+			dto.setThumbNail(imgUrl);
+
+			list.add(dto);
+		}
+		return list;
+	}
+
 	public Map<String, Object> findQuotationsWithFarmerByRequestId(Long requestId) {
 		QQuotation quotation = QQuotation.quotation;
 		QFarmer farmer = QFarmer.farmer;
 
 		List<Tuple> quotesWithFarmer = jpaQueryFactory
-				.select(quotation, farmer.farmName, 
-						farmer.farmAddress, farmer.farmPixurl, farmer.rating,
+				.select(quotation, farmer.farmName, farmer.farmAddress, farmer.farmPixurl, farmer.rating,
 						farmer.reviewCount, farmer.followCount)
 				.from(quotation).leftJoin(farmer).on(quotation.farmerId.eq(farmer.farmerId))
 				.where(quotation.requestId.eq(requestId)).fetch();
@@ -138,26 +283,12 @@ public class FarmDslRepository {
 
 	}
 
-	public List<Orders> findOrderswithReviewByUserId(Long userId) {
-		QOrders orders = QOrders.orders;
+	public List<PayInfo> findPayInfowithReviewByUserId(Long userId) {
+		QPayInfo payInfo = QPayInfo.payInfo;
 		QReview review = QReview.review;
-		return jpaQueryFactory.select(orders).from(orders).leftJoin(review).on(orders.ordersId.eq(review.ordersId))
-				.where(orders.userId.eq(userId)).fetch();
-	}
+		return jpaQueryFactory.select(payInfo).from(payInfo).leftJoin(review).on(payInfo.receiptId.eq(review.receiptId))
+				.where(payInfo.userId.eq(userId)).fetch();
 
-	@Transactional
-	public void updateStock(Long productId, Integer stock) {
-
-	}
-
-	// 파머의 카테고리 이름 가져오기? ㄴㄴ farminterest 검색하기
-	public List<Tuple> getFarmersByCategory(String categoryName) {
-		QFarmer farmer = QFarmer.farmer;
-		QCategory category = QCategory.category;
-		QProduct product = QProduct.product;
-		return jpaQueryFactory.select(farmer, category.categoryName).from(product).join(farmer)
-				.on(product.farmerId.eq(farmer.farmerId)).join(category).on(product.categoryId.eq(category.categoryId))
-				.where(category.categoryName.eq(categoryName)).fetch();
 	}
 
 }

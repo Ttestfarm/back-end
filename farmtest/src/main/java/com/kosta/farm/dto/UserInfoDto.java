@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class UserInfoDto {
-	private Long userId;
+  private Long userId;
   private Long farmerId;
   private String userName;
   private String userEmail;
@@ -18,7 +18,7 @@ public class UserInfoDto {
   private String userRole;
 
   public UserInfoDto (Long userId, Long farmerId, String userName, String userEmail, String userPassword,
-  		String userTel, String address1, String address2, String address3, String userRole) {
+        String userTel, String address1, String address2, String address3, String userRole) {
       this.userId = userId;
       this.farmerId = farmerId;
       this.userName = userName;

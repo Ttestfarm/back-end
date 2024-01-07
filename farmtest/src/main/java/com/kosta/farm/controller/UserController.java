@@ -1,8 +1,11 @@
 package com.kosta.farm.controller;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
 import org.springframework.http.HttpHeaders;
@@ -21,8 +24,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.kosta.farm.config.jwt.JwtTokenUtil;
+import com.kosta.farm.config.oauth2.OAuth2LoginSuccessHandler;
 import com.kosta.farm.dto.ErrorResponseDto;
-import com.kosta.farm.dto.FarmerDto;
+import com.kosta.farm.dto.FarmerInfoDto;
 import com.kosta.farm.dto.JoinRequestDto;
 import com.kosta.farm.dto.LoginRequestDto;
 import com.kosta.farm.dto.ModifyFarmDto;
@@ -42,14 +46,17 @@ public class UserController {
 
 	private final UserService userService;
 	private final FarmerService farmerService;
-	
-	private final BCryptPasswordEncoder encoder;
-	
-  @Value("${jwt.secretKey}")
-  private String secretKey;
 
-  @Value("${jwt.expireTime}")
-  private int expireTime;
+	private final BCryptPasswordEncoder encoder;
+
+	@Value("${jwt.secretKey}")
+	private String secretKey;
+
+	@Value("${jwt.expireTime}")
+	private int expireTime;
+
+	@Autowired
+	private OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
 	@PostMapping("/join")
 	public ResponseEntity<String> join(@RequestBody JoinRequestDto joinRequest) throws Exception {
@@ -66,7 +73,6 @@ public class UserController {
 	public ResponseEntity<String> checkEmail(@RequestBody Map<String, Object> userEmail) throws Exception {
 		try {
 			String inputEmail = (String) userEmail.get("userEmail");
-			
 			if (userService.checkEmail(inputEmail)) {
 				return ResponseEntity.ok("사용 가능한 이메일입니다.");
 			}
@@ -85,82 +91,75 @@ public class UserController {
 			}
 
 			String token = JwtTokenUtil.createToken(user.getUserEmail(), secretKey, expireTime);
-			
+
 			HttpHeaders headers = new HttpHeaders();
-			
+
 			headers.add("Authorization", "Bearer " + token);
 			return ResponseEntity.ok().headers(headers).body("로그인 성공");
 		} catch (Exception e) {
 			return ResponseEntity.badRequest().body(e.getMessage());
 		}
 	}
-	
-	@GetMapping("/login/userInfo")
-  public ResponseEntity<?> userInfo(Authentication auth) throws Exception {
-		User user =  (User)auth.getPrincipal();
+
+	@GetMapping("/user/userInfo")
+	public ResponseEntity<?> userInfo(Authentication auth) throws Exception {
+		User user = (User) auth.getPrincipal();
 		try {
 			User loginUser = userService.getLoginUserByUserEmail(user.getUserEmail());
-
-	    UserInfoDto userInfoResponse = new UserInfoDto(
-	            loginUser.getUserId(),
-	            loginUser.getFarmerId(),
-	            loginUser.getUserName(),
-	            loginUser.getUserEmail(),
-	            loginUser.getUserPassword(),
-	            loginUser.getUserTel(),
-	            loginUser.getAddress1(),
-	            loginUser.getAddress2(),
-	            loginUser.getAddress3(),
-	            loginUser.getUserRole().name()
-	    );
-	    
-	    return ResponseEntity.ok().body(userInfoResponse);
+			System.out.println(loginUser);
+			UserInfoDto userInfoResponse = new UserInfoDto(
+					loginUser.getUserId(),
+					loginUser.getFarmerId(),
+					loginUser.getUserName(),
+					loginUser.getUserEmail(),
+					loginUser.getUserPassword(),
+					loginUser.getUserTel(),
+					loginUser.getAddress1(),
+					loginUser.getAddress2(),
+					loginUser.getAddress3(),
+					loginUser.getUserRole().name());
+			
+			System.out.println(userInfoResponse);
+			return ResponseEntity.ok().body(userInfoResponse);
 		} catch (Exception e) {
+			e.printStackTrace();
 			ErrorResponseDto errorResponse = new ErrorResponseDto("유저 정보 불러오기 실패", e.getMessage());
-      return ResponseEntity.badRequest().body(errorResponse);
+			return ResponseEntity.badRequest().body(errorResponse);
 		}
 	}
-	
+
 	@PutMapping("/user/modify-user")
 	public ResponseEntity<?> modifyUser(@RequestBody ModifyUserDto modifyUserRequest, Authentication auth) {
-    try {
-      // 로그인한 사용자 정보 가져오기
-      User loginUser = (User) auth.getPrincipal();
+		try {
+			// 로그인한 사용자 정보 가져오기
+			User loginUser = (User) auth.getPrincipal();
 
-      // 사용자 정보 수정
-      loginUser.setUserName(modifyUserRequest.getUserName());
-      loginUser.setUserPassword(encoder.encode(modifyUserRequest.getUserPassword()));
-      loginUser.setUserTel(modifyUserRequest.getUserTel());
-      loginUser.setAddress1(modifyUserRequest.getAddress1());
-      loginUser.setAddress2(modifyUserRequest.getAddress2());
-      loginUser.setAddress3(modifyUserRequest.getAddress3());
+			// 사용자 정보 수정
+			User modifiedUser = userService.modifyUser(loginUser, modifyUserRequest);
 
-      // 수정된 사용자 정보 저장
-      userService.saveUser(loginUser);
+			// 수정된 사용자 정보 응답
+			UserInfoDto modifiedUserInfo = new UserInfoDto(
+					modifiedUser.getUserId(),
+					modifiedUser.getFarmerId(),
+					modifiedUser.getUserName(),
+					modifiedUser.getUserEmail(),
+					modifiedUser.getUserPassword(),
+					modifiedUser.getUserTel(),
+					modifiedUser.getAddress1(),
+					modifiedUser.getAddress2(),
+					modifiedUser.getAddress3(),
+					modifiedUser.getUserRole().name());
 
-      // 수정된 사용자 정보 응답
-      UserInfoDto modifiedUserInfo = new UserInfoDto(
-              loginUser.getUserId(),
-              loginUser.getFarmerId(),
-              loginUser.getUserName(),
-              loginUser.getUserEmail(),
-              loginUser.getUserPassword(),
-              loginUser.getUserTel(),
-              loginUser.getAddress1(),
-              loginUser.getAddress2(),
-              loginUser.getAddress3(),
-              loginUser.getUserRole().name()
-      );
-
-      return ResponseEntity.ok().body(modifiedUserInfo);
-    } catch (Exception e) {
-      ErrorResponseDto errorResponse = new ErrorResponseDto("회원 정보 수정 실패", e.getMessage());
-      return ResponseEntity.badRequest().body(errorResponse);
-    }
+			return ResponseEntity.ok().body(modifiedUserInfo);
+		} catch (Exception e) {
+			ErrorResponseDto errorResponse = new ErrorResponseDto("회원 정보 수정 실패", e.getMessage());
+			return ResponseEntity.badRequest().body(errorResponse);
+		}
 	}
-	
-	@GetMapping("/user/modify-user/check-sms/{telNum}")
+
+	@GetMapping("/modify-user/check-sms/{telNum}")
 	public @ResponseBody String sendSMS(@PathVariable String telNum) {
+		System.out.println(telNum);
 		try {
 			Random rand = new Random();
 			String numStr = "";
@@ -178,7 +177,7 @@ public class UserController {
 			return "인증번호 전송 오류가 발생했습니다.";
 		}
 	}
-	
+
 	@GetMapping("/find-email/{userName}/{userTel}")
 	public ResponseEntity<?> findEmail(@PathVariable String userName, @PathVariable String userTel) {
 		try {
@@ -197,7 +196,7 @@ public class UserController {
 			return ResponseEntity.badRequest().body(errorResponse);
 		}
 	}
-	
+
 	@GetMapping("/find-pw/{userName}/{userEmail}")
 	public ResponseEntity<?> findPassword(@PathVariable String userName, @PathVariable String userEmail) {
 		try {
@@ -207,10 +206,10 @@ public class UserController {
 			if (foundUser != null) {
 				// 사용자를 찾았을 경우 임시 비밀번호 생성
 				String tempPassword = userService.makeTempPassword();
-				
+
 				// 임시 비밀번호로 DB 업데이트
 				userService.updatePassword(foundUser.getUserId(), tempPassword);
-				
+
 				// 이메일 전송
 				userService.sendTempPasswordEmail(foundUser.getUserEmail(), tempPassword);
 				return ResponseEntity.ok().body("임시 비밀번호가 이메일로 전송되었습니다.");
@@ -222,60 +221,99 @@ public class UserController {
 			return ResponseEntity.badRequest().body(errorResponse);
 		}
 	}
-	
+
 	@PostMapping("/findfarmer/reg-farmer")
-	public ResponseEntity<String> regFarmer(
-			@RequestPart("farmPixurl") MultipartFile profileImage,
-      @RequestParam("farmName") String farmName,
-      @RequestParam("farmTel") String farmTel,
-      @RequestParam("farmAddress") String farmAddress,
-      @RequestParam("farmAddressDetail") String farmAddressDetail,
-      @RequestParam("registrationNum") String registrationNum,
-      @RequestParam("farmBank") String farmBank,
-      @RequestParam("farmAccountNum") String farmAccountNum,
-      @RequestParam("farmInterest") String farmInterest,
-      Authentication auth) throws Exception {
-		
+	public ResponseEntity<Map<String, Object>> regFarmer(
+			@RequestPart("farmPixurl") MultipartFile farmPixurl,
+			@RequestParam("farmName") String farmName,
+			@RequestParam("farmTel") String farmTel,
+			@RequestParam("farmAddress") String farmAddress,
+			@RequestParam("farmAddressDetail") String farmAddressDetail,
+			@RequestParam("registrationNum") String registrationNum,
+			@RequestParam("farmBank") String farmBank,
+			@RequestParam("farmAccountNum") String farmAccountNum,
+			@RequestParam("farmInterest") String farmInterest,
+			Authentication auth) throws Exception {
+
 		try {
 			User loginUser = (User) auth.getPrincipal();
 			RegFarmerDto request = new RegFarmerDto();
-	    request.setFarmName(farmName);
-	    request.setFarmTel(farmTel);
-	    request.setFarmAddress(farmAddress);
-	    request.setFarmAddressDetail(farmAddressDetail);
-	    request.setRegistrationNum(registrationNum);
-	    request.setFarmBank(farmBank);
-	    request.setFarmAccountNum(farmAccountNum);
-	    request.setFarmInterest(farmInterest);
-	    request.setFarmPixurl(profileImage);
-	    
-			Farmer registeredFarmer = farmerService.registerFarmer(request, profileImage);
+			request.setFarmName(farmName);
+			request.setFarmTel(farmTel);
+			request.setFarmAddress(farmAddress);
+			request.setFarmAddressDetail(farmAddressDetail);
+			request.setRegistrationNum(registrationNum);
+			request.setFarmBank(farmBank);
+			request.setFarmAccountNum(farmAccountNum);
+			request.setFarmInterest(farmInterest);
+			request.setFarmPixurl(farmPixurl);
+
+			Farmer registeredFarmer = farmerService.registerFarmer(request, farmPixurl);
 			userService.updateUserInfoAfterRegFarmer(loginUser, registeredFarmer.getFarmerId());
-			return ResponseEntity.ok("파머등록 성공");
+			Map<String, Object> response = new HashMap<>();
+      response.put("message", "파머등록 성공");
+      response.put("farmerId", registeredFarmer.getFarmerId());
+      return ResponseEntity.ok(response);
+      //return ResponseEntity.ok("파머등록 성공");
 		} catch (Exception e) {
-			return ResponseEntity.badRequest().body("파머등록 실패: " + e.getMessage());
+			//return ResponseEntity.badRequest().body("파머등록 실패: " + e.getMessage());
+			return ResponseEntity.badRequest().body(Collections.singletonMap("message", "파머등록 실패: " + e.getMessage()));
 		}
 	}
 	
+	// 파머 정보 가져오기
+	@GetMapping("/farmer/farmerInfo/{farmerId}")
+	public ResponseEntity<?> farmerInfo(@PathVariable Long farmerId, Authentication auth) throws Exception {
+		User user = (User) auth.getPrincipal();
+		try {
+			// 현재 로그인한 사용자의 farmerId 가져오기
+			Long loginFarmerId = user.getFarmerId();
+
+			if (loginFarmerId == null || !loginFarmerId.equals(farmerId)) {
+				// 로그인한 사용자의 farmerId가 없거나, 프론트에서 받은 farmerId와 일치하지 않으면 에러 응답
+				ErrorResponseDto errorResponse = new ErrorResponseDto("파머 정보에 접근할 수 없습니다", "권한이 없거나 유효하지 않은 farmerId입니다");
+				return ResponseEntity.status(403).body(errorResponse);
+			}
+
+			// Farmer 정보 가져오기
+			Farmer farmer = farmerService.getFarmerById(farmerId);
+
+			if (farmer != null) {
+				// Farmer 정보가 있을 경우 응답
+				FarmerInfoDto farmerInfoResponse = farmer.toDto();
+				return ResponseEntity.ok().body(farmerInfoResponse);
+			} else {
+				// Farmer 정보가 없을 경우 에러 응답
+				ErrorResponseDto errorResponse = new ErrorResponseDto("파머를 찾을 수 없습니다", "해당 farmerId에 대한 정보를 찾을 수 없습니다");
+				return ResponseEntity.status(404).body(errorResponse);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			ErrorResponseDto errorResponse = new ErrorResponseDto("파머 정보 조회 실패", e.getMessage());
+			return ResponseEntity.badRequest().body(errorResponse);
+		}
+
+	}
+	
 	// 팜 정보 수정
-	@PutMapping("/farmer/modify-farm")
+	@PutMapping("/farmer/modify-farmer")
 	public ResponseEntity<?> modifyFarm(
-			@RequestPart("farmPixurl") MultipartFile profileImage,
-      @RequestParam("farmName") String farmName,
-      @RequestParam("farmTel") String farmTel,
-      @RequestParam("farmAddress") String farmAddress,
-      @RequestParam("farmAddressDetail") String farmAddressDetail,
-      @RequestParam("registrationNum") String registrationNum,
-      @RequestParam("farmBank") String farmBank,
-      @RequestParam("farmAccountNum") String farmAccountNum,
-      @RequestParam("farmInterest") String farmInterest,
-      Authentication auth) throws Exception {
-		
+			@RequestPart("farmPixurl") MultipartFile farmPixurl,
+			@RequestParam("farmName") String farmName,
+			@RequestParam("farmTel") String farmTel,
+			@RequestParam("farmAddress") String farmAddress,
+			@RequestParam("farmAddressDetail") String farmAddressDetail,
+			@RequestParam("registrationNum") String registrationNum,
+			@RequestParam("farmBank") String farmBank,
+			@RequestParam("farmAccountNum") String farmAccountNum,
+			@RequestParam("farmInterest") String farmInterest,
+			Authentication auth) throws Exception {
+
 		try {
 			User loginUser = (User) auth.getPrincipal();
 			// 로그인한 유저의 farmerId 가져오기
 			Long farmerId = loginUser.getFarmerId();
-			
+
 			if (farmerId == null) {
 				// 로그인한 유저가 파머가 아닌 경우 에러 응답
 				ErrorResponseDto errorResponse = new ErrorResponseDto("파머 정보가 없습니다", "파머로 등록된 사용자가 아닙니다");
@@ -283,18 +321,18 @@ public class UserController {
 			}
 
 			ModifyFarmDto request = new ModifyFarmDto();
-      request.setFarmerId(farmerId);
-      request.setFarmName(farmName);
-      request.setFarmTel(farmTel);
-      request.setFarmAddress(farmAddress);
-      request.setFarmAddressDetail(farmAddressDetail);
-      request.setRegistrationNum(registrationNum);
-      request.setFarmBank(farmBank);
-      request.setFarmAccountNum(farmAccountNum);
-      request.setFarmInterest(farmInterest);
-      request.setFarmPixurl(profileImage);
-			
-			Farmer modifiedFarmer = farmerService.modifyFarmer(request, profileImage);
+			request.setFarmerId(farmerId);
+			request.setFarmName(farmName);
+			request.setFarmTel(farmTel);
+			request.setFarmAddress(farmAddress);
+			request.setFarmAddressDetail(farmAddressDetail);
+			request.setRegistrationNum(registrationNum);
+			request.setFarmBank(farmBank);
+			request.setFarmAccountNum(farmAccountNum);
+			request.setFarmInterest(farmInterest);
+			request.setFarmPixurl(farmPixurl);
+
+			Farmer modifiedFarmer = farmerService.modifyFarmer(request, farmPixurl);
 
 			return ResponseEntity.ok("파머 정보가 성공적으로 수정되었습니다");
 		} catch (NotFoundException e) {
@@ -305,5 +343,5 @@ public class UserController {
 			return ResponseEntity.badRequest().body(errorResponse);
 		}
 	}
-
+	
 }

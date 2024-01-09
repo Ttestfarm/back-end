@@ -18,6 +18,7 @@ import com.kosta.farm.dto.OrderHistoryDto;
 import com.kosta.farm.dto.PayInfoSummaryDto;
 import com.kosta.farm.dto.ProductInfoDto;
 import com.kosta.farm.dto.RequestDto;
+import com.kosta.farm.dto.RequestWithQuotationCountDTO;
 import com.kosta.farm.dto.ReviewInfoDto;
 import com.kosta.farm.entity.Farmer;
 import com.kosta.farm.entity.Farmerfollow;
@@ -37,6 +38,10 @@ import com.kosta.farm.entity.Review;
 import com.kosta.farm.util.PageInfo;
 import com.kosta.farm.util.RequestStatus;
 import com.querydsl.core.Tuple;
+import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.ComparableExpressionBase;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
@@ -115,9 +120,8 @@ public class FarmDslRepository {
 
 	public Long requestAllCount() throws Exception {
 		QRequest request = QRequest.request;
-		return jpaQueryFactory.select(request.count()).from(request)
-			    .where(request.state.eq(RequestStatus.REQUEST))
-			    .fetchOne();
+		return jpaQueryFactory.select(request.count()).from(request).where(request.state.eq(RequestStatus.REQUEST))
+				.fetchOne();
 	}
 
 	public List<RequestDto> requestListWithNameByPage(PageInfo pageInfo) throws Exception {
@@ -125,16 +129,12 @@ public class FarmDslRepository {
 		QUser user = QUser.user;
 		Long count = requestAllCount();
 		pageInfo.setAllPage((int) Math.ceil(count.intValue() / 9));
-		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 9
-//				,Sort.by(Sort.Direction.DESC, "requestId")
-		);
+		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 9);
 
 		List<Tuple> tupleList = jpaQueryFactory.select(request, user.userName).from(request).leftJoin(user)
-				.on(request.userId.eq(user.userId))
-				.where(request.state.eq(RequestStatus.REQUEST))
-			    .orderBy(request.requestId.desc()) // 요청 ID 내림차순으로 정렬
-				.offset(pageRequest.getOffset())
-				.limit(pageRequest.getPageSize()).fetch();
+				.on(request.userId.eq(user.userId)).where(request.state.eq(RequestStatus.REQUEST))
+				.orderBy(request.requestId.desc()) // 요청 ID 내림차순으로 정렬
+				.offset(pageRequest.getOffset()).limit(pageRequest.getPageSize()).fetch();
 
 		List<RequestDto> list = new ArrayList<>();
 		for (Tuple t : tupleList) {
@@ -195,9 +195,9 @@ public class FarmDslRepository {
 		List<Tuple> tupleList = jpaQueryFactory
 				.select(payInfo.receiptId, payInfo.ordersId, payInfo.farmerId, payInfo.quotationId, payInfo.productId,
 						payInfo.userId, payInfo.paymentMethod, payInfo.paymentDelivery, payInfo.productPrice,
-						payInfo.count, payInfo.quotationQuantity, payInfo.amount, payInfo.productName, payInfo.buyerAddress, payInfo.buyerName,
-						payInfo.buyerTel, payInfo.createAt, payInfo.state, product.thumbNail, farmer.farmName,
-						quotation.quotationImages)
+						payInfo.count, payInfo.quotationQuantity, payInfo.amount, payInfo.productName,
+						payInfo.buyerAddress, payInfo.buyerName, payInfo.buyerTel, payInfo.createAt, payInfo.state,
+						product.thumbNail, farmer.farmName, quotation.quotationImages)
 				.from(payInfo).leftJoin(product).on(payInfo.productId.eq(product.productId)).leftJoin(farmer)
 				.on(payInfo.farmerId.eq(farmer.farmerId)).leftJoin(quotation)
 				.on(payInfo.quotationId.eq(quotation.quotationId)).where(payInfo.userId.eq(userId))
@@ -207,10 +207,10 @@ public class FarmDslRepository {
 		List<PayInfoSummaryDto> list = new ArrayList<>();
 		for (Tuple t : tupleList) {
 			String imgUrl = null;
-			if(t.get(product.thumbNail)==null)
+			if (t.get(product.thumbNail) == null)
 				imgUrl = t.get(quotation.quotationImages);
-			else 
-				imgUrl = t.get(product.thumbNail)+"";
+			else
+				imgUrl = t.get(product.thumbNail) + "";
 			PayInfoSummaryDto dto = new PayInfoSummaryDto();
 			dto.setCreateAt(t.get(payInfo.createAt));
 			dto.setReceiptId(t.get(payInfo.receiptId));
@@ -291,4 +291,28 @@ public class FarmDslRepository {
 
 	}
 
+	public List<RequestWithQuotationCountDTO> findRequestWithQuoteCountByUser(Long userId) {
+		QRequest request = QRequest.request;
+		QQuotation quotation = QQuotation.quotation;
+
+		return jpaQueryFactory.select(Projections.fields(RequestWithQuotationCountDTO.class, // Dto 클래스 지정
+				request, // 엔티티 객체
+				Expressions.as( // quotationCount 필드 생성
+						JPAExpressions.select(quotation.count()).from(quotation)
+								.where(quotation.requestId.eq(request.requestId)),
+						"quotationCount")))
+				.from(request) // 기준 엔티티
+				.leftJoin(quotation).on(request.requestId.eq(quotation.requestId))
+				.where(request.userId.eq(userId), request.state.eq(RequestStatus.REQUEST)) // 필터링 조건
+				// 그룹화
+				.groupBy(request.requestId)
+				.orderBy(
+						Expressions.numberTemplate(Long.class, "coalesce({0}, -1)",
+								 // 서브쿼리 결과값이 null일 경우 -1을 반환
+								JPAExpressions.select(quotation.count()).from(quotation)
+										.where(quotation.requestId.eq(request.requestId)))
+								.desc(),
+						request.requestId.desc())
+				.fetch();
+	}
 }

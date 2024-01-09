@@ -1,10 +1,10 @@
 package com.kosta.farm.dto;
 
-import org.springframework.web.multipart.MultipartFile;
+import lombok.Getter;
+import lombok.Setter;
 
-import lombok.Data;
-
-@Data
+@Getter
+@Setter
 public class ReviewDto {
 	private Long userId;
 	private String receiptId;

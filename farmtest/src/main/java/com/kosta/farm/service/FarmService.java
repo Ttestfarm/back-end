@@ -2,6 +2,7 @@ package com.kosta.farm.service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.servlet.ServletOutputStream;
 
@@ -14,6 +15,7 @@ import com.kosta.farm.dto.QuotationInfoDto;
 import com.kosta.farm.dto.QuotePayDto;
 import com.kosta.farm.dto.RequestCopyDto;
 import com.kosta.farm.dto.RequestDto;
+import com.kosta.farm.dto.RequestWithQuotationCountDTO;
 import com.kosta.farm.dto.ReviewDto;
 import com.kosta.farm.dto.ReviewInfoDto;
 import com.kosta.farm.entity.Farmer;
@@ -32,6 +34,10 @@ public interface FarmService {
 
 	// 리뷰 등록
 	void addReview(String receiptId, MultipartFile reviewpixUrl, Integer rating, String content) throws Exception;
+
+	Optional<Review> findReviewByReceiptId(String receiptId) throws Exception;
+
+	void updateReview(String receiptId, MultipartFile reviewpixUrl, Integer rating, String content) throws Exception;
 
 	// 모든 파머 가져오기
 	List<Farmer> findAllFarmers() throws Exception;
@@ -66,7 +72,7 @@ public interface FarmService {
 
 	// 파머 상세 페이지
 	Farmer farmerDetail(Long farmerId) throws Exception;
-	
+
 	// 요청서 따라하기
 	RequestCopyDto requestCopy(Long requestId) throws Exception;
 
@@ -105,12 +111,13 @@ public interface FarmService {
 			throws Exception;
 
 	List<PayInfoSummaryDto> findBuyListByUser(PageInfo pageInfo, Long userId) throws Exception;
-	
+
 	void updateRequestState() throws Exception;
-	
+
 	Request updateRequestStateToCANCEL(Long requestId) throws Exception;
+
+	List<RequestWithQuotationCountDTO> getRequestsWithQuotationCountByUser(Long userId) throws Exception;
 	
 	
-	
-	
+
 }

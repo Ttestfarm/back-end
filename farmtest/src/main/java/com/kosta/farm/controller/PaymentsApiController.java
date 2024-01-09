@@ -60,7 +60,7 @@ public class PaymentsApiController {
 			log.info("주문 상품 환불 진행 : 주문 번호 {}", receiptId);
 			String token = refundService.getToken(impKey, impSecret);
 			refundService.refundRequest(token, receiptId, e.getMessage());
-			
+
 			e.printStackTrace();
 			return new ResponseEntity<String>("결제 에러", HttpStatus.BAD_REQUEST);
 		}
@@ -75,10 +75,10 @@ public class PaymentsApiController {
 		return payment;
 	}
 
-	@PostMapping("/refund/{recieptId}") //취소요청
+	@PostMapping("/refund/{recieptId}") // 취소요청
 	public ResponseEntity<String> refundPayment(@PathVariable String recieptId) {
 		try {
-			String reason="재고";
+			String reason = "재고";
 			String token = refundService.getToken(impKey, impSecret);
 			refundService.refundRequest(token, recieptId, reason);
 			return ResponseEntity.ok("결제 취소 요청이 성공적으로 전송되었습니다.");

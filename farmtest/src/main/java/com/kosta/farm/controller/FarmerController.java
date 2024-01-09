@@ -103,7 +103,7 @@ public class FarmerController {
 		Long farmerId = user.getFarmerId();
 		try {
 			product.setFarmerId(farmerId);
-			System.out.println("product = "+product.toString());
+			System.out.println("product = " + product.toString());
 			farmerService.productEnter(product, titleImage, images);
 			return new ResponseEntity<String>("성공", HttpStatus.OK);
 		} catch (Exception e) {
@@ -288,4 +288,7 @@ public class FarmerController {
 			return new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
 		}
 	}
+
+
+
 }

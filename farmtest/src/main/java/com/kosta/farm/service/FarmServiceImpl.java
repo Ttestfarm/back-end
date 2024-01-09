@@ -29,6 +29,7 @@ import com.kosta.farm.dto.QuotationInfoDto;
 import com.kosta.farm.dto.QuotePayDto;
 import com.kosta.farm.dto.RequestCopyDto;
 import com.kosta.farm.dto.RequestDto;
+import com.kosta.farm.dto.RequestWithQuotationCountDTO;
 import com.kosta.farm.dto.ReviewDto;
 import com.kosta.farm.dto.ReviewInfoDto;
 import com.kosta.farm.entity.Farmer;
@@ -87,8 +88,37 @@ public class FarmServiceImpl implements FarmService {
 	@Value("${upload.path}")
 	private String dir;
 
+	private Review createReview(String receiptId, MultipartFile reviewpixUrl, Integer rating, String content,
+			PayInfo orders, String userName) throws Exception {
+		Review review = Review.builder().receiptId(orders.getReceiptId()).rating(rating).content(content)
+				.farmerId(orders.getFarmerId()).userId(orders.getUserId()).userName(userName).build();
+
+		if (reviewpixUrl != null && !reviewpixUrl.isEmpty()) {
+			FileVo imageFile = FileVo.builder().directory(dir).fileName(reviewpixUrl.getOriginalFilename())
+					.size(reviewpixUrl.getSize()).build();
+			fileVoRepository.save(imageFile);
+
+			File uploadFile = new File(dir + imageFile.getFileId());
+			reviewpixUrl.transferTo(uploadFile);
+			review.setReviewpixUrl(imageFile.getFileId() + "");
+		}
+		return review;
+	}
+
+	private void saveReviewAndUpdateFarmer(Review review) throws Exception {
+		reviewRepository.save(review);
+
+		List<Review> farmerReviews = reviewRepository.findAllByFarmerId(review.getFarmerId());
+		Farmer farmer = farmerRepository.findById(review.getFarmerId())
+				.orElseThrow(() -> new Exception("해당 판매자를 찾을 수 없습니다."));
+		farmer.updateAvgRating(farmerReviews);
+		Integer reviewCount = farmerReviews.size();
+		farmer.setReviewCount(reviewCount);
+		farmerRepository.save(farmer);
+	}
+
 	@Override // 리뷰 작성하기 ordersId에 해당하면 리뷰를 쓸 수 있다 근데 하나의 주문에 하나의 review만 쓸 수 있다 리뷰가 추가되면 파머
-	// rating field 업데이트
+	@Transactional // rating field 업데이트
 	public void addReview(String receiptId, MultipartFile reviewpixUrl, Integer rating, String content)
 			throws Exception {
 		Optional<PayInfo> oPay = payInfoRepository.findById(receiptId);
@@ -139,6 +169,35 @@ public class FarmServiceImpl implements FarmService {
 
 	}
 
+	@Transactional
+	@Override // review 수정하기
+	public void updateReview(String receiptId, MultipartFile reviewpixUrl, Integer rating, String content)
+			throws Exception {
+
+		Optional<PayInfo> oPay = payInfoRepository.findById(receiptId);
+		if (oPay.isEmpty())
+			throw new Exception("해당하는 주문이 없습니다");
+		PayInfo orders = oPay.get();
+
+		Long userId = orders.getUserId();
+		Optional<User> user = userRepository.findById(userId);
+		if (user.isEmpty())
+			throw new Exception("사용자 정보를 찾을 수 없습니다");
+		String userName = user.get().getUserName(); // username가져오기
+
+		Optional<Review> oReview = reviewRepository.findByReceiptId(orders.getReceiptId());
+		if (oReview.isEmpty())
+			throw new Exception("존재하지 않는 리뷰입니다");
+
+		Review review = createReview(receiptId, reviewpixUrl, rating, content, orders, userName);
+		saveReviewAndUpdateFarmer(review);
+	}
+
+	@Override
+	public Optional<Review> findReviewByReceiptId(String receiptId) throws Exception {
+		return reviewRepository.findByReceiptId(receiptId);
+	}
+
 	@Override // 이건 페이지네이션을 지원
 	public List<Farmer> farmerListByPage(PageInfo pageInfo) throws Exception {
 		PageRequest pageRequest = PageRequest.of(pageInfo.getCurPage() - 1, 8,
@@ -165,7 +224,6 @@ public class FarmServiceImpl implements FarmService {
 		List<FarmerInfoDto> farmerDtoList = new ArrayList<>();
 		for (Farmer farmer : detail) {
 			farmerDtoList.add(farmer.toDto());
-
 		}
 		return farmerDtoList;
 	}
@@ -266,6 +324,7 @@ public class FarmServiceImpl implements FarmService {
 		return farmerRepository.findAll();
 	}
 
+	@Transactional
 	@Override // farmerfollow하기
 	public Boolean farmerfollow(Long userId, Long farmerId) throws Exception {
 		Farmer farmer = farmerRepository.findById(farmerId).get();
@@ -328,6 +387,11 @@ public class FarmServiceImpl implements FarmService {
 	}
 
 	@Override
+	public List<RequestWithQuotationCountDTO> getRequestsWithQuotationCountByUser(Long userId) throws Exception {
+		return farmDslRepository.findRequestWithQuoteCountByUser(userId);
+	}
+
+	@Override
 	public List<Tuple> quoteandRequestListByRequestId(Long requestId) throws Exception {
 		return farmDslRepository.getReqandQuoteByRequestId(requestId);
 	}
@@ -381,6 +445,7 @@ public class FarmServiceImpl implements FarmService {
 
 	}
 
+	@Transactional
 	@Override // payment정보 저장하기
 	public void savePaymentInfo(PayInfo payInfo) throws Exception {
 		payInfoRepository.save(payInfo);
@@ -446,13 +511,11 @@ public class FarmServiceImpl implements FarmService {
 					// 처리할 작업 수행
 					request.setState(RequestStatus.EXPIRED); // 상태를 EXPIRED로 변경
 					requestRepository.save(request); // 변경된 상태 저장
-				} else {
-					// 요청 날짜가 현재 날짜 이후인 경우 다른 작업 수행
 				}
 			} catch (ParseException e) {
 				// 날짜 형식 변환 실패 시 예외 처리
 				e.printStackTrace();
-				System.out.println("Failed to parse date: " + request.getRequestDate()); // 요청된 날짜 값을 출력
+				System.out.println("날짜 형식 변환 실패: " + request.getRequestDate()); // 요청된 날짜 값을 출력
 
 			}
 		}
@@ -467,6 +530,7 @@ public class FarmServiceImpl implements FarmService {
 		return oRequest.get().toDto();
 	}
 
+	@Transactional
 	@Override
 	public Request updateRequestStateToCANCEL(Long requestId) throws Exception {
 		Optional<Request> oRequest = requestRepository.findById(requestId);

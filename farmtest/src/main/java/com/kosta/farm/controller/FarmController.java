@@ -61,28 +61,7 @@ public class FarmController {
 		}
 	}
 
-//	@PutMapping("/buylist") // 리뷰 수정하기
-//	public ResponseEntity<String> updateReview(@ModelAttribute ReviewDto review, MultipartFile reviewpixUrl,
-//			Authentication authentication) {
-//		try {
-//			if (review.getReceiptId() == null) {
-//				return ResponseEntity.badRequest().body("Receipt ID가 없습니다.");
-//			}
-//
-//			// 수정할 리뷰가 존재하는지 확인
-//			Optional<Review> existingReview = farmService.findReviewByReceiptId(review.getReceiptId());
-//			if (existingReview.isEmpty()) {
-//				return ResponseEntity.badRequest().body("수정할 리뷰를 찾을 수 없습니다.");
-//			}
-//
-//			// 리뷰 수정 처리
-//			farmService.updateReview(review.getReceiptId(), reviewpixUrl, review.getRating(), review.getContent());
-//			return ResponseEntity.ok("리뷰가 성공적으로 수정되었습니다.");
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			return ResponseEntity.badRequest().body("리뷰 수정에 실패했습니다: " + e.getMessage());
-//		}
-//	}
+
 
 	@PostMapping("/matching/request") // 요청서 작성하기
 	public ResponseEntity<String> writeRequest(@RequestBody RequestDto request, Authentication authentication) {
